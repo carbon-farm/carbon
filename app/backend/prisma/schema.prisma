@@ -9,8 +9,11 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // Supabase transaction-mode pooler (6543) — app runtime
+  directUrl = env("DIRECT_URL")   // Supabase session-mode pooler (5432) — migrations only;
+                                   // transaction mode doesn't support the advisory locks and
+                                   // DDL Prisma's migration engine needs
 }
 
 enum Role {
