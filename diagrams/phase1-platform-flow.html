@@ -1,0 +1,493 @@
+<title>Phase 1 Platform Flow — Digital Agriculture Platform</title>
+<style>
+  :root {
+    --bg: #EFF1E6;
+    --card: #FBFBF6;
+    --card-border: #CBD2B9;
+    --ink: #1D2A1A;
+    --ink-soft: #55624C;
+    --ink-faint: #838F76;
+    --rule: #C4CCB2;
+    --accent: #2F6D4F;
+    --accent-ink: #0F2A1C;
+    --accent-soft: #DCE7DA;
+    --state: #C1841E;
+    --state-fill: #F3E3C4;
+    --state-ink: #4A3308;
+    --data-line: #3B5A72;
+    --data-ink: #274153;
+    --data-fill: #E7EEF2;
+    --font-display: ui-serif, Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+    --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12160F;
+      --card: #1A2117;
+      --card-border: #3A4432;
+      --ink: #EDF0E5;
+      --ink-soft: #ABB79C;
+      --ink-faint: #78826B;
+      --rule: #3A4432;
+      --accent: #5FA37E;
+      --accent-ink: #EAF3ED;
+      --accent-soft: #223A2D;
+      --state: #E0A54B;
+      --state-fill: #3B2E14;
+      --state-ink: #F4DEB0;
+      --data-line: #7FA8C2;
+      --data-ink: #CFE1EC;
+      --data-fill: #1B2A33;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12160F; --card: #1A2117; --card-border: #3A4432;
+    --ink: #EDF0E5; --ink-soft: #ABB79C; --ink-faint: #78826B; --rule: #3A4432;
+    --accent: #5FA37E; --accent-ink: #EAF3ED; --accent-soft: #223A2D;
+    --state: #E0A54B; --state-fill: #3B2E14; --state-ink: #F4DEB0;
+    --data-line: #7FA8C2; --data-ink: #CFE1EC; --data-fill: #1B2A33;
+  }
+  :root[data-theme="light"] {
+    --bg: #EFF1E6; --card: #FBFBF6; --card-border: #CBD2B9;
+    --ink: #1D2A1A; --ink-soft: #55624C; --ink-faint: #838F76; --rule: #C4CCB2;
+    --accent: #2F6D4F; --accent-ink: #0F2A1C; --accent-soft: #DCE7DA;
+    --state: #C1841E; --state-fill: #F3E3C4; --state-ink: #4A3308;
+    --data-line: #3B5A72; --data-ink: #274153; --data-fill: #E7EEF2;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.55;
+  }
+
+  .page {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+
+  header.hero {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 32px;
+  }
+  .kicker {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(28px, 4vw, 38px);
+    line-height: 1.15;
+    margin: 0;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .lede {
+    font-size: 16px;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin: 0;
+  }
+  .meta {
+    font-size: 13px;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  section.diagram-block {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .diagram-head { display: flex; flex-direction: column; gap: 6px; }
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    margin: 0;
+    color: var(--ink);
+  }
+  .caption { font-size: 14.5px; color: var(--ink-soft); max-width: 68ch; margin: 0; }
+
+  .diagram-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 20px;
+    overflow-x: auto;
+  }
+  .diagram-card svg { display: block; width: 100%; height: auto; min-width: 720px; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  /* diagram text classes (shared by both inline SVGs) */
+  text { font-family: var(--font-body); }
+  .n-title { font-size: 14px; font-weight: 600; fill: var(--ink); }
+  .n-sub { font-size: 11.5px; font-weight: 400; fill: var(--ink-soft); }
+  .n-note { font-size: 11.5px; font-weight: 500; fill: var(--ink-faint); }
+  .divider-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; fill: var(--ink-faint); text-transform: uppercase; }
+
+  .box-process rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.4; }
+  .box-process .n-title { fill: var(--accent-ink); }
+  .box-hub rect { fill: var(--card); stroke: var(--ink); stroke-width: 1.6; }
+  .box-state rect { fill: var(--state-fill); stroke: var(--state); stroke-width: 1.4; }
+  .box-state .n-title { fill: var(--state-ink); }
+  .box-data rect { fill: var(--data-fill); stroke: var(--data-line); stroke-width: 1.4; stroke-dasharray: 4 3; }
+  .box-data .n-title { fill: var(--data-ink); }
+  .box-plain rect { fill: var(--card); stroke: var(--card-border); stroke-width: 1.4; }
+
+  .edge { stroke: var(--ink-faint); stroke-width: 1.4; fill: none; marker-end: url(#arrowhead); }
+  .edge.dashed { stroke-dasharray: 4 3; }
+  .rule-line { stroke: var(--rule); stroke-width: 1; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding-top: 4px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-soft); }
+  .swatch { width: 16px; height: 16px; border-radius: 3px; flex: none; }
+  .swatch.process { background: var(--accent-soft); border: 1.4px solid var(--accent); }
+  .swatch.state { background: var(--state-fill); border: 1.4px solid var(--state); border-radius: 8px; }
+  .swatch.data { background: var(--data-fill); border: 1.4px dashed var(--data-line); }
+  .swatch.hub { background: var(--card); border: 1.6px solid var(--ink); }
+
+  footer {
+    border-top: 1px solid var(--rule);
+    padding-top: 24px;
+    font-size: 13.5px;
+    color: var(--ink-faint);
+  }
+  footer a { color: var(--accent); }
+</style>
+
+<div class="page">
+
+  <header class="hero">
+    <span class="kicker">Digital Agriculture Knowledge &amp; Advisory Platform</span>
+    <h1>Phase 1 platform flow</h1>
+    <p class="lede">
+      A clean, structured version of the platform journey — from a farmer opening the app,
+      through the Farmer Dashboard's modules, into the ten-state Case Lifecycle, and finally
+      into the separate, Moderator-gated workflow that turns a closed case into public knowledge.
+      Built to reflect the Phase 1 scope in the Project Charter: fully human-expert-operated,
+      no AI in the Case Management path.
+    </p>
+    <p class="meta">Companion to 000-Project-Charter.md · v0.3 · Draft for review</p>
+  </header>
+
+  <section class="diagram-block">
+    <div class="diagram-head">
+      <span class="kicker">Diagram 1 — Overview</span>
+      <h2>Farmer journey &amp; module map</h2>
+      <p class="caption">
+        Every member enters through registration or login, lands on a single dashboard, and
+        branches into five modules. Notifications and Administration/Moderation run underneath
+        all of them.
+      </p>
+    </div>
+    <div class="diagram-card">
+      <h3 class="sr-only">
+        Flowchart: farmer registers or logs in, arrives at the Farmer Dashboard, then branches
+        into Learning, Report a Case, Soil Laboratory, Marketplace, and Knowledge Repository.
+        Notifications and Administration run as platform-wide services beneath all modules.
+      </h3>
+      <svg viewBox="0 0 1180 560" role="img" aria-labelledby="d1-title d1-desc">
+        <title id="d1-title">Phase 1 farmer journey and module map</title>
+        <desc id="d1-desc">
+          Registration or login leads to the Farmer Dashboard, which branches into Learning,
+          Report a Case, Soil Laboratory, Marketplace, and Knowledge Repository. Notifications
+          and Administration are shown as platform-wide services beneath the module row.
+        </desc>
+        <defs>
+          <marker id="arrowhead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+
+        <!-- Row 1: auth -->
+        <g class="box-process">
+          <rect x="390" y="40" width="400" height="90" rx="10"/>
+          <text class="n-title" x="590" y="75" text-anchor="middle">Register or log in</text>
+          <text class="n-sub" x="590" y="97" text-anchor="middle">Mobile number + OTP or password</text>
+        </g>
+        <path class="edge" d="M590,130 L590,168"/>
+
+        <!-- Row 2: hub -->
+        <g class="box-hub">
+          <rect x="390" y="168" width="400" height="80" rx="10"/>
+          <text class="n-title" x="590" y="203" text-anchor="middle">Farmer Dashboard</text>
+          <text class="n-sub" x="590" y="225" text-anchor="middle">Membership, KPIs, activity at a glance</text>
+        </g>
+
+        <!-- fan-out arrows to 5 modules -->
+        <path class="edge" d="M390,248 L140,290"/>
+        <path class="edge" d="M490,248 L365,290"/>
+        <path class="edge" d="M590,248 L590,290"/>
+        <path class="edge" d="M690,248 L815,290"/>
+        <path class="edge" d="M790,248 L1040,290"/>
+
+        <!-- Row 3: five modules -->
+        <g class="box-process">
+          <rect x="40" y="290" width="200" height="90" rx="10"/>
+          <text class="n-title" x="140" y="320" text-anchor="middle">Learning</text>
+          <text class="n-sub" x="140" y="340" text-anchor="middle">Courses, videos,</text>
+          <text class="n-sub" x="140" y="356" text-anchor="middle">certificates</text>
+        </g>
+
+        <g class="box-process">
+          <rect x="265" y="290" width="200" height="90" rx="10"/>
+          <text class="n-title" x="365" y="320" text-anchor="middle">Report a Case</text>
+          <text class="n-sub" x="365" y="340" text-anchor="middle">Disease, pest,</text>
+          <text class="n-sub" x="365" y="356" text-anchor="middle">deficiency &amp; more</text>
+        </g>
+
+        <g class="box-process">
+          <rect x="490" y="290" width="200" height="90" rx="10"/>
+          <text class="n-title" x="590" y="320" text-anchor="middle">Soil Laboratory</text>
+          <text class="n-sub" x="590" y="340" text-anchor="middle">Sample, dispatch,</text>
+          <text class="n-sub" x="590" y="356" text-anchor="middle">test, report</text>
+        </g>
+
+        <g class="box-process">
+          <rect x="715" y="290" width="200" height="90" rx="10"/>
+          <text class="n-title" x="815" y="320" text-anchor="middle">Marketplace</text>
+          <text class="n-sub" x="815" y="340" text-anchor="middle">Browse, buy,</text>
+          <text class="n-sub" x="815" y="356" text-anchor="middle">track orders</text>
+        </g>
+
+        <g class="box-process">
+          <rect x="940" y="290" width="200" height="90" rx="10"/>
+          <text class="n-title" x="1040" y="320" text-anchor="middle">Knowledge</text>
+          <text class="n-sub" x="1040" y="340" text-anchor="middle">Search resolved</text>
+          <text class="n-sub" x="1040" y="356" text-anchor="middle">cases &amp; articles</text>
+        </g>
+
+        <text class="n-note" x="365" y="400" text-anchor="middle">↓ full case lifecycle in Diagram 2</text>
+
+        <line class="rule-line" x1="40" y1="415" x2="1140" y2="415"/>
+        <text class="divider-label" x="590" y="431" text-anchor="middle">Platform-wide services</text>
+
+        <!-- Row 4: services -->
+        <g class="box-plain">
+          <rect x="40" y="450" width="535" height="70" rx="10"/>
+          <text class="n-title" x="307" y="480" text-anchor="middle">Notifications</text>
+          <text class="n-sub" x="307" y="500" text-anchor="middle">SMS, WhatsApp, push, email on case &amp; order updates</text>
+        </g>
+        <g class="box-plain">
+          <rect x="605" y="450" width="535" height="70" rx="10"/>
+          <text class="n-title" x="872" y="480" text-anchor="middle">Administration &amp; Moderation</text>
+          <text class="n-sub" x="872" y="500" text-anchor="middle">Experts, moderators, content, vendors, reports</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section class="diagram-block">
+    <div class="diagram-head">
+      <span class="kicker">Diagram 2 — Detail</span>
+      <h2>Case lifecycle</h2>
+      <p class="caption">
+        Case Management, modeled on CRM ticketing: a farmer reports a Disease, Pest, Nutrient
+        Deficiency, Weather Damage, an Unknown Problem, or a General Advisory/Planning question,
+        and the Case moves through ten defined states. It can loop between expert and farmer, be
+        disputed and Reopened instead of confirmed, or auto-close as Abandoned if the farmer goes
+        quiet — Closed is the end of the Case's own lifecycle (what happens next is Diagram 3).
+      </p>
+    </div>
+    <div class="diagram-card">
+      <h3 class="sr-only">
+        Flowchart: a case moves through Draft, Submitted, Under Review, and Assigned, then
+        alternates between Expert Working and Waiting Farmer until the expert is ready, then
+        reaches Answered, where the farmer either confirms (proceeding to Farmer Confirmed then
+        Closed) or disputes it (moving to Reopened, which loops back to Expert Working). A case
+        left waiting on the farmer past its SLA window auto-closes as Abandoned.
+      </h3>
+      <svg viewBox="0 0 1220 800" role="img" aria-labelledby="d2-title d2-desc">
+        <title id="d2-title">Case lifecycle, Draft to Closed</title>
+        <desc id="d2-desc">
+          A case moves through Draft, Submitted, Under Review, and Assigned. It then alternates
+          between Expert Working and Waiting Farmer until the expert has enough information, and
+          reaches Answered. There the farmer either confirms the answer (Farmer Confirmed, then
+          Closed) or disputes it (Reopened, looping back to Expert Working). A case left in
+          Waiting Farmer past its SLA window auto-closes as Abandoned.
+        </desc>
+        <defs>
+          <marker id="arrowhead2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+        <style>#d2 .edge { marker-end: url(#arrowhead2); }</style>
+
+        <g id="d2">
+          <g class="box-state">
+            <rect x="440" y="40" width="300" height="60" rx="30"/>
+            <text class="n-title" x="590" y="66" text-anchor="middle">Draft</text>
+            <text class="n-sub" x="590" y="84" text-anchor="middle">Private, editable by the farmer</text>
+          </g>
+          <path class="edge" d="M590,100 L590,130"/>
+
+          <g class="box-state">
+            <rect x="440" y="130" width="300" height="60" rx="30"/>
+            <text class="n-title" x="590" y="156" text-anchor="middle">Submitted</text>
+            <text class="n-sub" x="590" y="174" text-anchor="middle">Case number issued</text>
+          </g>
+          <path class="edge" d="M590,190 L590,220"/>
+
+          <g class="box-state">
+            <rect x="440" y="220" width="300" height="60" rx="30"/>
+            <text class="n-title" x="590" y="246" text-anchor="middle">Under Review</text>
+            <text class="n-sub" x="590" y="264" text-anchor="middle">Moderator checks completeness</text>
+          </g>
+          <path class="edge" d="M590,280 L590,310"/>
+
+          <g class="box-state">
+            <rect x="440" y="310" width="300" height="60" rx="30"/>
+            <text class="n-title" x="590" y="336" text-anchor="middle">Assigned</text>
+            <text class="n-sub" x="590" y="354" text-anchor="middle">Routed to an expert</text>
+          </g>
+          <path class="edge" d="M590,370 L430,400"/>
+
+          <g class="box-state">
+            <rect x="290" y="400" width="280" height="60" rx="30"/>
+            <text class="n-title" x="430" y="426" text-anchor="middle">Expert Working</text>
+            <text class="n-sub" x="430" y="444" text-anchor="middle">Investigates the case</text>
+          </g>
+          <g class="box-state">
+            <rect x="610" y="400" width="280" height="60" rx="30"/>
+            <text class="n-title" x="750" y="426" text-anchor="middle">Waiting Farmer</text>
+            <text class="n-sub" x="750" y="444" text-anchor="middle">Needs more input</text>
+          </g>
+          <path class="edge" d="M570,418 L610,418"/>
+          <path class="edge" d="M610,442 L570,442"/>
+
+          <path class="edge dashed" d="M890,430 L1080,430 L1080,730 L740,730"/>
+          <text class="n-note" x="1090" y="560" text-anchor="start">no response,</text>
+          <text class="n-note" x="1090" y="574" text-anchor="start">auto-closed</text>
+
+          <path class="edge" d="M430,460 L590,520"/>
+
+          <g class="box-state">
+            <rect x="440" y="520" width="300" height="60" rx="30"/>
+            <text class="n-title" x="590" y="546" text-anchor="middle">Answered</text>
+            <text class="n-sub" x="590" y="564" text-anchor="middle">Expert delivers the solution</text>
+          </g>
+
+          <path class="edge" d="M590,580 L590,610"/>
+          <path class="edge" d="M480,580 L260,610"/>
+
+          <g class="box-state">
+            <rect x="440" y="610" width="300" height="60" rx="30"/>
+            <text class="n-title" x="590" y="636" text-anchor="middle">Farmer Confirmed</text>
+            <text class="n-sub" x="590" y="654" text-anchor="middle">Farmer accepts the answer</text>
+          </g>
+          <g class="box-state">
+            <rect x="110" y="610" width="300" height="60" rx="30"/>
+            <text class="n-title" x="260" y="636" text-anchor="middle">Reopened</text>
+            <text class="n-sub" x="260" y="654" text-anchor="middle">Farmer disputes the answer</text>
+          </g>
+          <path class="edge" d="M200,610 L200,430 L290,430"/>
+
+          <path class="edge" d="M590,670 L590,700"/>
+
+          <g class="box-state">
+            <rect x="440" y="700" width="300" height="60" rx="30"/>
+            <text class="n-title" x="590" y="726" text-anchor="middle">Closed</text>
+            <text class="n-sub" x="590" y="744" text-anchor="middle">Case fully resolved</text>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <div class="legend" aria-hidden="true">
+      <div class="legend-item"><span class="swatch hub"></span>Hub screen</div>
+      <div class="legend-item"><span class="swatch state"></span>Case state</div>
+      <div class="legend-item"><span class="swatch data"></span>System-generated record</div>
+    </div>
+  </section>
+
+  <section class="diagram-block">
+    <div class="diagram-head">
+      <span class="kicker">Diagram 3 — Detail</span>
+      <h2>Knowledge Article publication workflow</h2>
+      <p class="caption">
+        A separate workflow from the Case Lifecycle, deliberately: closing a case never publishes
+        anything by itself. Every draft passes a Moderator before it can pollute — or improve —
+        the searchable Knowledge Repository.
+      </p>
+    </div>
+    <div class="diagram-card">
+      <h3 class="sr-only">
+        Flowchart: a closed case generates a draft knowledge article, which a moderator approves,
+        after which it is published and visible in the knowledge repository.
+      </h3>
+      <svg viewBox="0 0 1220 180" role="img" aria-labelledby="d3-title d3-desc">
+        <title id="d3-title">Knowledge Article publication workflow</title>
+        <desc id="d3-desc">
+          A Closed case auto-generates a Draft Article. A Moderator reviews and approves it.
+          Once approved, it is Published and visible in the Knowledge Repository.
+        </desc>
+        <defs>
+          <marker id="arrowhead3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+        <style>#d3 .edge { marker-end: url(#arrowhead3); }</style>
+
+        <g id="d3">
+          <text class="n-note" x="120" y="94" text-anchor="middle">Case Closed</text>
+          <path class="edge dashed" d="M60,100 L180,100"/>
+
+          <g class="box-data">
+            <rect x="180" y="60" width="260" height="80" rx="10"/>
+            <text class="n-title" x="310" y="94" text-anchor="middle">Draft Article</text>
+            <text class="n-sub" x="310" y="115" text-anchor="middle">Auto-generated from the case</text>
+          </g>
+          <path class="edge" d="M440,100 L480,100"/>
+
+          <g class="box-state">
+            <rect x="480" y="60" width="260" height="80" rx="10"/>
+            <text class="n-title" x="610" y="94" text-anchor="middle">Moderator Approval</text>
+            <text class="n-sub" x="610" y="115" text-anchor="middle">Reviewed before publishing</text>
+          </g>
+          <path class="edge" d="M740,100 L780,100"/>
+
+          <g class="box-data">
+            <rect x="780" y="60" width="260" height="80" rx="10"/>
+            <text class="n-title" x="910" y="94" text-anchor="middle">Published</text>
+            <text class="n-sub" x="910" y="115" text-anchor="middle">Live in the Knowledge Repository</text>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <footer>
+    Reflects the Phase 1 scope defined in <strong>000-Project-Charter.md</strong> (v0.3.0) — no
+    AI in the Case Management path; every case is worked and resolved by a named human expert,
+    and every published article passes a Moderator. Marketplace and Case Management are shown as
+    separate branches from the Farmer Dashboard, consistent with the charter's Advisory
+    Independence principle.
+  </footer>
+
+</div>

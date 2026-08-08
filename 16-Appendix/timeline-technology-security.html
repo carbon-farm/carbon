@@ -1,0 +1,327 @@
+<title>Timeline, Technology & Security — AgriAI Platform</title>
+<style>
+  :root {
+    --bg: #EFF1E6;
+    --card: #FBFBF6;
+    --card-border: #CBD2B9;
+    --ink: #1D2A1A;
+    --ink-soft: #55624C;
+    --ink-faint: #838F76;
+    --rule: #C4CCB2;
+    --accent: #2F6D4F;
+    --accent-ink: #0F2A1C;
+    --accent-soft: #DCE7DA;
+    --state: #C1841E;
+    --state-soft: #F3E3C4;
+    --state-ink: #4A3308;
+    --data-line: #3B5A72;
+    --data-ink: #274153;
+    --data-soft: #E7EEF2;
+    --row-alt: rgba(47, 109, 79, 0.05);
+    --font-display: ui-serif, Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+    --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12160F;
+      --card: #1A2117;
+      --card-border: #3A4432;
+      --ink: #EDF0E5;
+      --ink-soft: #ABB79C;
+      --ink-faint: #78826B;
+      --rule: #3A4432;
+      --accent: #5FA37E;
+      --accent-ink: #EAF3ED;
+      --accent-soft: #223A2D;
+      --state: #E0A54B;
+      --state-soft: #3B2E14;
+      --state-ink: #F4DEB0;
+      --data-line: #7FA8C2;
+      --data-ink: #CFE1EC;
+      --data-soft: #1B2A33;
+      --row-alt: rgba(95, 163, 126, 0.08);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12160F; --card: #1A2117; --card-border: #3A4432;
+    --ink: #EDF0E5; --ink-soft: #ABB79C; --ink-faint: #78826B; --rule: #3A4432;
+    --accent: #5FA37E; --accent-ink: #EAF3ED; --accent-soft: #223A2D;
+    --state: #E0A54B; --state-soft: #3B2E14; --state-ink: #F4DEB0;
+    --data-line: #7FA8C2; --data-ink: #CFE1EC; --data-soft: #1B2A33;
+    --row-alt: rgba(95, 163, 126, 0.08);
+  }
+  :root[data-theme="light"] {
+    --bg: #EFF1E6; --card: #FBFBF6; --card-border: #CBD2B9;
+    --ink: #1D2A1A; --ink-soft: #55624C; --ink-faint: #838F76; --rule: #C4CCB2;
+    --accent: #2F6D4F; --accent-ink: #0F2A1C; --accent-soft: #DCE7DA;
+    --state: #C1841E; --state-soft: #F3E3C4; --state-ink: #4A3308;
+    --data-line: #3B5A72; --data-ink: #274153; --data-soft: #E7EEF2;
+    --row-alt: rgba(47, 109, 79, 0.05);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.55;
+  }
+
+  .page {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 44px;
+  }
+
+  header.hero {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 32px;
+  }
+  .kicker {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(28px, 4vw, 38px);
+    line-height: 1.15;
+    margin: 0;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .lede {
+    font-size: 16px;
+    color: var(--ink-soft);
+    max-width: 68ch;
+    margin: 0;
+  }
+  .meta { font-size: 13px; color: var(--ink-faint); }
+  .meta a { color: var(--accent); }
+
+  section.block { display: flex; flex-direction: column; gap: 16px; }
+  .block-head { display: flex; flex-direction: column; gap: 6px; }
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    margin: 0;
+    color: var(--ink);
+  }
+  .caption { font-size: 14.5px; color: var(--ink-soft); max-width: 70ch; margin: 0; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 20px;
+    overflow-x: auto;
+  }
+
+  .milestones { border-collapse: collapse; width: 100%; font-size: 14px; }
+  .milestones th, .milestones td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  .milestones th { font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+  .milestones td:nth-child(2) { color: var(--accent-ink); font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .milestones tr:last-child td { border-bottom: none; }
+
+  table.ref { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 640px; }
+  table.ref caption { text-align: left; font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; padding-bottom: 10px; }
+  table.ref th, table.ref td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  table.ref th { font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+  table.ref tbody tr:nth-child(even) { background: var(--row-alt); }
+  table.ref td:first-child { font-weight: 600; color: var(--accent-ink); white-space: nowrap; }
+  table.ref.security td:first-child { color: var(--data-ink); }
+
+  .pill-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .pill {
+    font-size: 12.5px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    border: 1px solid var(--card-border);
+  }
+
+  footer {
+    border-top: 1px solid var(--rule);
+    padding-top: 24px;
+    font-size: 13.5px;
+    color: var(--ink-faint);
+  }
+  footer a { color: var(--accent); }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  pre.mermaid { background: transparent; margin: 0; }
+</style>
+
+<div class="page">
+
+  <header class="hero">
+    <span class="kicker">Digital Agriculture Knowledge &amp; Advisory Platform — Reference</span>
+    <h1>Timeline, technology &amp; security</h1>
+    <p class="lede">
+      Architect-level working reference for Phase 1: a staged delivery timeline, the recommended
+      technology stack, and the security approach. Informal for now — each section belongs in its
+      own governed document (<code>04-Product-Roadmap.md</code>, <code>04-Architecture/</code>,
+      <code>11-Security/</code>) once the series reaches it.
+    </p>
+    <p class="meta">
+      Companion to 000-Project-Charter.md (v1.0.0) and 01-Product/01-Vision.md (v1.0.0) · Draft reference
+    </p>
+  </header>
+
+  <section class="block">
+    <div class="block-head">
+      <span class="kicker">Timeline</span>
+      <h2>Phase 1 delivery, staged</h2>
+      <p class="caption">
+        Charter Risk R11 flags Phase 1 as four near-independent product surfaces bundled together.
+        This stages them rather than building all four in parallel — roughly nine to ten months to
+        full GA, with a usable pilot at the four-month mark.
+      </p>
+    </div>
+    <div class="card">
+      <h3 class="sr-only">Gantt chart of Phase 1 delivery: foundation, core trust loop, learning and soil, commerce, then hardening and launch, across roughly ten months.</h3>
+      <pre class="mermaid">
+gantt
+    title Phase 1 Delivery Timeline (illustrative)
+    dateFormat YYYY-MM-DD
+    axisFormat %b %Y
+    section Foundation
+    Architecture, DevOps, CI/CD           :f1, 2026-09-01, 3w
+    Identity, Membership, Configuration   :f2, after f1, 3w
+    Security foundation (authN/authZ)     :f3, after f1, 4w
+    section Core Trust Loop (pilot-ready)
+    Case Management (full lifecycle)      :c1, after f2, 6w
+    Knowledge Repository + Publication    :c2, after c1, 3w
+    Farmer Dashboard + Expert Portal      :c3, after f2, 6w
+    Notifications                         :c4, after f2, 3w
+    section Learning & Soil
+    Learning Management (LMS)             :l1, after c2, 4w
+    Soil Laboratory + lab partner integ.  :l2, after c2, 4w
+    section Commerce
+    Marketplace (full ecommerce)          :m1, after l1, 6w
+    Finance, Payments, GST                :m2, after m1, 3w
+    section Hardening & Launch
+    Security audit + DPDP compliance      :h1, after m2, 2w
+    UAT + soft launch                     :h2, after h1, 2w
+      </pre>
+    </div>
+    <div class="card">
+      <table class="milestones">
+        <thead>
+          <tr><th>Milestone</th><th>Elapsed</th><th>Significance</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Core Trust Loop pilot-ready</td>
+            <td>~4 months</td>
+            <td>Case Management, Knowledge Repository, and Farmer Dashboard usable by real farmers — the earliest point to test whether farmers actually trust the platform and whether knowledge actually generalizes, before the costlier Marketplace build begins.</td>
+          </tr>
+          <tr>
+            <td>Full Phase 1 GA</td>
+            <td>~9–10 months</td>
+            <td>All fourteen Charter modules complete, security-audited, DPDP-reviewed, and ready for public launch.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <span class="kicker">Technology</span>
+      <h2>Recommended stack</h2>
+      <p class="caption">
+        Chosen to satisfy the Charter's own guiding principles — Cloud Native, Modular, API First,
+        DDD, and Future AI Ready — without over-building for traffic Phase 1 doesn't have yet.
+      </p>
+    </div>
+    <div class="card">
+      <table class="ref">
+        <caption>Stack by layer</caption>
+        <thead>
+          <tr><th>Layer</th><th>Recommendation</th><th>Why</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Backend</td><td>NestJS (Node.js/TypeScript)</td><td>Modular, DI-based structure maps directly onto Modular Architecture + DDD; native CQRS and event-driven support.</td></tr>
+          <tr><td>Database</td><td>PostgreSQL, primary OLTP</td><td>Relational integrity for Case/Farm-Land/Order data; JSONB for flexible fields; mature and cloud-portable.</td></tr>
+          <tr><td>ORM</td><td>Prisma</td><td>Type-safe schema, strong migration story for a fast-moving Phase 1 schema.</td></tr>
+          <tr><td>Dashboard read model</td><td>Materialized views / read-replica on domain events</td><td>Implements the CQRS note already in the Charter (Module 2) — avoids the dashboard fanning out live under low-bandwidth conditions.</td></tr>
+          <tr><td>Search</td><td>Postgres full-text + Module 14 taxonomy filters</td><td>Matches the Charter's non-AI, index/category-based search constraint exactly; vector search stays a Phase 2 concern.</td></tr>
+          <tr><td>Cache / queue</td><td>Redis + BullMQ</td><td>Notifications, media processing, publication events, SLA-breach checks.</td></tr>
+          <tr><td>Object storage</td><td>S3-compatible (AWS S3 / Cloudflare R2 / MinIO)</td><td>Backs the centralized Media Library with signed URLs, never public buckets.</td></tr>
+          <tr><td>Farmer app</td><td>PWA first, Capacitor-wrapped native later</td><td>Matches low-bandwidth/low-literacy constraints; one codebase, installable, offline draft caching.</td></tr>
+          <tr><td>Admin / Expert / Moderator</td><td>React + TypeScript SPA</td><td>Desktop/tablet-first, matching those personas.</td></tr>
+          <tr><td>Notifications</td><td>WhatsApp Business API, SMS, FCM, transactional email</td><td>Covers all five channels in Module 12.</td></tr>
+          <tr><td>Payments</td><td>Razorpay / UPI-native gateway, hosted checkout</td><td>Keeps card data out of platform-owned systems entirely.</td></tr>
+          <tr><td>DevOps</td><td>Docker + GitHub Actions, managed cloud or VPS</td><td>Cloud Native without over-committing to Kubernetes early.</td></tr>
+          <tr><td>Observability</td><td>pino logging, Sentry, uptime monitoring</td><td>Needed for the SLA-breach visibility Mission Principle MP2 depends on.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <span class="kicker">Security</span>
+      <h2>Security approach</h2>
+      <p class="caption">
+        Covers authentication and access control, data protection under India's DPDP Act 2023,
+        payment scope reduction, and the audit trail the Charter already treats as binding.
+      </p>
+    </div>
+    <div class="card">
+      <table class="ref security">
+        <caption>Controls by area</caption>
+        <thead>
+          <tr><th>Area</th><th>Approach</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>AuthN</td><td>Mobile number + password, SMS OTP for verification/recovery; JWT access token + refresh rotation.</td></tr>
+          <tr><td>AuthZ</td><td>RBAC across Farmer, Expert, Moderator, Administrator, Vendor, Support — enforced at the API layer. Expert Portal access gated behind Module 10 credential verification before a token is issued.</td></tr>
+          <tr><td>Data at rest / in transit</td><td>Encryption at rest for database and object storage; TLS 1.2+ everywhere; no plaintext PII in logs.</td></tr>
+          <tr><td>DPDP Act 2023</td><td>Explicit consent at registration; data minimization; anonymize — never hard-delete — a farmer's identity in Closed cases/articles on an erasure request, preserving Audit Trail and Knowledge Repository integrity.</td></tr>
+          <tr><td>Payment security</td><td>PCI scope kept minimal via hosted checkout/tokenization — the platform never stores card data.</td></tr>
+          <tr><td>API security</td><td>Rate limiting, strict input validation, OWASP Top 10 mitigations, WAF in front of the API gateway.</td></tr>
+          <tr><td>Audit trail</td><td>Append-only, tamper-evident log of every case transition, content publication, order transaction, and expert/moderator assignment.</td></tr>
+          <tr><td>Media/content security</td><td>File-type validation and malware scanning on every Media Library upload; access via short-lived signed URLs, never public buckets.</td></tr>
+          <tr><td>Secrets management</td><td>Managed secrets store (AWS Secrets Manager / Doppler / Vault) — never in source control or plain env files.</td></tr>
+          <tr><td>Mobile/PWA</td><td>Encrypted local storage for client-persisted Draft cases — not plaintext.</td></tr>
+          <tr><td>Incident response</td><td>Written breach-notification procedure aligned with DPDP Act timelines, owned by the Security &amp; Compliance function.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pill-row" aria-hidden="true">
+      <span class="pill">DPDP Act 2023</span>
+      <span class="pill">RBAC</span>
+      <span class="pill">Audit Trail</span>
+      <span class="pill">PCI scope reduction</span>
+      <span class="pill">OWASP Top 10</span>
+    </div>
+  </section>
+
+  <footer>
+    Working reference, not a governed document — see
+    <strong>000-Project-Charter.md</strong> (v1.0.0) and <strong>01-Product/01-Vision.md</strong>
+    (v1.0.0) for what's actually approved. Formalize into
+    <code>01-Product/04-Product-Roadmap.md</code>, <code>04-Architecture/</code>, and
+    <code>11-Security/</code> when the series reaches them.
+  </footer>
+
+</div>

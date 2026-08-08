@@ -1,0 +1,248 @@
+// Stage 1 (Foundation): Identity & Membership, Farm/Land, Configuration
+// taxonomy, Expert credentialing, and the Audit Trail.
+// Stage 2 (Core Trust Loop), in progress: Case Management below. Knowledge
+// Repository publication workflow, Learning, Marketplace, and Soil Laboratory
+// are still not modeled — see 01-Product/04-Product-Roadmap.md.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  FARMER
+  EXPERT
+  MODERATOR
+  ADMINISTRATOR
+  VENDOR
+  SUPPORT_AGENT
+}
+
+enum MembershipStatus {
+  PENDING_PAYMENT
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+}
+
+enum CredentialStatus {
+  NOT_SUBMITTED
+  PENDING_REVIEW
+  VERIFIED
+  REJECTED
+}
+
+enum OtpPurpose {
+  REGISTRATION
+  PASSWORD_RESET
+}
+
+// The ten states fixed in 000-Project-Charter.md's Case Lifecycle (v0.3.0).
+// Knowledge Repository publication is deliberately NOT a Case status — it's a
+// separate workflow triggered by Closed, per the Charter's own distinction.
+enum CaseStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  ASSIGNED
+  EXPERT_WORKING
+  WAITING_FARMER
+  ANSWERED
+  FARMER_CONFIRMED
+  REOPENED
+  CLOSED
+}
+
+enum ClosureReason {
+  RESOLVED
+  ABANDONED
+}
+
+model User {
+  id                 String   @id @default(uuid())
+  mobileNumber       String   @unique
+  passwordHash       String
+  role               Role
+  name               String
+  preferredLanguage  String   @default("te") // Telugu, per 01-Product/05-Target-Users.md
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Membership fields apply to FARMER role only; left nullable for other roles.
+  membershipTier     String?
+  membershipStatus   MembershipStatus?
+  membershipExpiry   DateTime?
+
+  farmLands          FarmLand[]
+  expertProfile      ExpertProfile?
+  refreshTokens      RefreshToken[]
+  auditLogs          AuditLog[]        @relation("AuditActor")
+  verifiedExperts    ExpertProfile[]   @relation("CredentialVerifier")
+  casesAsFarmer      Case[]            @relation("CaseFarmer")
+  casesAsExpert      Case[]            @relation("CaseExpert")
+
+  @@index([role])
+}
+
+// Farm/Land Parcel — its own entity per Charter v0.4.0: a farmer may operate more
+// than one; Cases and Soil Reports (Stage 2+) link to the specific parcel, not the
+// farmer generally.
+model FarmLand {
+  id             String   @id @default(uuid())
+  farmerId       String
+  farmer         User     @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  label          String   // farmer-facing name, e.g. "North field"
+  address        String
+  landSizeAcres  Float
+  primaryCrops   String[] // crop names, validated against CropMaster at the API layer
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  cases          Case[]
+
+  @@index([farmerId])
+}
+
+// Module 4 — Case Management, modeled on CRM ticketing per Charter v0.3.0.
+// caseNumber is farmer-visible and assigned at Submitted. isPriority +
+// priorityConfirmedBy implement the confirmation-gated Emergency Advisory
+// path (Charter v0.3.0) — a farmer requesting priority alone doesn't grant
+// it, per the anti-abuse rule already in Section 9.1 of the Charter.
+model Case {
+  id                  String         @id @default(uuid())
+  caseNumber          String?        @unique // set on Submitted, null while Draft
+
+  farmerId            String
+  farmer              User           @relation("CaseFarmer", fields: [farmerId], references: [id], onDelete: Cascade)
+  farmLandId          String
+  farmLand            FarmLand       @relation(fields: [farmLandId], references: [id], onDelete: Cascade)
+
+  categoryId          String
+  category            CaseCategoryMaster @relation(fields: [categoryId], references: [id])
+
+  problemDescription  String
+  evidenceNotes       String?        // media upload infra doesn't exist yet — see README gap note
+
+  status              CaseStatus     @default(DRAFT)
+  closureReason       ClosureReason?
+
+  assignedExpertId    String?
+  assignedExpert      User?          @relation("CaseExpert", fields: [assignedExpertId], references: [id])
+
+  priorityRequested   Boolean        @default(false) // the farmer's ask, alone, grants nothing
+  isPriority          Boolean        @default(false) // true only after a Moderator/Administrator confirms — the actual anti-abuse gate
+  priorityConfirmedBy String?        // userId of the Moderator/Administrator who confirmed it
+
+  followUpQuestion    String?        // set when Expert Working -> Waiting Farmer
+  followUpResponse    String?        // set when the farmer responds, before returning to Expert Working
+  resolutionNotes     String?        // the expert's prescription/solution, set at Answered
+
+  submittedAt         DateTime?
+  closedAt            DateTime?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  @@index([farmerId])
+  @@index([assignedExpertId])
+  @@index([status])
+}
+
+// Module 10 — Administration: expert credential verification is a precondition of
+// Expert Portal activation, per Charter v0.4.0 / Risk R9 mitigation.
+model ExpertProfile {
+  id                 String            @id @default(uuid())
+  userId             String            @unique
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  qualification      String? // null until the expert submits credentials (ExpertsService.submitCredentials)
+  licenseNumber      String?
+  credentialStatus   CredentialStatus  @default(NOT_SUBMITTED)
+  verifiedByUserId   String?
+  verifiedBy         User?             @relation("CredentialVerifier", fields: [verifiedByUserId], references: [id])
+  verifiedAt         DateTime?
+  submittedAt        DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
+
+model RefreshToken {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  revoked    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+model OtpVerification {
+  id            String     @id @default(uuid())
+  mobileNumber  String
+  codeHash      String
+  purpose       OtpPurpose
+  expiresAt     DateTime
+  consumed      Boolean    @default(false)
+  attempts      Int        @default(0)
+  createdAt     DateTime   @default(now())
+
+  @@index([mobileNumber, purpose])
+}
+
+// --- Module 14: Configuration — the platform's single controlled taxonomy.
+// Referenced by other modules, never duplicated, per Charter v0.3.0.
+
+model CropMaster {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model CaseCategoryMaster {
+  id          String   @id @default(uuid())
+  name        String   @unique // Disease, Pest, Nutrient Deficiency, Weather Damage,
+                                // Unknown Problem, General Advisory/Planning (Charter v0.3.0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  cases       Case[]
+}
+
+model TagMaster {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model RegionMaster {
+  id         String   @id @default(uuid())
+  name       String
+  state      String
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@unique([name, state])
+}
+
+// Cross-cutting: Audit Trail is a binding Charter principle from day one, not a
+// Stage-5 hardening afterthought.
+model AuditLog {
+  id          String   @id @default(uuid())
+  actorId     String?
+  actor       User?    @relation("AuditActor", fields: [actorId], references: [id])
+  action      String   // e.g. "user.register", "expert.credential.verify"
+  entityType  String
+  entityId    String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorId])
+}
