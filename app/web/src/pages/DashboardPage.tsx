@@ -17,6 +17,8 @@ export function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locating, setLocating] = useState(false);
 
   useEffect(() => {
     if (!session) return;
@@ -48,13 +50,36 @@ export function DashboardPage() {
       .filter(Boolean);
 
     try {
-      const farm = await createFarm(session.accessToken, { label, address, landSizeAcres, primaryCrops });
+      const farm = await createFarm(session.accessToken, {
+        label,
+        address,
+        landSizeAcres,
+        primaryCrops,
+        ...(coords ? { latitude: coords.latitude, longitude: coords.longitude } : {}),
+      });
       setFarms((prev) => [farm, ...prev]);
       setShowAddForm(false);
+      setCoords(null);
       event.currentTarget.reset();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.couldNotAddParcel.en} / ${strings.couldNotAddParcel.te}`);
     }
+  }
+
+  function handleUseLocation() {
+    setError(null);
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCoords({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+        setLocating(false);
+      },
+      () => {
+        setError(`${strings.locationDeniedError.en} / ${strings.locationDeniedError.te}`);
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000 },
+    );
   }
 
   return (
@@ -141,6 +166,20 @@ export function DashboardPage() {
                   required
                 />
               </label>
+              <div>
+                {coords ? (
+                  <>
+                    <BiValue value={strings.locationCapturedNotice} as="p" className="hint" />
+                    <button type="button" className="secondary" onClick={() => setCoords(null)}>
+                      <Bi id="removeLocationButton" />
+                    </button>
+                  </>
+                ) : (
+                  <button type="button" className="secondary" onClick={handleUseLocation} disabled={locating}>
+                    {locating ? <BiValue value={strings.locatingButton} /> : <Bi id="useLocationButton" />}
+                  </button>
+                )}
+              </div>
               <button type="submit">
                 <Bi id="saveParcelButton" />
               </button>
@@ -155,6 +194,16 @@ export function DashboardPage() {
               <div className="meta">
                 {farm.address} · {farm.landSizeAcres} acres · {farm.primaryCrops.join(', ')}
               </div>
+              {farm.latitude != null && farm.longitude != null && (
+                <a
+                  href={`https://www.google.com/maps?q=${farm.latitude},${farm.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link-button"
+                >
+                  {strings.viewOnMapLink.en} / {strings.viewOnMapLink.te}
+                </a>
+              )}
             </div>
           ))}
         </div>

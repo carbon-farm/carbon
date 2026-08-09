@@ -103,6 +103,8 @@ model FarmLand {
   address        String
   landSizeAcres  Float
   primaryCrops   String[] // crop names, validated against CropMaster at the API layer
+  latitude       Float?   // optional GPS pin, captured via the browser's Geolocation
+  longitude      Float?   // API — easier for a farmer standing in the field than typing an address
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 

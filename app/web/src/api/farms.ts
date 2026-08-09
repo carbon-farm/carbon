@@ -6,6 +6,8 @@ export interface FarmLand {
   address: string;
   landSizeAcres: number;
   primaryCrops: string[];
+  latitude: number | null;
+  longitude: number | null;
   createdAt: string;
 }
 
@@ -15,7 +17,14 @@ export function listFarms(token: string) {
 
 export function createFarm(
   token: string,
-  data: { label: string; address: string; landSizeAcres: number; primaryCrops: string[] },
+  data: {
+    label: string;
+    address: string;
+    landSizeAcres: number;
+    primaryCrops: string[];
+    latitude?: number;
+    longitude?: number;
+  },
 ) {
   return apiRequest<FarmLand>('/farms', { method: 'POST', body: data, token });
 }
