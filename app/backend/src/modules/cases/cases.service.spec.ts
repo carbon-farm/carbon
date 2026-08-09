@@ -243,6 +243,17 @@ describe('CasesService', () => {
 
       await expect(service.abandon('case-1', 'admin-1')).rejects.toThrow(BadRequestException);
     });
+
+    it('allows a system-triggered abandon with no actor (the scheduler sweep)', async () => {
+      prisma.case.findUnique.mockResolvedValue(buildCase({ status: CaseStatus.WAITING_FARMER }));
+      prisma.case.update.mockImplementation(({ data }) => Promise.resolve(buildCase({ ...data })));
+
+      const result = await service.abandon('case-1');
+      expect(result.status).toBe(CaseStatus.CLOSED);
+      expect(audit.log).toHaveBeenCalledWith(
+        expect.objectContaining({ actorId: undefined, metadata: { trigger: 'scheduler' } }),
+      );
+    });
   });
 
   describe('confirmPriority', () => {
@@ -262,6 +273,22 @@ describe('CasesService', () => {
       const result = await service.confirmPriority('case-1', 'mod-1', { approve: true });
       expect(result.isPriority).toBe(true);
       expect(result.priorityConfirmedBy).toBe('mod-1');
+    });
+  });
+
+  describe('findStaleWaitingFarmer', () => {
+    it('queries only WAITING_FARMER cases updated before the cutoff', async () => {
+      prisma.case.findMany.mockResolvedValue([{ id: 'case-1' }]);
+      const cutoff = new Date('2026-01-01');
+
+      const result = await service.findStaleWaitingFarmer(cutoff);
+
+      expect(prisma.case.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { status: CaseStatus.WAITING_FARMER, updatedAt: { lt: cutoff } },
+        }),
+      );
+      expect(result).toEqual([{ id: 'case-1' }]);
     });
   });
 

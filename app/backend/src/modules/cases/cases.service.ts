@@ -266,10 +266,12 @@ export class CasesService {
   }
 
   // Administrator: WAITING_FARMER -> CLOSED (Abandoned), after the SLA
-  // window. Manual for now — there's no scheduler wired up yet (Charter's
-  // BullMQ recommendation isn't built), so this is triggered on demand
-  // rather than automatically. That gap is real; see cases.module.ts note.
-  async abandon(caseId: string, actorId: string): Promise<Case> {
+  // window. actorId is optional because CasesSchedulerService also calls
+  // this for cases past the SLA automatically (see cases.scheduler.ts) —
+  // there's no human actor for those, so the audit entry just omits one
+  // rather than attributing the system's own action to whichever
+  // Administrator happens to exist.
+  async abandon(caseId: string, actorId?: string): Promise<Case> {
     const existing = await this.getOrThrow(caseId);
     this.assertStatus(existing, [CaseStatus.WAITING_FARMER], 'abandon');
     const updated = await this.prisma.case.update({
@@ -282,6 +284,7 @@ export class CasesService {
       action: 'case.abandon',
       entityType: 'Case',
       entityId: caseId,
+      metadata: actorId ? undefined : { trigger: 'scheduler' },
     });
     return updated;
   }
@@ -309,6 +312,18 @@ export class CasesService {
       entityId: caseId,
     });
     return updated;
+  }
+
+  // CasesSchedulerService's sweep target: cases that have been sitting in
+  // Waiting Farmer since before the SLA cutoff. updatedAt is the right
+  // field here, not followUp timestamps — every transition into
+  // WAITING_FARMER (requestFollowUp) bumps it, so it always reflects when
+  // the farmer's clock actually started.
+  async findStaleWaitingFarmer(olderThan: Date) {
+    return this.prisma.case.findMany({
+      where: { status: CaseStatus.WAITING_FARMER, updatedAt: { lt: olderThan } },
+      select: { id: true },
+    });
   }
 
   async listMine(farmerId: string) {
