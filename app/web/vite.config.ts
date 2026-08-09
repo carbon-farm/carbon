@@ -12,9 +12,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'AgriAI Platform / అగ్రిఏఐ ప్లాట్‌ఫారమ్',
-        short_name: 'AgriAI',
-        description: 'Digital Agriculture Knowledge & Advisory Platform / డిజిటల్ వ్యవసాయ జ్ఞాన మరియు సలహా వేదిక',
+        name: 'Organic Carbon Farming / ఆర్గానిక్ కార్బన్ ఫార్మింగ్',
+        short_name: 'Carbon Farming',
+        description: 'Organic Carbon Farming / ఆర్గానిక్ కార్బన్ ఫార్మింగ్',
         theme_color: '#2F6D4F',
         background_color: '#EFF1E6',
         display: 'standalone',

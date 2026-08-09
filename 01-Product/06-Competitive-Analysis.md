@@ -5,7 +5,7 @@
 **Status:** Draft — Pending Approval
 **Version:** 1.0.0
 **Classification:** Internal — Strategic Planning
-**Series Position:** Document 7 of the Digital Agriculture Knowledge & Advisory Platform documentation series
+**Series Position:** Document 7 of the Organic Carbon Farming documentation series
 
 ---
 

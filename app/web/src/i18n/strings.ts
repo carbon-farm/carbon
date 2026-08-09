@@ -12,7 +12,7 @@ export interface Bilingual {
 }
 
 export const strings = {
-  brand: { en: 'AgriAI Platform', te: 'అగ్రిఏఐ ప్లాట్‌ఫారమ్' },
+  brand: { en: 'Organic Carbon Farming', te: 'ఆర్గానిక్ కార్బన్ ఫార్మింగ్' },
 
   // Login
   loginTitle: { en: 'Log in', te: 'లాగిన్ అవ్వండి' },

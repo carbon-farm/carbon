@@ -1,6 +1,6 @@
-# AgriAI Platform — Application Code
+# Organic Carbon Farming — Application Code
 
-Implementation of the Digital Agriculture Knowledge & Advisory Platform, following
+Implementation of the Organic Carbon Farming platform, following
 [`../000-Project-Charter.md`](../000-Project-Charter.md) and the documentation series in
 [`../01-Product/`](../01-Product/).
 

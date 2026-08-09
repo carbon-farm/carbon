@@ -20,7 +20,7 @@ async function bootstrap() {
   const port = process.env.PORT ?? 7000;
   await app.listen(port);
   // eslint-disable-next-line no-console
-  console.log(`AgriAI backend (Stage 1) listening on http://localhost:${port}/api/v1`);
+  console.log(`Organic Carbon Farming backend (Stage 1) listening on http://localhost:${port}/api/v1`);
 }
 
 bootstrap();

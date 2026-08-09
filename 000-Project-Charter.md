@@ -5,7 +5,7 @@
 **Status:** Approved
 **Version:** 1.0.0
 **Classification:** Internal — Strategic Planning
-**Applies To:** Digital Agriculture Knowledge & Advisory Platform ("the Platform"), all phases
+**Applies To:** Organic Carbon Farming ("the Platform"), all phases
 
 ---
 
@@ -37,7 +37,7 @@
 
 ## 1. Executive Summary
 
-The **Digital Agriculture Knowledge & Advisory Platform** ("the Platform") is a purpose-built, enterprise-grade digital system that connects farmers with agricultural knowledge, expert advisory services, learning content, and agri-input marketplaces through a single, trusted, membership-based digital experience.
+**Organic Carbon Farming** ("the Platform") is a purpose-built, enterprise-grade digital system that connects farmers with agricultural knowledge, expert advisory services, learning content, and agri-input marketplaces through a single, trusted, membership-based digital experience.
 
 Smallholder and mid-scale farmers in emerging agricultural economies today face a structural information gap: agronomic knowledge exists, but it is fragmented across word-of-mouth, informal social media groups, unlicensed input dealers, and inconsistent extension services. When a farmer encounters a problem — a pest outbreak, an unexplained yield drop, a soil health question — there is no reliable, accountable, auditable channel to reach a qualified expert, describe the problem with evidence (photos, videos, soil data), and receive a documented, trackable resolution.
 
@@ -518,7 +518,7 @@ The long-term roadmap extends beyond Phase 2 to describe the platform's multi-ye
 
 ```mermaid
 timeline
-    title Digital Agriculture Knowledge & Advisory Platform — Long-Term Roadmap
+    title Organic Carbon Farming — Long-Term Roadmap
     section Phase 1 — Trust Foundation (No AI)
         Membership, Learning, Manual Advisory, Knowledge Repository, Marketplace, Admin, Security & Audit : Human-expert-operated core platform
     section Phase 2 — AI-Augmented Intelligence
@@ -627,7 +627,7 @@ Per the repository structure already established for this project, the following
 
 | Term | Definition |
 |---|---|
-| **Platform** | The Digital Agriculture Knowledge & Advisory Platform as a whole, spanning the fourteen modules in [Section 9](#9-high-level-features). |
+| **Platform** | Organic Carbon Farming as a whole, spanning the fourteen modules in [Section 9](#9-high-level-features). |
 | **Farmer / Member** | A registered end user of the platform who consumes learning content, raises Cases, and may purchase marketplace products, all from a personal Dashboard. |
 | **Agricultural Expert / Advisor** | A qualified human professional responsible for working assigned Cases to resolution in Phase 1's manual Case Management workflow, via the Expert Portal. Credentials (qualification, license, certification) are verified by Administration before Expert Portal access is activated. |
 | **Farm / Land Parcel** | A single piece of land operated by a Farmer, with its own address, land size, primary crops, and soil history. A farmer may have more than one; Cases and Soil Reports are linked to the specific parcel they concern, not to the farmer generally. |
@@ -667,7 +667,7 @@ Per the repository structure already established for this project, the following
 
 ## Approval
 
-This Project Charter is the foundational governance document for the Digital Agriculture Knowledge & Advisory Platform. It was reviewed across three rounds (initial draft, sponsor domain refinement, architecture review) before approval, and is now binding on every downstream document in this series.
+This Project Charter is the foundational governance document for Organic Carbon Farming. It was reviewed across three rounds (initial draft, sponsor domain refinement, architecture review) before approval, and is now binding on every downstream document in this series.
 
 **Approval Status:** Approved
 
