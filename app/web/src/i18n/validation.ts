@@ -2,6 +2,11 @@ import type { ChangeEvent, FormEvent } from 'react';
 
 type Validatable = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
+function decimalPlaces(step: string): number {
+  const dot = step.indexOf('.');
+  return dot === -1 ? 0 : step.length - dot - 1;
+}
+
 // Native HTML5 validation tooltips ("Please fill out this field") come from
 // the browser's own locale, not from src/i18n/strings.ts — they bypass the
 // whole bilingual system silently. setCustomValidity() is the only way to
@@ -23,6 +28,10 @@ export function bilingualInvalidHandler(event: FormEvent<Validatable>): void {
     input.setCustomValidity('Enter a valid value in the format shown / చూపిన ఫార్మాట్‌లో సరైన విలువను నమోదు చేయండి');
   } else if (v.rangeUnderflow && 'min' in input) {
     input.setCustomValidity(`Enter a value of at least ${input.min} / కనీసం ${input.min} విలువను నమోదు చేయండి`);
+  } else if (v.stepMismatch && 'step' in input) {
+    input.setCustomValidity(
+      `Enter a number with at most ${decimalPlaces(String(input.step))} decimal place(s) / అత్యధికం ${decimalPlaces(String(input.step))} దశాంశ స్థానాలతో సంఖ్యను నమోదు చేయండి`,
+    );
   } else if (v.typeMismatch) {
     input.setCustomValidity('Enter a valid value / సరైన విలువను నమోదు చేయండి');
   } else {

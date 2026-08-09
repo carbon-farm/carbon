@@ -124,8 +124,8 @@ export function DashboardPage() {
                 <input
                   name="landSizeAcres"
                   type="number"
-                  step="0.1"
-                  min="0.1"
+                  step="0.01"
+                  min="0.01"
                   onChange={clearCustomValidity}
                   onInvalid={bilingualInvalidHandler}
                   required
