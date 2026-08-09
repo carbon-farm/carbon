@@ -1,8 +1,7 @@
-// Where each role lands after login. FARMER/MODERATOR/EXPERT have real
-// screens; ADMINISTRATOR/VENDOR/SUPPORT_AGENT don't have a web UI yet (Stage
-// 1/2 only built the farmer, moderator triage, and expert case-work
-// surfaces) — they fall through to the not-built notice rather than hitting
-// a farmer-only endpoint like /farms and crashing.
+// Where each role lands after login. FARMER/MODERATOR/EXPERT/ADMINISTRATOR
+// have real screens; VENDOR/SUPPORT_AGENT don't yet — they fall through to
+// the not-built notice rather than hitting a role-gated endpoint and
+// crashing.
 export function roleHomePath(role: string): string {
   switch (role) {
     case 'FARMER':
@@ -11,6 +10,8 @@ export function roleHomePath(role: string): string {
       return '/moderator/queue';
     case 'EXPERT':
       return '/expert/cases';
+    case 'ADMINISTRATOR':
+      return '/admin';
     default:
       return '/no-portal';
   }

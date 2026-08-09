@@ -11,6 +11,10 @@ import { CaseDetailPage } from './pages/CaseDetailPage';
 import { ModeratorQueuePage } from './pages/ModeratorQueuePage';
 import { ExpertCasesPage } from './pages/ExpertCasesPage';
 import { ExpertCaseDetailPage } from './pages/ExpertCaseDetailPage';
+import { AdminHomePage } from './pages/AdminHomePage';
+import { AdminStaffPage } from './pages/AdminStaffPage';
+import { AdminCredentialsPage } from './pages/AdminCredentialsPage';
+import { AdminTaxonomyPage } from './pages/AdminTaxonomyPage';
 import { NoPortalPage } from './pages/NoPortalPage';
 
 export function App() {
@@ -78,6 +82,39 @@ export function App() {
             element={
               <ProtectedRoute roles={['EXPERT']}>
                 <ExpertCaseDetailPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute roles={['ADMINISTRATOR']}>
+                <AdminHomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/staff"
+            element={
+              <ProtectedRoute roles={['ADMINISTRATOR']}>
+                <AdminStaffPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/credentials"
+            element={
+              <ProtectedRoute roles={['ADMINISTRATOR']}>
+                <AdminCredentialsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/taxonomy"
+            element={
+              <ProtectedRoute roles={['ADMINISTRATOR']}>
+                <AdminTaxonomyPage />
               </ProtectedRoute>
             }
           />
