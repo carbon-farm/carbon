@@ -71,8 +71,8 @@ export const strings = {
   logoutButton: { en: 'Log out', te: 'లాగ్ అవుట్' },
   farmLandParcelsStat: { en: 'Farm/Land parcels', te: 'పొలం స్థలాలు' },
   stage1Notice: {
-    en: "Case Management, Learning, and Marketplace aren't built yet — that's Stage 2+ of the Product Roadmap. This is Stage 1: your account and your land.",
-    te: 'కేస్ మేనేజ్‌మెంట్, లెర్నింగ్, మార్కెట్‌ప్లేస్ ఇంకా నిర్మించలేదు — అవి ప్రొడక్ట్ రోడ్‌మ్యాప్‌లో దశ 2కి చెందినవి. ఇది దశ 1: మీ ఖాతా మరియు మీ భూమి.',
+    en: "Learning and Marketplace aren't built yet — that's later in the Product Roadmap. Your account, your land, and reporting a problem all work today.",
+    te: 'లెర్నింగ్, మార్కెట్‌ప్లేస్ ఇంకా నిర్మించలేదు — అవి ప్రొడక్ట్ రోడ్‌మ్యాప్‌లో తర్వాత భాగం. మీ ఖాతా, మీ భూమి, సమస్యను నివేదించడం ఇప్పుడు పనిచేస్తాయి.',
   },
   farmLandParcelsHeading: { en: 'Farm/Land parcels', te: 'పొలం స్థలాలు' },
   addParcelButton: { en: '+ Add parcel', te: '+ స్థలం జోడించండి' },
@@ -84,6 +84,89 @@ export const strings = {
   saveParcelButton: { en: 'Save parcel', te: 'స్థలాన్ని సేవ్ చేయండి' },
   noParcelsYet: { en: 'No parcels yet — add your first one.', te: 'ఇంకా స్థలాలు లేవు — మీ మొదటిదాన్ని జోడించండి.' },
   loading: { en: 'Loading…', te: 'లోడ్ అవుతోంది…' },
+
+  // Dashboard — Cases entry point
+  myCasesStat: { en: 'Cases', te: 'కేసులు' },
+  reportProblemButton: { en: 'Report a problem', te: 'సమస్యను నివేదించండి' },
+
+  // Cases — list ("My Cases")
+  myCasesEyebrow: { en: 'Cases', te: 'కేసులు' },
+  myCasesTitle: { en: 'My cases', te: 'నా కేసులు' },
+  newCaseButton: { en: '+ New case', te: '+ కొత్త కేసు' },
+  noCasesYet: {
+    en: 'No cases yet — report a problem to get expert advice.',
+    te: 'ఇంకా కేసులు లేవు — నిపుణుల సలహా పొందడానికి ఒక సమస్యను నివేదించండి.',
+  },
+  couldNotLoadCases: { en: 'Could not load your cases.', te: 'మీ కేసులను లోడ్ చేయలేకపోయాము.' },
+  priorityBadgeLabel: { en: 'Priority', te: 'ప్రాధాన్యత' },
+  draftBadgeNotice: { en: 'Not submitted yet', te: 'ఇంకా సమర్పించలేదు' },
+
+  // Case status labels — the ten states in 000-Project-Charter.md's Case Lifecycle
+  statusDraft: { en: 'Draft', te: 'డ్రాఫ్ట్' },
+  statusSubmitted: { en: 'Submitted', te: 'సమర్పించబడింది' },
+  statusUnderReview: { en: 'Under review', te: 'సమీక్షలో ఉంది' },
+  statusAssigned: { en: 'Assigned to an expert', te: 'నిపుణుడికి కేటాయించబడింది' },
+  statusExpertWorking: { en: 'Expert is working on it', te: 'నిపుణుడు దీనిపై పనిచేస్తున్నారు' },
+  statusWaitingFarmer: { en: 'Waiting for your response', te: 'మీ స్పందన కోసం వేచి ఉంది' },
+  statusAnswered: { en: 'Answered — please review', te: 'సమాధానం ఇవ్వబడింది — దయచేసి సమీక్షించండి' },
+  statusFarmerConfirmed: { en: 'Confirmed', te: 'ధృవీకరించబడింది' },
+  statusReopened: { en: 'Reopened', te: 'తిరిగి తెరవబడింది' },
+  statusClosedResolved: { en: 'Closed — resolved', te: 'మూసివేయబడింది — పరిష్కరించబడింది' },
+  statusClosedAbandoned: { en: 'Closed — no response received', te: 'మూసివేయబడింది — స్పందన రాలేదు' },
+  statusClosed: { en: 'Closed', te: 'మూసివేయబడింది' },
+
+  // Case categories (from CaseCategoryMaster — fixed six per Charter v0.3.0)
+  categoryDisease: { en: 'Disease', te: 'వ్యాధి' },
+  categoryPest: { en: 'Pest', te: 'పురుగు' },
+  categoryNutrientDeficiency: { en: 'Nutrient Deficiency', te: 'పోషకాహార లోపం' },
+  categoryWeatherDamage: { en: 'Weather Damage', te: 'వాతావరణ నష్టం' },
+  categoryUnknownProblem: { en: 'Unknown Problem', te: 'తెలియని సమస్య' },
+  categoryGeneralAdvisory: { en: 'General Advisory / Planning', te: 'సాధారణ సలహా / ప్రణాళిక' },
+
+  // New Case form
+  newCaseEyebrow: { en: 'New case', te: 'కొత్త కేసు' },
+  newCaseTitle: { en: 'Report a problem', te: 'సమస్యను నివేదించండి' },
+  farmLandFieldLabel: { en: 'Which parcel?', te: 'ఏ స్థలం?' },
+  categoryFieldLabel: { en: 'What kind of problem?', te: 'ఎలాంటి సమస్య?' },
+  selectPlaceholder: { en: 'Select…', te: 'ఎంచుకోండి…' },
+  problemDescriptionField: { en: 'Describe the problem', te: 'సమస్యను వివరించండి' },
+  evidenceNotesField: { en: 'Anything else to add? (optional)', te: 'ఇంకా ఏమైనా చెప్పాలా? (ఐచ్ఛికం)' },
+  requestPriorityLabel: {
+    en: 'This is urgent — request priority handling',
+    te: 'ఇది అత్యవసరం — ప్రాధాన్యతా చికిత్సను అభ్యర్థించండి',
+  },
+  saveDraftButton: { en: 'Save as draft', te: 'డ్రాఫ్ట్‌గా సేవ్ చేయండి' },
+  submitCaseButton: { en: 'Submit case', te: 'కేసును సమర్పించండి' },
+  saving: { en: 'Saving…', te: 'సేవ్ చేస్తోంది…' },
+  submitting: { en: 'Submitting…', te: 'సమర్పిస్తోంది…' },
+  noFarmLandsWarning: {
+    en: 'Add a Farm/Land parcel first, from your Dashboard, before reporting a problem.',
+    te: 'సమస్యను నివేదించే ముందు, మీ డాష్‌బోర్డ్ నుండి ముందుగా ఒక పొలం స్థలాన్ని జోడించండి.',
+  },
+  couldNotCreateCase: { en: 'Could not create this case.', te: 'ఈ కేసును సృష్టించలేకపోయాము.' },
+  couldNotSubmitCase: { en: 'Could not submit this case.', te: 'ఈ కేసును సమర్పించలేకపోయాము.' },
+
+  // Case detail
+  caseDetailEyebrow: { en: 'Case', te: 'కేసు' },
+  backToCasesLink: { en: 'Back to my cases', te: 'నా కేసులకు తిరిగి వెళ్ళండి' },
+  parcelLabel: { en: 'Parcel', te: 'స్థలం' },
+  categoryLabel: { en: 'Category', te: 'వర్గం' },
+  problemLabel: { en: 'Problem', te: 'సమస్య' },
+  evidenceLabel: { en: 'Additional notes', te: 'అదనపు గమనికలు' },
+  followUpQuestionLabel: { en: 'The expert is asking', te: 'నిపుణుడు అడుగుతున్నారు' },
+  yourResponseField: { en: 'Your response', te: 'మీ స్పందన' },
+  sendResponseButton: { en: 'Send response', te: 'స్పందనను పంపండి' },
+  sending: { en: 'Sending…', te: 'పంపుతోంది…' },
+  resolutionLabel: { en: "Expert's advice", te: 'నిపుణుడి సలహా' },
+  confirmResolutionButton: { en: 'This solved my problem', te: 'ఇది నా సమస్యను పరిష్కరించింది' },
+  disputeResolutionButton: { en: "This didn't help", te: 'ఇది సహాయపడలేదు' },
+  confirming: { en: 'Confirming…', te: 'ధృవీకరిస్తోంది…' },
+  disputing: { en: 'Sending back…', te: 'తిరిగి పంపుతోంది…' },
+  caseNotFoundError: { en: 'Case not found.', te: 'కేసు కనుగొనబడలేదు.' },
+  couldNotLoadCase: { en: 'Could not load this case.', te: 'ఈ కేసును లోడ్ చేయలేకపోయాము.' },
+  couldNotRespond: { en: 'Could not send your response.', te: 'మీ స్పందనను పంపలేకపోయాము.' },
+  couldNotConfirm: { en: 'Could not confirm this case.', te: 'ఈ కేసును ధృవీకరించలేకపోయాము.' },
+  couldNotDispute: { en: 'Could not send this back.', te: 'దీన్ని తిరిగి పంపలేకపోయాము.' },
 
   // Generic fallback error (network failure with no server message)
   genericError: { en: 'Something went wrong. Try again.', te: 'ఏదో తప్పు జరిగింది. మళ్ళీ ప్రయత్నించండి.' },
@@ -101,4 +184,48 @@ export function otpSentTo(mobileNumber: string): Bilingual {
     en: `We sent a 6-digit code to ${mobileNumber}.`,
     te: `మేము ${mobileNumber}కి 6-అంకెల కోడ్ పంపాము.`,
   };
+}
+
+// CaseCategoryMaster stores a single English name (Prisma seed data) — this
+// maps the fixed six from that seed to their bilingual display pair. An
+// unrecognized name (a category an Administrator added later, outside the
+// seed) falls back to showing the raw name on both lines rather than
+// crashing — better than a missing category.
+const CASE_CATEGORY_KEYS: Record<string, StringKey> = {
+  Disease: 'categoryDisease',
+  Pest: 'categoryPest',
+  'Nutrient Deficiency': 'categoryNutrientDeficiency',
+  'Weather Damage': 'categoryWeatherDamage',
+  'Unknown Problem': 'categoryUnknownProblem',
+  'General Advisory / Planning': 'categoryGeneralAdvisory',
+};
+
+export function caseCategoryLabel(name: string): Bilingual {
+  const key = CASE_CATEGORY_KEYS[name];
+  return key ? strings[key] : { en: name, te: name };
+}
+
+// Case status + closure reason -> display label. CLOSED needs the
+// ClosureReason alongside it to say "resolved" vs. "no response received" —
+// everything else maps straight off CaseStatus.
+const CASE_STATUS_KEYS: Record<string, StringKey> = {
+  DRAFT: 'statusDraft',
+  SUBMITTED: 'statusSubmitted',
+  UNDER_REVIEW: 'statusUnderReview',
+  ASSIGNED: 'statusAssigned',
+  EXPERT_WORKING: 'statusExpertWorking',
+  WAITING_FARMER: 'statusWaitingFarmer',
+  ANSWERED: 'statusAnswered',
+  FARMER_CONFIRMED: 'statusFarmerConfirmed',
+  REOPENED: 'statusReopened',
+};
+
+export function caseStatusLabel(status: string, closureReason?: string | null): Bilingual {
+  if (status === 'CLOSED') {
+    if (closureReason === 'ABANDONED') return strings.statusClosedAbandoned;
+    if (closureReason === 'RESOLVED') return strings.statusClosedResolved;
+    return strings.statusClosed;
+  }
+  const key = CASE_STATUS_KEYS[status];
+  return key ? strings[key] : { en: status, te: status };
 }

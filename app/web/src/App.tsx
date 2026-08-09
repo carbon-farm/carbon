@@ -5,6 +5,9 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { CasesPage } from './pages/CasesPage';
+import { NewCasePage } from './pages/NewCasePage';
+import { CaseDetailPage } from './pages/CaseDetailPage';
 
 export function App() {
   return (
@@ -20,6 +23,30 @@ export function App() {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cases"
+            element={
+              <ProtectedRoute>
+                <CasesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cases/new"
+            element={
+              <ProtectedRoute>
+                <NewCasePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cases/:id"
+            element={
+              <ProtectedRoute>
+                <CaseDetailPage />
               </ProtectedRoute>
             }
           />

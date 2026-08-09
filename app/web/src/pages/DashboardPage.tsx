@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { createFarm, listFarms, type FarmLand } from '../api/farms';
@@ -74,6 +75,12 @@ export function DashboardPage() {
           <BiValue value={strings.farmLandParcelsStat} as="div" className="label" />
         </div>
       </div>
+
+      <Link to="/cases">
+        <button type="button">
+          <Bi id="reportProblemButton" />
+        </button>
+      </Link>
 
       <BiValue value={strings.stage1Notice} as="p" className="hint" />
 

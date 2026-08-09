@@ -134,7 +134,7 @@ button .bi-te {
 
 /* Large tap targets throughout — per 01-Product/05-Target-Users.md, this is
    a low-literacy, often-imprecise-touch mobile persona, not a desktop one. */
-input, select, button {
+input, select, textarea, button {
   font-size: 16px;
   font-family: inherit;
   padding: 14px 16px;
@@ -144,9 +144,27 @@ input, select, button {
   color: var(--ink);
 }
 
-input:focus, select:focus, button:focus-visible {
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+input:focus, select:focus, textarea:focus, button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
+}
+
+.checkbox-label {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkbox-label input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  flex: none;
 }
 
 button {
@@ -219,6 +237,53 @@ button.secondary {
 .farm-item .meta {
   font-size: 13px;
   color: var(--ink-soft);
+}
+
+.case-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.case-item .label {
+  font-weight: 600;
+}
+
+.case-item .meta {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.status-line {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-ink);
+}
+
+.priority-badge {
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 8px;
+  border-radius: 999px;
+  align-self: flex-start;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 2px;
 }
 
 .top-bar {
