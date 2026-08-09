@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { listQueueCases, startReviewCase, assignCase, type Case } from '../api/cases';
@@ -80,6 +81,12 @@ export function ModeratorQueuePage() {
           <Bi id="logoutButton" />
         </button>
       </div>
+
+      <Link to="/moderator/articles">
+        <button type="button" className="secondary">
+          <Bi id="articleQueueTitle" />
+        </button>
+      </Link>
 
       {error && <div className="error-banner">{error}</div>}
 

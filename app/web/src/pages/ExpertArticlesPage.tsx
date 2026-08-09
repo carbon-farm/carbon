@@ -1,0 +1,67 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import { ApiError } from '../api/client';
+import { listMyArticles, type Article } from '../api/knowledge';
+import { Bi, BiValue } from '../i18n/Bi';
+import { strings, articleStatusLabel } from '../i18n/strings';
+
+export function ExpertArticlesPage() {
+  const { session, logout } = useAuth();
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!session) return;
+    listMyArticles(session.accessToken)
+      .then(setArticles)
+      .catch((err) => {
+        if (err instanceof ApiError && err.status === 401) {
+          logout();
+          return;
+        }
+        setError(err instanceof ApiError ? err.message : `${strings.couldNotLoadArticles.en} / ${strings.couldNotLoadArticles.te}`);
+      })
+      .finally(() => setLoading(false));
+  }, [session, logout]);
+
+  return (
+    <div className="screen">
+      <div className="top-bar">
+        <div>
+          <Bi id="knowledgeEyebrow" as="span" className="eyebrow" />
+          <Bi id="myArticlesTitle" as="h1" />
+        </div>
+        <Link to="/expert/articles/new">
+          <button type="button">
+            <Bi id="newArticleButton" />
+          </button>
+        </Link>
+      </div>
+
+      {error && <div className="error-banner">{error}</div>}
+
+      {loading ? (
+        <BiValue value={strings.loading} as="p" className="hint" />
+      ) : articles.length === 0 ? (
+        <BiValue value={strings.noArticlesYet} as="p" className="hint" />
+      ) : (
+        <div className="card">
+          {articles.map((a) => (
+            <Link to={`/expert/articles/${a.id}`} key={a.id} className="case-item">
+              <div className="label">{a.title}</div>
+              <div className="status-line">
+                <BiValue value={articleStatusLabel(a.status)} />
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      <Link to="/expert/cases" className="link-button">
+        {strings.backButton.en} / {strings.backButton.te}
+      </Link>
+    </div>
+  );
+}

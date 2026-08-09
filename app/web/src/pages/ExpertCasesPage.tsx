@@ -38,6 +38,12 @@ export function ExpertCasesPage() {
         </button>
       </div>
 
+      <Link to="/expert/articles">
+        <button type="button" className="secondary">
+          <Bi id="myArticlesTitle" />
+        </button>
+      </Link>
+
       {error && <div className="error-banner">{error}</div>}
 
       {loading ? (

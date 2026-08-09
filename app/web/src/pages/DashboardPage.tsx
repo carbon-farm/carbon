@@ -107,6 +107,12 @@ export function DashboardPage() {
         </button>
       </Link>
 
+      <Link to="/knowledge">
+        <button type="button" className="secondary">
+          <Bi id="browseKnowledgeButton" />
+        </button>
+      </Link>
+
       <BiValue value={strings.stage1Notice} as="p" className="hint" />
 
       {error && <div className="error-banner">{error}</div>}

@@ -280,6 +280,45 @@ export const strings = {
   couldNotLoadTaxonomy: { en: 'Could not load this list.', te: 'ఈ జాబితాను లోడ్ చేయలేకపోయాము.' },
   couldNotAddItem: { en: 'Could not add this.', te: 'దీన్ని జోడించలేకపోయాము.' },
 
+  // Knowledge — shared
+  knowledgeEyebrow: { en: 'Knowledge', te: 'జ్ఞానం' },
+  articleStatusDraft: { en: 'Draft', te: 'డ్రాఫ్ట్' },
+  articleStatusPending: { en: 'Pending review', te: 'సమీక్ష పెండింగ్‌లో' },
+  articleStatusPublished: { en: 'Published', te: 'ప్రచురించబడింది' },
+  articleStatusRejected: { en: 'Sent back — needs changes', te: 'తిరిగి పంపబడింది — మార్పులు అవసరం' },
+
+  // Expert — My Articles
+  myArticlesTitle: { en: 'My articles', te: 'నా వ్యాసాలు' },
+  newArticleButton: { en: '+ New article', te: '+ కొత్త వ్యాసం' },
+  noArticlesYet: { en: 'No articles yet — share what you know.', te: 'ఇంకా వ్యాసాలు లేవు — మీకు తెలిసినది పంచుకోండి.' },
+  couldNotLoadArticles: { en: 'Could not load your articles.', te: 'మీ వ్యాసాలను లోడ్ చేయలేకపోయాము.' },
+
+  // Article form
+  articleTitleField: { en: 'Title', te: 'శీర్షిక' },
+  articleContentField: { en: 'Content', te: 'విషయం' },
+  articleCategoryField: { en: 'Topic (optional)', te: 'అంశం (ఐచ్ఛికం)' },
+  submitArticleButton: { en: 'Submit for review', te: 'సమీక్ష కోసం సమర్పించండి' },
+  rejectionNoticeLabel: { en: 'Why it was sent back', te: 'ఎందుకు తిరిగి పంపబడింది' },
+  couldNotCreateArticle: { en: 'Could not create this article.', te: 'ఈ వ్యాసాన్ని సృష్టించలేకపోయాము.' },
+  couldNotSaveArticle: { en: 'Could not save this article.', te: 'ఈ వ్యాసాన్ని సేవ్ చేయలేకపోయాము.' },
+  couldNotSubmitArticle: { en: 'Could not submit this article.', te: 'ఈ వ్యాసాన్ని సమర్పించలేకపోయాము.' },
+  couldNotLoadArticle: { en: 'Could not load this article.', te: 'ఈ వ్యాసాన్ని లోడ్ చేయలేకపోయాము.' },
+  articleNotFoundError: { en: 'Article not found.', te: 'వ్యాసం కనుగొనబడలేదు.' },
+
+  // Moderator — article queue
+  articleQueueTitle: { en: 'Article review queue', te: 'వ్యాస సమీక్ష క్యూ' },
+  noArticlesInQueue: { en: 'Nothing waiting for review.', te: 'సమీక్ష కోసం ఏమీ లేదు.' },
+  couldNotLoadArticleQueue: { en: 'Could not load the review queue.', te: 'సమీక్ష క్యూను లోడ్ చేయలేకపోయాము.' },
+  couldNotApproveArticle: { en: 'Could not approve this article.', te: 'ఈ వ్యాసాన్ని ఆమోదించలేకపోయాము.' },
+  couldNotRejectArticle: { en: 'Could not send this article back.', te: 'ఈ వ్యాసాన్ని తిరిగి పంపలేకపోయాము.' },
+
+  // Knowledge browse (everyone)
+  knowledgeBrowseTitle: { en: 'Knowledge', te: 'జ్ఞానం' },
+  browseKnowledgeButton: { en: 'Browse advice', te: 'సలహాలను చూడండి' },
+  noPublishedArticles: { en: 'Nothing published yet.', te: 'ఇంకా ఏమీ ప్రచురించలేదు.' },
+  couldNotLoadPublished: { en: 'Could not load articles.', te: 'వ్యాసాలను లోడ్ చేయలేకపోయాము.' },
+  byAuthorLabel: { en: 'By', te: 'రచయిత' },
+
   // Generic fallback error (network failure with no server message)
   genericError: { en: 'Something went wrong. Try again.', te: 'ఏదో తప్పు జరిగింది. మళ్ళీ ప్రయత్నించండి.' },
   incorrectCodeError: { en: 'Incorrect code. Try again.', te: 'తప్పు కోడ్. మళ్ళీ ప్రయత్నించండి.' },
@@ -339,5 +378,17 @@ export function caseStatusLabel(status: string, closureReason?: string | null): 
     return strings.statusClosed;
   }
   const key = CASE_STATUS_KEYS[status];
+  return key ? strings[key] : { en: status, te: status };
+}
+
+const ARTICLE_STATUS_KEYS: Record<string, StringKey> = {
+  DRAFT: 'articleStatusDraft',
+  PENDING_REVIEW: 'articleStatusPending',
+  PUBLISHED: 'articleStatusPublished',
+  REJECTED: 'articleStatusRejected',
+};
+
+export function articleStatusLabel(status: string): Bilingual {
+  const key = ARTICLE_STATUS_KEYS[status];
   return key ? strings[key] : { en: status, te: status };
 }

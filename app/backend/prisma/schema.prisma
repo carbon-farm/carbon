@@ -65,6 +65,16 @@ enum ClosureReason {
   ABANDONED
 }
 
+// Knowledge Repository publication workflow — deliberately separate from
+// the Case Lifecycle (000-Project-Charter.md's own distinction): an
+// article is reusable advisory content, not tied to one farmer's problem.
+enum KnowledgeArticleStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  REJECTED
+}
+
 model User {
   id                 String   @id @default(uuid())
   mobileNumber       String   @unique
@@ -88,6 +98,8 @@ model User {
   verifiedExperts    ExpertProfile[]   @relation("CredentialVerifier")
   casesAsFarmer      Case[]            @relation("CaseFarmer")
   casesAsExpert      Case[]            @relation("CaseExpert")
+  articlesAuthored   KnowledgeArticle[] @relation("KnowledgeAuthor")
+  articlesReviewed   KnowledgeArticle[] @relation("KnowledgeReviewer")
 
   @@index([role])
 }
@@ -157,6 +169,31 @@ model Case {
   @@index([status])
 }
 
+// Module 5 — Knowledge Repository. Draft -> Pending Review -> Published,
+// gated by a Moderator (parallels CasesService.startReview/assign, but this
+// is a separate, simpler workflow — never a Case status). authorId is
+// EXPERT-only at the service layer, matching who actually has advisory
+// standing to publish reusable content.
+model KnowledgeArticle {
+  id                String                 @id @default(uuid())
+  authorId          String
+  author            User                   @relation("KnowledgeAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  title             String
+  content           String
+  categoryId        String?
+  category          CaseCategoryMaster?    @relation(fields: [categoryId], references: [id])
+  status            KnowledgeArticleStatus @default(DRAFT)
+  rejectionReason   String?                // required in spirit when rejected; enforced in service
+  reviewedByUserId  String?
+  reviewedBy        User?                  @relation("KnowledgeReviewer", fields: [reviewedByUserId], references: [id])
+  publishedAt       DateTime?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  @@index([authorId])
+  @@index([status])
+}
+
 // Module 10 — Administration: expert credential verification is a precondition of
 // Expert Portal activation, per Charter v0.4.0 / Risk R9 mitigation.
 model ExpertProfile {
@@ -217,6 +254,7 @@ model CaseCategoryMaster {
   createdAt   DateTime @default(now())
 
   cases       Case[]
+  articles    KnowledgeArticle[]
 }
 
 model TagMaster {
