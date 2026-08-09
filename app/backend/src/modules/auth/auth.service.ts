@@ -39,25 +39,38 @@ export class AuthService {
     const existing = await this.prisma.user.findUnique({
       where: { mobileNumber: dto.mobileNumber },
     });
-    if (existing) {
+
+    // A previously-registered but never-activated account (the farmer missed
+    // their on-screen code, or its 10-minute window expired) is not a
+    // conflict — it's a pending registration with no way to get a fresh code
+    // otherwise, since this is the only entry point that issues one. Treat it
+    // as a resend: update the details in case they're correcting a typo, and
+    // issue a new OTP against the same user row rather than creating a
+    // second one or rejecting them outright.
+    if (existing?.isActive) {
       throw new ConflictException(bi('Mobile number already registered', 'మొబైల్ నంబర్ ఇప్పటికే నమోదు అయింది'));
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
-    const user = await this.prisma.user.create({
-      data: {
-        mobileNumber: dto.mobileNumber,
-        passwordHash,
-        name: dto.name,
-        role: Role.FARMER,
-        preferredLanguage: dto.preferredLanguage ?? 'te',
-        isActive: false, // activated once REGISTRATION OTP is verified
-      },
-    });
+    const user = existing
+      ? await this.prisma.user.update({
+          where: { id: existing.id },
+          data: { passwordHash, name: dto.name, preferredLanguage: dto.preferredLanguage ?? 'te' },
+        })
+      : await this.prisma.user.create({
+          data: {
+            mobileNumber: dto.mobileNumber,
+            passwordHash,
+            name: dto.name,
+            role: Role.FARMER,
+            preferredLanguage: dto.preferredLanguage ?? 'te',
+            isActive: false, // activated once REGISTRATION OTP is verified
+          },
+        });
 
     await this.audit.log({
       actorId: user.id,
-      action: 'user.register',
+      action: existing ? 'user.register.resend' : 'user.register',
       entityType: 'User',
       entityId: user.id,
     });
