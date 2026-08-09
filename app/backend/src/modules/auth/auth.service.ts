@@ -66,10 +66,9 @@ export class AuthService {
     return {
       userId: user.id,
       message: bi(
-        'Registered. Verify the OTP sent to your mobile number to activate your account.',
-        'నమోదు పూర్తయింది. మీ ఖాతాను యాక్టివేట్ చేయడానికి మీ మొబైల్‌కు పంపిన OTPని ధృవీకరించండి.',
+        'Registered. Enter the verification code shown next to activate your account.',
+        'నమోదు పూర్తయింది. మీ ఖాతాను యాక్టివేట్ చేయడానికి తర్వాత చూపించే ధృవీకరణ కోడ్‌ను నమోదు చేయండి.',
       ),
-      // devOtp is only ever present outside production — see issueOtp().
       ...(otp.devCode ? { devOtp: otp.devCode } : {}),
     };
   }
@@ -104,11 +103,11 @@ export class AuthService {
     });
     if (dto.purpose === OtpPurpose.PASSWORD_RESET && !user) {
       // Do not reveal whether a mobile number is registered.
-      return { message: bi('If this number is registered, an OTP has been sent.', 'ఈ నంబర్ నమోదు అయి ఉంటే, OTP పంపబడింది.') };
+      return { message: bi('If this number is registered, a code is ready.', 'ఈ నంబర్ నమోదు అయి ఉంటే, కోడ్ సిద్ధంగా ఉంది.') };
     }
     const otp = await this.issueOtp(dto.mobileNumber, dto.purpose);
     return {
-      message: bi('OTP sent.', 'OTP పంపబడింది.'),
+      message: bi('Verification code ready.', 'ధృవీకరణ కోడ్ సిద్ధంగా ఉంది.'),
       ...(otp.devCode ? { devOtp: otp.devCode } : {}),
     };
   }
@@ -275,15 +274,17 @@ export class AuthService {
       },
     });
 
-    // Stage 1 has no SMS gateway yet (WhatsApp/SMS integration is Stage 2,
-    // Notifications — 01-Product/04-Product-Roadmap.md). In production this
-    // must be replaced with a real send; never log/return a real OTP there.
-    if (process.env.NODE_ENV === 'production') {
-      // TODO(Stage 2): wire to the Notification module's SMS channel.
-      return { devCode: undefined as string | undefined };
-    }
+    // DELIBERATE, TEMPORARY: no SMS/WhatsApp gateway is wired up yet
+    // (Notifications is a later module — 01-Product/04-Product-Roadmap.md),
+    // and every real delivery channel costs money per message. Until that's
+    // built, the code is returned to the client and shown on-screen instead
+    // of texted — this is a known, accepted gap while other modules are
+    // built, NOT a secure verification flow: it doesn't prove the requester
+    // controls that mobile number, so anyone who knows a farmer's number can
+    // see their registration/password-reset code. Must be replaced with a
+    // real send before any real farmer is onboarded onto the live site.
     // eslint-disable-next-line no-console
-    console.log(`[dev-otp] ${mobileNumber} (${purpose}): ${code}`);
+    console.log(`[on-screen-otp] ${mobileNumber} (${purpose}): ${code}`);
     return { devCode: code };
   }
 

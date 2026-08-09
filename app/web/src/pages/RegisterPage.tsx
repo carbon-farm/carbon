@@ -61,7 +61,7 @@ export function RegisterPage() {
         </div>
         <BiValue value={otpSentTo(mobileNumber)} as="p" className="hint" />
         {devOtpHint && (
-          <div className="error-banner" style={{ background: 'var(--accent-soft)', color: 'var(--accent-ink)' }}>
+          <div className="error-banner">
             <Bi id="devOtpPrefix" /> <strong>{devOtpHint}</strong>
           </div>
         )}

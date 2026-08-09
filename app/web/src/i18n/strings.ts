@@ -61,8 +61,8 @@ export const strings = {
   verifying: { en: 'Verifying…', te: 'ధృవీకరిస్తోంది…' },
   backButton: { en: 'Back', te: 'వెనుకకు' },
   devOtpPrefix: {
-    en: 'Dev mode — no SMS gateway yet (Stage 2). Your code is:',
-    te: 'డెవ్ మోడ్ — ఇంకా SMS గేట్‌వే లేదు (దశ 2). మీ కోడ్:',
+    en: "Temporary: SMS isn't connected yet, so your code is shown here instead of being texted to you:",
+    te: 'తాత్కాలికం: SMS ఇంకా అనుసంధానించబడలేదు, కాబట్టి మీ కోడ్ మీకు మెసేజ్ చేయబడకుండా ఇక్కడ చూపబడుతుంది:',
   },
 
   // Dashboard
@@ -230,8 +230,8 @@ export type StringKey = keyof typeof strings;
 // kept as a function, outside the static dictionary, for that reason alone.
 export function otpSentTo(mobileNumber: string): Bilingual {
   return {
-    en: `We sent a 6-digit code to ${mobileNumber}.`,
-    te: `మేము ${mobileNumber}కి 6-అంకెల కోడ్ పంపాము.`,
+    en: `A 6-digit code was generated for ${mobileNumber}.`,
+    te: `${mobileNumber} కోసం 6-అంకెల కోడ్ రూపొందించబడింది.`,
   };
 }
 
