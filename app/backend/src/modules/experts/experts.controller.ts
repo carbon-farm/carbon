@@ -25,6 +25,12 @@ export class ExpertsController {
     return this.expertsService.listPendingReview();
   }
 
+  @Roles(Role.MODERATOR, Role.ADMINISTRATOR)
+  @Get('verified')
+  listVerified() {
+    return this.expertsService.listVerified();
+  }
+
   @Roles(Role.ADMINISTRATOR)
   @Patch('credentials/:expertProfileId/verify')
   verify(

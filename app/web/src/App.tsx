@@ -8,6 +8,10 @@ import { DashboardPage } from './pages/DashboardPage';
 import { CasesPage } from './pages/CasesPage';
 import { NewCasePage } from './pages/NewCasePage';
 import { CaseDetailPage } from './pages/CaseDetailPage';
+import { ModeratorQueuePage } from './pages/ModeratorQueuePage';
+import { ExpertCasesPage } from './pages/ExpertCasesPage';
+import { ExpertCaseDetailPage } from './pages/ExpertCaseDetailPage';
+import { NoPortalPage } from './pages/NoPortalPage';
 
 export function App() {
   return (
@@ -18,10 +22,11 @@ export function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={['FARMER']}>
                 <DashboardPage />
               </ProtectedRoute>
             }
@@ -29,7 +34,7 @@ export function App() {
           <Route
             path="/cases"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={['FARMER']}>
                 <CasesPage />
               </ProtectedRoute>
             }
@@ -37,7 +42,7 @@ export function App() {
           <Route
             path="/cases/new"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={['FARMER']}>
                 <NewCasePage />
               </ProtectedRoute>
             }
@@ -45,8 +50,43 @@ export function App() {
           <Route
             path="/cases/:id"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={['FARMER']}>
                 <CaseDetailPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/moderator/queue"
+            element={
+              <ProtectedRoute roles={['MODERATOR']}>
+                <ModeratorQueuePage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/expert/cases"
+            element={
+              <ProtectedRoute roles={['EXPERT']}>
+                <ExpertCasesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/expert/cases/:id"
+            element={
+              <ProtectedRoute roles={['EXPERT']}>
+                <ExpertCaseDetailPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/no-portal"
+            element={
+              <ProtectedRoute>
+                <NoPortalPage />
               </ProtectedRoute>
             }
           />

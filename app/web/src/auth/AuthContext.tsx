@@ -22,7 +22,7 @@ interface AuthContextValue {
   session: Session | null;
   register: (mobileNumber: string, password: string, name: string) => Promise<RegisterResult>;
   verifyRegistrationOtp: (mobileNumber: string, code: string) => Promise<void>;
-  login: (mobileNumber: string, password: string) => Promise<void>;
+  login: (mobileNumber: string, password: string) => Promise<{ role: string }>;
   logout: () => void;
   requestPasswordResetOtp: (mobileNumber: string) => Promise<RequestOtpResult>;
   verifyPasswordResetOtp: (mobileNumber: string, code: string) => Promise<string>;
@@ -68,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: { mobileNumber, password },
     });
     setSession({ accessToken: result.accessToken, refreshToken: result.refreshToken, role: result.role });
+    return { role: result.role };
   }, []);
 
   const requestPasswordResetOtp = useCallback((mobileNumber: string) => {

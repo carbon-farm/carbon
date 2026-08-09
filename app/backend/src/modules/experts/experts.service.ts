@@ -84,4 +84,16 @@ export class ExpertsService {
     const profile = await this.prisma.expertProfile.findUnique({ where: { userId } });
     return profile?.credentialStatus === CredentialStatus.VERIFIED;
   }
+
+  // Moderator-facing: the pool of experts eligible for case assignment. Only
+  // VERIFIED experts, not the full roster — an unverified expert can't be
+  // assigned per CasesService.assign's own enforcement, so offering them in
+  // the picker would just be a dead-end click.
+  async listVerified() {
+    return this.prisma.expertProfile.findMany({
+      where: { credentialStatus: CredentialStatus.VERIFIED },
+      include: { user: { select: { id: true, name: true, mobileNumber: true } } },
+      orderBy: { verifiedAt: 'desc' },
+    });
+  }
 }

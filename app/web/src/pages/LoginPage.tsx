@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { roleHomePath } from '../auth/roleHome';
 import { ApiError } from '../api/client';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
@@ -19,8 +20,8 @@ export function LoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await login(mobileNumber, password);
-      navigate('/dashboard');
+      const { role } = await login(mobileNumber, password);
+      navigate(roleHomePath(role));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.genericError.en} / ${strings.genericError.te}`);
     } finally {

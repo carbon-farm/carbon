@@ -168,6 +168,55 @@ export const strings = {
   couldNotConfirm: { en: 'Could not confirm this case.', te: 'ఈ కేసును ధృవీకరించలేకపోయాము.' },
   couldNotDispute: { en: 'Could not send this back.', te: 'దీన్ని తిరిగి పంపలేకపోయాము.' },
 
+  // No portal built yet (Administrator/Vendor/Support Agent)
+  noPortalTitle: { en: 'No web portal yet for your role', te: 'మీ పాత్ర కోసం ఇంకా వెబ్ పోర్టల్ లేదు' },
+  noPortalNotice: {
+    en: "This role's screens haven't been built yet.",
+    te: 'ఈ పాత్ర కోసం స్క్రీన్‌లు ఇంకా నిర్మించలేదు.',
+  },
+
+  // Moderator — Case Queue
+  moderatorQueueEyebrow: { en: 'Moderator', te: 'మోడరేటర్' },
+  moderatorQueueTitle: { en: 'Case queue', te: 'కేసు క్యూ' },
+  noCasesInQueue: { en: 'Nothing waiting for review right now.', te: 'ప్రస్తుతం సమీక్ష కోసం ఏమీ లేదు.' },
+  startReviewButton: { en: 'Start review', te: 'సమీక్ష ప్రారంభించండి' },
+  assignExpertFieldLabel: { en: 'Assign to', te: 'కేటాయించండి' },
+  assignButton: { en: 'Assign', te: 'కేటాయించండి' },
+  assigning: { en: 'Assigning…', te: 'కేటాయిస్తోంది…' },
+  reviewing: { en: 'Starting…', te: 'ప్రారంభిస్తోంది…' },
+  noVerifiedExperts: {
+    en: 'No verified experts available to assign yet.',
+    te: 'కేటాయించడానికి ధృవీకరించబడిన నిపుణులు ఇంకా లేరు.',
+  },
+  couldNotLoadQueue: { en: 'Could not load the case queue.', te: 'కేసు క్యూను లోడ్ చేయలేకపోయాము.' },
+  couldNotStartReview: { en: 'Could not start review on this case.', te: 'ఈ కేసుపై సమీక్ష ప్రారంభించలేకపోయాము.' },
+  couldNotAssign: { en: 'Could not assign this case.', te: 'ఈ కేసును కేటాయించలేకపోయాము.' },
+
+  // Expert — assigned cases
+  expertCasesEyebrow: { en: 'Expert', te: 'నిపుణుడు' },
+  expertCasesTitle: { en: 'My assigned cases', te: 'నాకు కేటాయించిన కేసులు' },
+  noAssignedCases: { en: 'No cases assigned to you right now.', te: 'ప్రస్తుతం మీకు కేటాయించిన కేసులు లేవు.' },
+  couldNotLoadAssigned: { en: 'Could not load your assigned cases.', te: 'మీ కేటాయించిన కేసులను లోడ్ చేయలేకపోయాము.' },
+
+  // Expert — case detail actions
+  startWorkButton: { en: 'Start work', te: 'పని ప్రారంభించండి' },
+  startingWork: { en: 'Starting…', te: 'ప్రారంభిస్తోంది…' },
+  askFollowUpHeading: { en: 'Ask the farmer a question', te: 'రైతును ఒక ప్రశ్న అడగండి' },
+  followUpQuestionField: { en: 'Your question', te: 'మీ ప్రశ్న' },
+  sendQuestionButton: { en: 'Send question', te: 'ప్రశ్నను పంపండి' },
+  farmerResponseLabel: { en: "Farmer's response", te: 'రైతు స్పందన' },
+  answerCaseHeading: { en: 'Answer this case', te: 'ఈ కేసుకు సమాధానం ఇవ్వండి' },
+  resolutionNotesField: { en: 'Your advice for the farmer', te: 'రైతు కోసం మీ సలహా' },
+  answerCaseButton: { en: 'Send answer', te: 'సమాధానం పంపండి' },
+  answering: { en: 'Sending…', te: 'పంపుతోంది…' },
+  waitingOnFarmerNotice: {
+    en: "Waiting for the farmer's response before you can continue.",
+    te: 'మీరు కొనసాగించే ముందు రైతు స్పందన కోసం వేచి ఉంది.',
+  },
+  couldNotStartWork: { en: 'Could not start work on this case.', te: 'ఈ కేసుపై పని ప్రారంభించలేకపోయాము.' },
+  couldNotSendQuestion: { en: 'Could not send this question.', te: 'ఈ ప్రశ్నను పంపలేకపోయాము.' },
+  couldNotAnswer: { en: 'Could not send this answer.', te: 'ఈ సమాధానాన్ని పంపలేకపోయాము.' },
+
   // Generic fallback error (network failure with no server message)
   genericError: { en: 'Something went wrong. Try again.', te: 'ఏదో తప్పు జరిగింది. మళ్ళీ ప్రయత్నించండి.' },
   incorrectCodeError: { en: 'Incorrect code. Try again.', te: 'తప్పు కోడ్. మళ్ళీ ప్రయత్నించండి.' },

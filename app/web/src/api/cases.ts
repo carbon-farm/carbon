@@ -42,6 +42,14 @@ export function listMyCases(token: string) {
   return apiRequest<Case[]>('/cases/mine', { token });
 }
 
+export function listAssignedCases(token: string) {
+  return apiRequest<Case[]>('/cases/assigned', { token });
+}
+
+export function listQueueCases(token: string) {
+  return apiRequest<Case[]>('/cases/queue', { token });
+}
+
 export function getCase(token: string, id: string) {
   return apiRequest<Case>(`/cases/${id}`, { token });
 }
@@ -75,4 +83,24 @@ export function confirmCase(token: string, id: string) {
 
 export function disputeCase(token: string, id: string) {
   return apiRequest<Case>(`/cases/${id}/dispute`, { method: 'POST', token });
+}
+
+export function startReviewCase(token: string, id: string) {
+  return apiRequest<Case>(`/cases/${id}/review`, { method: 'POST', token });
+}
+
+export function assignCase(token: string, id: string, expertId: string) {
+  return apiRequest<Case>(`/cases/${id}/assign`, { method: 'POST', body: { expertId }, token });
+}
+
+export function startWorkCase(token: string, id: string) {
+  return apiRequest<Case>(`/cases/${id}/start-work`, { method: 'POST', token });
+}
+
+export function requestFollowUpOnCase(token: string, id: string, question: string) {
+  return apiRequest<Case>(`/cases/${id}/request-followup`, { method: 'POST', body: { question }, token });
+}
+
+export function answerCase(token: string, id: string, resolutionNotes: string) {
+  return apiRequest<Case>(`/cases/${id}/answer`, { method: 'POST', body: { resolutionNotes }, token });
 }
