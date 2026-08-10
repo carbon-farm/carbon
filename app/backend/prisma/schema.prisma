@@ -1,8 +1,8 @@
 // Stage 1 (Foundation): Identity & Membership, Farm/Land, Configuration
 // taxonomy, Expert credentialing, and the Audit Trail.
-// Stage 2 (Core Trust Loop), in progress: Case Management below. Knowledge
-// Repository publication workflow, Learning, Marketplace, and Soil Laboratory
-// are still not modeled — see 01-Product/04-Product-Roadmap.md.
+// Stage 2 (Core Trust Loop): Case Management, Knowledge Repository
+// publication workflow. Learning, Marketplace, and Soil Laboratory are
+// still not modeled — see 01-Product/04-Product-Roadmap.md.
 
 generator client {
   provider = "prisma-client-js"
@@ -143,7 +143,8 @@ model Case {
   category            CaseCategoryMaster @relation(fields: [categoryId], references: [id])
 
   problemDescription  String
-  evidenceNotes       String?        // media upload infra doesn't exist yet — see README gap note
+  evidenceNotes       String?
+  evidenceMediaUrls   String[]       @default([]) // Supabase Storage public URLs (photos/videos)
 
   status              CaseStatus     @default(DRAFT)
   closureReason       ClosureReason?

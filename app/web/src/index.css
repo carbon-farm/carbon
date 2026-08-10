@@ -286,6 +286,20 @@ button.secondary {
   margin-bottom: 2px;
 }
 
+.evidence-media-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.evidence-thumb {
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+}
+
 .top-bar {
   display: flex;
   justify-content: space-between;

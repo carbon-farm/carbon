@@ -1,5 +1,7 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Role } from '@prisma/client';
+import { MAX_FILE_SIZE_BYTES } from '../uploads/uploads.service';
 import { CasesService } from './cases.service';
 import { CreateCaseDto } from './dto/create-case.dto';
 import { UpdateCaseDto } from './dto/update-case.dto';
@@ -53,6 +55,17 @@ export class CasesController {
   @Patch(':id')
   updateDraft(@Param('id') id: string, @Body() dto: UpdateCaseDto, @CurrentUser() user: AuthenticatedUser) {
     return this.casesService.updateDraft(id, user.userId, dto);
+  }
+
+  @Roles(Role.FARMER)
+  @Post(':id/evidence')
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_FILE_SIZE_BYTES } }))
+  uploadEvidence(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.casesService.addEvidenceMedia(id, user.userId, file);
   }
 
   @Roles(Role.FARMER)

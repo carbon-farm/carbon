@@ -1,4 +1,4 @@
-import { apiRequest } from './client';
+import { apiRequest, apiUpload } from './client';
 
 export type CaseStatus =
   | 'DRAFT'
@@ -24,6 +24,7 @@ export interface Case {
   category: { id: string; name: string };
   problemDescription: string;
   evidenceNotes: string | null;
+  evidenceMediaUrls: string[];
   status: CaseStatus;
   closureReason: ClosureReason | null;
   assignedExpertId: string | null;
@@ -103,4 +104,8 @@ export function requestFollowUpOnCase(token: string, id: string, question: strin
 
 export function answerCase(token: string, id: string, resolutionNotes: string) {
   return apiRequest<Case>(`/cases/${id}/answer`, { method: 'POST', body: { resolutionNotes }, token });
+}
+
+export function uploadCaseEvidence(token: string, id: string, file: File) {
+  return apiUpload<Case>(`/cases/${id}/evidence`, file, token);
 }

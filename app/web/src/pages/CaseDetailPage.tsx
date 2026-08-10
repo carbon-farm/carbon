@@ -1,11 +1,17 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
-import { getCase, submitCase, respondToFollowUp, confirmCase, disputeCase, type Case } from '../api/cases';
+import { getCase, submitCase, respondToFollowUp, confirmCase, disputeCase, uploadCaseEvidence, type Case } from '../api/cases';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings, caseCategoryLabel, caseStatusLabel } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
+
+const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
+function isImageUrl(url: string): boolean {
+  const lower = url.toLowerCase();
+  return IMAGE_EXTENSIONS.some((ext) => lower.endsWith(ext));
+}
 
 export function CaseDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -14,6 +20,8 @@ export function CaseDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!session || !id) return;
@@ -91,6 +99,21 @@ export function CaseDetailPage() {
     }
   }
 
+  async function handleFileSelected(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!session || !theCase || !file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      setCase(await uploadCaseEvidence(session.accessToken, theCase.id, file));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : `${strings.couldNotUploadEvidence.en} / ${strings.couldNotUploadEvidence.te}`);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
+
   return (
     <div className="screen">
       <div>
@@ -129,6 +152,39 @@ export function CaseDetailPage() {
                 <div className="field-label"><Bi id="evidenceLabel" /></div>
                 <div>{theCase.evidenceNotes}</div>
               </div>
+            )}
+
+            {theCase.evidenceMediaUrls.length > 0 && (
+              <div>
+                <div className="field-label"><Bi id="evidenceMediaLabel" /></div>
+                <div className="evidence-media-grid">
+                  {theCase.evidenceMediaUrls.map((url) =>
+                    isImageUrl(url) ? (
+                      <a href={url} target="_blank" rel="noopener noreferrer" key={url}>
+                        <img src={url} alt="" className="evidence-thumb" />
+                      </a>
+                    ) : (
+                      <a href={url} target="_blank" rel="noopener noreferrer" key={url} className="link-button">
+                        {strings.watchVideoLink.en} / {strings.watchVideoLink.te}
+                      </a>
+                    ),
+                  )}
+                </div>
+              </div>
+            )}
+
+            {theCase.status !== 'CLOSED' && (
+              <label>
+                <Bi id="addEvidenceButton" />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
+                  onChange={handleFileSelected}
+                  disabled={uploading}
+                />
+                {uploading && <BiValue value={strings.uploading} as="p" className="hint" />}
+              </label>
             )}
           </div>
 

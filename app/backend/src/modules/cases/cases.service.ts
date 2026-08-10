@@ -9,6 +9,7 @@ import * as crypto from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { ExpertsService } from '../experts/experts.service';
+import { UploadsService } from '../uploads/uploads.service';
 import { bi } from '../../common/i18n';
 import { CreateCaseDto } from './dto/create-case.dto';
 import { UpdateCaseDto } from './dto/update-case.dto';
@@ -27,6 +28,7 @@ export class CasesService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly experts: ExpertsService,
+    private readonly uploads: UploadsService,
   ) {}
 
   async createDraft(farmerId: string, dto: CreateCaseDto): Promise<Case> {
@@ -65,6 +67,30 @@ export class CasesService {
     await this.audit.log({
       actorId: farmerId,
       action: 'case.draft.update',
+      entityType: 'Case',
+      entityId: caseId,
+    });
+    return updated;
+  }
+
+  // Farmer: attaches a photo/video to any case they haven't closed yet —
+  // not DRAFT-only like updateDraft, since a farmer may want to add
+  // evidence after an expert asks for it mid-conversation, well past the
+  // point the case was submitted.
+  async addEvidenceMedia(caseId: string, farmerId: string, file: Express.Multer.File): Promise<Case> {
+    const existing = await this.getOwnedByFarmer(caseId, farmerId);
+    if (existing.status === CaseStatus.CLOSED) {
+      throw new BadRequestException(bi('Cannot add evidence to a closed case', 'మూసివేసిన కేసుకు ఆధారాలు జోడించలేరు'));
+    }
+    const url = await this.uploads.uploadCaseEvidence(caseId, file);
+    const updated = await this.prisma.case.update({
+      where: { id: caseId },
+      data: { evidenceMediaUrls: { push: url } },
+      include: { category: true, farmLand: true },
+    });
+    await this.audit.log({
+      actorId: farmerId,
+      action: 'case.evidence.upload',
       entityType: 'Case',
       entityId: caseId,
     });

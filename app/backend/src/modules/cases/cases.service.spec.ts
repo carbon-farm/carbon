@@ -4,6 +4,7 @@ import { CasesService } from './cases.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { ExpertsService } from '../experts/experts.service';
+import { UploadsService } from '../uploads/uploads.service';
 
 // The guarded state machine behind 000-Project-Charter.md's ten-state Case
 // Lifecycle — only ever exercised manually via curl until now. This suite
@@ -20,6 +21,7 @@ function buildCase(overrides: Partial<Case> = {}): Case {
     categoryId: 'category-1',
     problemDescription: 'Leaves have yellow spots.',
     evidenceNotes: null,
+    evidenceMediaUrls: [],
     status: CaseStatus.DRAFT,
     closureReason: null,
     assignedExpertId: null,
@@ -44,6 +46,7 @@ describe('CasesService', () => {
   };
   let audit: { log: jest.Mock };
   let experts: { isVerified: jest.Mock };
+  let uploads: { uploadCaseEvidence: jest.Mock };
   let service: CasesService;
 
   beforeEach(() => {
@@ -53,10 +56,12 @@ describe('CasesService', () => {
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     experts = { isVerified: jest.fn() };
+    uploads = { uploadCaseEvidence: jest.fn() };
     service = new CasesService(
       prisma as unknown as PrismaService,
       audit as unknown as AuditService,
       experts as unknown as ExpertsService,
+      uploads as unknown as UploadsService,
     );
   });
 
@@ -87,6 +92,38 @@ describe('CasesService', () => {
         }),
       ).rejects.toThrow(ForbiddenException);
       expect(prisma.case.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('addEvidenceMedia', () => {
+    const fakeFile = { originalname: 'leaf.jpg', mimetype: 'image/jpeg', size: 1024 } as Express.Multer.File;
+
+    it('uploads and appends the resulting URL to evidenceMediaUrls', async () => {
+      prisma.case.findUnique.mockResolvedValue(buildCase({ status: CaseStatus.SUBMITTED }));
+      uploads.uploadCaseEvidence.mockResolvedValue('https://example.supabase.co/storage/v1/object/public/case-evidence/leaf.jpg');
+      prisma.case.update.mockResolvedValue(
+        buildCase({ evidenceMediaUrls: ['https://example.supabase.co/storage/v1/object/public/case-evidence/leaf.jpg'] }),
+      );
+
+      await service.addEvidenceMedia('case-1', 'farmer-1', fakeFile);
+
+      expect(uploads.uploadCaseEvidence).toHaveBeenCalledWith('case-1', fakeFile);
+      expect(prisma.case.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: { evidenceMediaUrls: { push: 'https://example.supabase.co/storage/v1/object/public/case-evidence/leaf.jpg' } },
+        }),
+      );
+    });
+
+    it('refuses to add evidence to a CLOSED case', async () => {
+      prisma.case.findUnique.mockResolvedValue(buildCase({ status: CaseStatus.CLOSED }));
+      await expect(service.addEvidenceMedia('case-1', 'farmer-1', fakeFile)).rejects.toThrow(BadRequestException);
+      expect(uploads.uploadCaseEvidence).not.toHaveBeenCalled();
+    });
+
+    it('refuses a farmer who does not own the case', async () => {
+      prisma.case.findUnique.mockResolvedValue(buildCase({ farmerId: 'someone-else' }));
+      await expect(service.addEvidenceMedia('case-1', 'farmer-1', fakeFile)).rejects.toThrow(ForbiddenException);
     });
   });
 
