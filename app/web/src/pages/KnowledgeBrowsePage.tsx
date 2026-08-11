@@ -50,9 +50,17 @@ export function KnowledgeBrowsePage() {
           {articles.map((a) => (
             <Link to={`/knowledge/${a.id}`} key={a.id} className="case-item">
               <div className="label">{a.title}</div>
-              {a.category && (
+              {(a.crop || a.category) && (
                 <div className="meta">
-                  <BiValue value={caseCategoryLabel(a.category.name)} />
+                  {a.crop && a.category ? (
+                    <>
+                      {a.crop.name} · <BiValue value={caseCategoryLabel(a.category.name)} />
+                    </>
+                  ) : a.crop ? (
+                    a.crop.name
+                  ) : (
+                    a.category && <BiValue value={caseCategoryLabel(a.category.name)} />
+                  )}
                 </div>
               )}
               <div className="meta">

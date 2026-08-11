@@ -91,8 +91,18 @@ export function ModeratorArticlesPage() {
             return (
               <div className="farm-item" key={a.id}>
                 <div className="label">{a.title}</div>
-                <div className="meta">{a.author?.name}</div>
-                <div style={{ whiteSpace: 'pre-wrap' }}>{a.content}</div>
+                <div className="meta">
+                  {a.author?.name}
+                  {a.crop && ` · ${a.crop.name}`}
+                </div>
+                {a.symptoms && (
+                  <div>
+                    <div className="field-label"><Bi id="articleSymptomsField" /></div>
+                    <div>{a.symptoms}</div>
+                  </div>
+                )}
+                <div className="field-label"><Bi id="articleSolutionField" /></div>
+                <div style={{ whiteSpace: 'pre-wrap' }}>{a.expertSolution}</div>
                 <button type="button" onClick={() => handleApprove(a.id)} disabled={isBusy}>
                   {isBusy ? <BiValue value={strings.approving} /> : <Bi id="approveButton" />}
                 </button>

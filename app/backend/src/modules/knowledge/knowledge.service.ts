@@ -1,17 +1,23 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { KnowledgeArticle, KnowledgeArticleStatus, Role } from '@prisma/client';
+import { Case, KnowledgeArticle, KnowledgeArticleStatus, Role } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { bi } from '../../common/i18n';
-import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { RejectArticleDto } from './dto/reject-article.dto';
 
-// Knowledge Repository publication workflow — Draft -> Pending Review ->
-// Published, gated by a Moderator. Deliberately simpler than the Case
-// Lifecycle's ten states: an article either needs work, is waiting on a
-// Moderator, is live, or was sent back — there's no multi-party
-// back-and-forth like a Case's follow-up loop.
+const ARTICLE_INCLUDE = {
+  category: true,
+  crop: true,
+  tags: true,
+  author: { select: { id: true, name: true } },
+} as const;
+
+// Module 3 — Knowledge Repository publication workflow: Draft (auto-generated) ->
+// Pending Review -> Published, gated by a Moderator. Deliberately simpler
+// than the Case Lifecycle's ten states: an article either needs work, is
+// waiting on a Moderator, is live, or was sent back — there's no
+// multi-party back-and-forth like a Case's follow-up loop.
 @Injectable()
 export class KnowledgeService {
   constructor(
@@ -19,16 +25,41 @@ export class KnowledgeService {
     private readonly audit: AuditService,
   ) {}
 
-  async createDraft(authorId: string, dto: CreateArticleDto): Promise<KnowledgeArticle> {
+  // Called by CasesService.confirm() when a case closes as Resolved — never
+  // invoked directly from a controller, per Charter Section 9.1: "Closed
+  // case -> Draft Article (auto-generated) -> Moderator Approval ->
+  // Published." No case without an assigned expert can generate one (no
+  // author to attribute "Created By" to).
+  async createDraftFromCase(closedCase: Case): Promise<KnowledgeArticle | null> {
+    if (!closedCase.assignedExpertId) return null;
+
+    const category = closedCase.categoryId
+      ? await this.prisma.caseCategoryMaster.findUnique({ where: { id: closedCase.categoryId } })
+      : null;
+    const crop = closedCase.cropId
+      ? await this.prisma.cropMaster.findUnique({ where: { id: closedCase.cropId } })
+      : null;
+    const title = [crop?.name, category?.name].filter(Boolean).join(' — ') || `Case ${closedCase.caseNumber ?? closedCase.id}`;
+
     const created = await this.prisma.knowledgeArticle.create({
-      data: { authorId, title: dto.title, content: dto.content, categoryId: dto.categoryId },
-      include: { category: true },
+      data: {
+        sourceCaseId: closedCase.id,
+        authorId: closedCase.assignedExpertId,
+        title,
+        cropId: closedCase.cropId,
+        categoryId: closedCase.categoryId,
+        problemDescription: closedCase.problemDescription,
+        expertSolution: closedCase.resolutionNotes ?? '',
+        evidenceMediaUrls: closedCase.evidenceMediaUrls,
+        status: KnowledgeArticleStatus.DRAFT,
+      },
+      include: ARTICLE_INCLUDE,
     });
     await this.audit.log({
-      actorId: authorId,
-      action: 'knowledge.draft.create',
+      action: 'knowledge.draft.autogenerate',
       entityType: 'KnowledgeArticle',
       entityId: created.id,
+      metadata: { sourceCaseId: closedCase.id },
     });
     return created;
   }
@@ -38,10 +69,16 @@ export class KnowledgeService {
   async updateDraft(articleId: string, authorId: string, dto: UpdateArticleDto): Promise<KnowledgeArticle> {
     const existing = await this.getOwnedByAuthor(articleId, authorId);
     this.assertStatus(existing, [KnowledgeArticleStatus.DRAFT, KnowledgeArticleStatus.REJECTED], 'edit');
+    const { tagIds, ...rest } = dto;
     const updated = await this.prisma.knowledgeArticle.update({
       where: { id: articleId },
-      data: { ...dto, status: KnowledgeArticleStatus.DRAFT, rejectionReason: null },
-      include: { category: true },
+      data: {
+        ...rest,
+        status: KnowledgeArticleStatus.DRAFT,
+        rejectionReason: null,
+        ...(tagIds ? { tags: { set: tagIds.map((id) => ({ id })) } } : {}),
+      },
+      include: ARTICLE_INCLUDE,
     });
     await this.audit.log({
       actorId: authorId,
@@ -52,13 +89,16 @@ export class KnowledgeService {
     return updated;
   }
 
+  // Each submission bumps `version` — a simple counter tracking "this is
+  // attempt N," not the immutable version history the Charter's "never
+  // overwritten" language implies (see schema.prisma's note on that gap).
   async submit(articleId: string, authorId: string): Promise<KnowledgeArticle> {
     const existing = await this.getOwnedByAuthor(articleId, authorId);
     this.assertStatus(existing, [KnowledgeArticleStatus.DRAFT, KnowledgeArticleStatus.REJECTED], 'submit');
     const updated = await this.prisma.knowledgeArticle.update({
       where: { id: articleId },
-      data: { status: KnowledgeArticleStatus.PENDING_REVIEW, rejectionReason: null },
-      include: { category: true },
+      data: { status: KnowledgeArticleStatus.PENDING_REVIEW, rejectionReason: null, version: { increment: 1 } },
+      include: ARTICLE_INCLUDE,
     });
     await this.audit.log({
       actorId: authorId,
@@ -75,7 +115,7 @@ export class KnowledgeService {
     const updated = await this.prisma.knowledgeArticle.update({
       where: { id: articleId },
       data: { status: KnowledgeArticleStatus.PUBLISHED, reviewedByUserId: moderatorId, publishedAt: new Date() },
-      include: { category: true },
+      include: ARTICLE_INCLUDE,
     });
     await this.audit.log({
       actorId: moderatorId,
@@ -92,7 +132,7 @@ export class KnowledgeService {
     const updated = await this.prisma.knowledgeArticle.update({
       where: { id: articleId },
       data: { status: KnowledgeArticleStatus.REJECTED, reviewedByUserId: moderatorId, rejectionReason: dto.reason },
-      include: { category: true },
+      include: ARTICLE_INCLUDE,
     });
     await this.audit.log({
       actorId: moderatorId,
@@ -108,7 +148,7 @@ export class KnowledgeService {
     return this.prisma.knowledgeArticle.findMany({
       where: { authorId },
       orderBy: { updatedAt: 'desc' },
-      include: { category: true },
+      include: ARTICLE_INCLUDE,
     });
   }
 
@@ -116,7 +156,7 @@ export class KnowledgeService {
     return this.prisma.knowledgeArticle.findMany({
       where: { status: KnowledgeArticleStatus.PENDING_REVIEW },
       orderBy: { updatedAt: 'asc' },
-      include: { category: true, author: { select: { id: true, name: true } } },
+      include: ARTICLE_INCLUDE,
     });
   }
 
@@ -125,14 +165,14 @@ export class KnowledgeService {
     return this.prisma.knowledgeArticle.findMany({
       where: { status: KnowledgeArticleStatus.PUBLISHED, ...(categoryId ? { categoryId } : {}) },
       orderBy: { publishedAt: 'desc' },
-      include: { category: true, author: { select: { id: true, name: true } } },
+      include: ARTICLE_INCLUDE,
     });
   }
 
   async getById(articleId: string, requester: { userId: string; role: Role }) {
     const found = await this.prisma.knowledgeArticle.findUnique({
       where: { id: articleId },
-      include: { category: true, author: { select: { id: true, name: true } } },
+      include: ARTICLE_INCLUDE,
     });
     if (!found) throw new NotFoundException(bi('Article not found', 'వ్యాసం కనుగొనబడలేదు'));
 

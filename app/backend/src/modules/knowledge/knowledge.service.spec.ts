@@ -1,5 +1,5 @@
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
-import { KnowledgeArticle, KnowledgeArticleStatus, Role } from '@prisma/client';
+import { Case, CaseStatus, ClosureReason, KnowledgeArticle, KnowledgeArticleStatus, Role } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
@@ -7,13 +7,19 @@ import { AuditService } from '../audit/audit.service';
 function buildArticle(overrides: Partial<KnowledgeArticle> = {}): KnowledgeArticle {
   return {
     id: 'article-1',
+    sourceCaseId: 'case-1',
     authorId: 'expert-1',
-    title: 'Managing whiteflies in chilli',
-    content: 'Spray neem oil solution every 5 days for 3 rounds, focusing on the underside of leaves.',
-    categoryId: null,
+    title: 'Chilli — Pest',
+    cropId: null,
+    categoryId: 'category-1',
+    symptoms: null,
+    problemDescription: 'Leaves have yellow spots.',
+    expertSolution: 'Spray neem oil solution every 5 days for 3 rounds.',
+    evidenceMediaUrls: [],
     status: KnowledgeArticleStatus.DRAFT,
     rejectionReason: null,
     reviewedByUserId: null,
+    version: 1,
     publishedAt: null,
     createdAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-01-01'),
@@ -21,36 +27,95 @@ function buildArticle(overrides: Partial<KnowledgeArticle> = {}): KnowledgeArtic
   };
 }
 
+function buildClosedCase(overrides: Partial<Case> = {}): Case {
+  return {
+    id: 'case-1',
+    caseNumber: 'CASE-2026-ABC123',
+    farmerId: 'farmer-1',
+    farmLandId: 'farmland-1',
+    categoryId: 'category-1',
+    cropId: 'crop-1',
+    problemDescription: 'Leaves have yellow spots.',
+    evidenceNotes: null,
+    evidenceMediaUrls: ['https://example.supabase.co/leaf.jpg'],
+    status: CaseStatus.CLOSED,
+    closureReason: ClosureReason.RESOLVED,
+    assignedExpertId: 'expert-1',
+    priorityRequested: false,
+    isPriority: false,
+    priorityConfirmedBy: null,
+    followUpQuestion: null,
+    followUpResponse: null,
+    resolutionNotes: 'Spray neem oil solution every 5 days for 3 rounds.',
+    submittedAt: new Date('2026-01-01'),
+    closedAt: new Date('2026-01-02'),
+    createdAt: new Date('2026-01-01'),
+    updatedAt: new Date('2026-01-02'),
+    ...overrides,
+  };
+}
+
 describe('KnowledgeService', () => {
-  let prisma: { knowledgeArticle: { create: jest.Mock; update: jest.Mock; findUnique: jest.Mock; findMany: jest.Mock } };
+  let prisma: {
+    knowledgeArticle: { create: jest.Mock; update: jest.Mock; findUnique: jest.Mock; findMany: jest.Mock };
+    caseCategoryMaster: { findUnique: jest.Mock };
+    cropMaster: { findUnique: jest.Mock };
+  };
   let audit: { log: jest.Mock };
   let service: KnowledgeService;
 
   beforeEach(() => {
     prisma = {
       knowledgeArticle: { create: jest.fn(), update: jest.fn(), findUnique: jest.fn(), findMany: jest.fn() },
+      caseCategoryMaster: { findUnique: jest.fn() },
+      cropMaster: { findUnique: jest.fn() },
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     service = new KnowledgeService(prisma as unknown as PrismaService, audit as unknown as AuditService);
   });
 
-  describe('createDraft', () => {
-    it('creates a DRAFT article', async () => {
+  describe('createDraftFromCase', () => {
+    it('auto-generates a DRAFT article carrying the case\'s problem/solution/media', async () => {
+      prisma.caseCategoryMaster.findUnique.mockResolvedValue({ id: 'category-1', name: 'Pest' });
+      prisma.cropMaster.findUnique.mockResolvedValue({ id: 'crop-1', name: 'Chilli' });
       prisma.knowledgeArticle.create.mockResolvedValue(buildArticle());
-      await service.createDraft('expert-1', { title: 'Managing whiteflies in chilli', content: 'Spray neem oil...' });
+
+      await service.createDraftFromCase(buildClosedCase());
+
       expect(prisma.knowledgeArticle.create).toHaveBeenCalledWith(
-        expect.objectContaining({ data: expect.objectContaining({ authorId: 'expert-1' }) }),
+        expect.objectContaining({
+          data: expect.objectContaining({
+            sourceCaseId: 'case-1',
+            authorId: 'expert-1',
+            title: 'Chilli — Pest',
+            problemDescription: 'Leaves have yellow spots.',
+            expertSolution: 'Spray neem oil solution every 5 days for 3 rounds.',
+            evidenceMediaUrls: ['https://example.supabase.co/leaf.jpg'],
+            status: KnowledgeArticleStatus.DRAFT,
+          }),
+        }),
       );
+    });
+
+    it('does nothing for a case with no assigned expert (no one to attribute authorship to)', async () => {
+      const result = await service.createDraftFromCase(buildClosedCase({ assignedExpertId: null }));
+      expect(result).toBeNull();
+      expect(prisma.knowledgeArticle.create).not.toHaveBeenCalled();
     });
   });
 
   describe('submit', () => {
-    it('moves DRAFT -> PENDING_REVIEW', async () => {
+    it('moves DRAFT -> PENDING_REVIEW and bumps the version counter', async () => {
       prisma.knowledgeArticle.findUnique.mockResolvedValue(buildArticle({ status: KnowledgeArticleStatus.DRAFT }));
-      prisma.knowledgeArticle.update.mockImplementation(({ data }) => Promise.resolve(buildArticle({ ...data })));
+      prisma.knowledgeArticle.update.mockImplementation(({ data }) =>
+        Promise.resolve(buildArticle({ status: data.status, version: 2 })),
+      );
 
       const result = await service.submit('article-1', 'expert-1');
       expect(result.status).toBe(KnowledgeArticleStatus.PENDING_REVIEW);
+      expect(prisma.knowledgeArticle.update).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ version: { increment: 1 } }) }),
+      );
     });
 
     it('also allows submitting a REJECTED article (resubmission after feedback)', async () => {
@@ -105,9 +170,21 @@ describe('KnowledgeService', () => {
       );
       prisma.knowledgeArticle.update.mockImplementation(({ data }) => Promise.resolve(buildArticle({ ...data })));
 
-      const result = await service.updateDraft('article-1', 'expert-1', { content: 'A more detailed rewrite.' });
+      const result = await service.updateDraft('article-1', 'expert-1', { expertSolution: 'A more detailed rewrite.' });
       expect(result.status).toBe(KnowledgeArticleStatus.DRAFT);
       expect(result.rejectionReason).toBeNull();
+    });
+
+    it('sets tags via the relation connect syntax when tagIds is provided', async () => {
+      prisma.knowledgeArticle.findUnique.mockResolvedValue(buildArticle({ status: KnowledgeArticleStatus.DRAFT }));
+      prisma.knowledgeArticle.update.mockResolvedValue(buildArticle());
+
+      await service.updateDraft('article-1', 'expert-1', { tagIds: ['tag-1', 'tag-2'] });
+      expect(prisma.knowledgeArticle.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ tags: { set: [{ id: 'tag-1' }, { id: 'tag-2' }] } }),
+        }),
+      );
     });
 
     it('refuses to edit a PUBLISHED article', async () => {

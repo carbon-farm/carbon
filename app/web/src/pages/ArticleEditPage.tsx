@@ -3,17 +3,25 @@ import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { getArticle, updateArticleDraft, submitArticle, type Article } from '../api/knowledge';
-import { Bi, BiValue } from '../i18n/Bi';
+import { listCrops, listTags, type Crop, type Tag } from '../api/configuration';
+import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, articleStatusLabel } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 
 const EDITABLE_STATUSES = ['DRAFT', 'REJECTED'];
+const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
+function isImageUrl(url: string): boolean {
+  return IMAGE_EXTENSIONS.some((ext) => url.toLowerCase().endsWith(ext));
+}
 
 export function ArticleEditPage() {
   const { id } = useParams<{ id: string }>();
   const { session, logout } = useAuth();
   const formRef = useRef<HTMLFormElement>(null);
   const [article, setArticle] = useState<Article | null>(null);
+  const [crops, setCrops] = useState<Crop[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<'save' | 'submit' | null>(null);
@@ -27,8 +35,13 @@ export function ArticleEditPage() {
   function load() {
     if (!session || !id) return;
     setLoading(true);
-    getArticle(session.accessToken, id)
-      .then(setArticle)
+    Promise.all([getArticle(session.accessToken, id), listCrops(session.accessToken), listTags(session.accessToken)])
+      .then(([articleResult, cropsResult, tagsResult]) => {
+        setArticle(articleResult);
+        setCrops(cropsResult);
+        setTags(tagsResult);
+        setSelectedTagIds(articleResult.tags.map((t) => t.id));
+      })
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) {
           logout();
@@ -37,6 +50,10 @@ export function ArticleEditPage() {
         setError(err instanceof ApiError ? err.message : `${strings.couldNotLoadArticle.en} / ${strings.couldNotLoadArticle.te}`);
       })
       .finally(() => setLoading(false));
+  }
+
+  function toggleTag(tagId: string) {
+    setSelectedTagIds((prev) => (prev.includes(tagId) ? prev.filter((t) => t !== tagId) : [...prev, tagId]));
   }
 
   async function handleSave(thenSubmit: boolean) {
@@ -48,7 +65,10 @@ export function ArticleEditPage() {
     try {
       const updated = await updateArticleDraft(session.accessToken, article.id, {
         title: String(data.get('title') ?? ''),
-        content: String(data.get('content') ?? ''),
+        cropId: String(data.get('cropId') ?? '') || undefined,
+        symptoms: String(data.get('symptoms') ?? '') || undefined,
+        expertSolution: String(data.get('expertSolution') ?? ''),
+        tagIds: selectedTagIds,
       });
       if (thenSubmit) {
         setArticle(await submitArticle(session.accessToken, article.id));
@@ -91,6 +111,26 @@ export function ArticleEditPage() {
             </div>
           )}
 
+          <div className="card">
+            <div className="field-label"><Bi id="problemLabel" /></div>
+            <div>{article.problemDescription}</div>
+            {article.evidenceMediaUrls.length > 0 && (
+              <div className="evidence-media-grid">
+                {article.evidenceMediaUrls.map((url) =>
+                  isImageUrl(url) ? (
+                    <a href={url} target="_blank" rel="noopener noreferrer" key={url}>
+                      <img src={url} alt="" className="evidence-thumb" />
+                    </a>
+                  ) : (
+                    <a href={url} target="_blank" rel="noopener noreferrer" key={url} className="link-button">
+                      {strings.watchVideoLink.en} / {strings.watchVideoLink.te}
+                    </a>
+                  ),
+                )}
+              </div>
+            )}
+          </div>
+
           {isEditable ? (
             <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
               <label>
@@ -105,17 +145,47 @@ export function ArticleEditPage() {
                 />
               </label>
               <label>
-                <Bi id="articleContentField" />
+                <Bi id="articleCropField" />
+                <select name="cropId" defaultValue={article.cropId ?? ''}>
+                  <option value="">{biInline('selectPlaceholder')}</option>
+                  {crops.map((crop) => (
+                    <option key={crop.id} value={crop.id}>
+                      {crop.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <Bi id="articleSymptomsField" />
+                <textarea name="symptoms" defaultValue={article.symptoms ?? ''} rows={3} />
+              </label>
+              <label>
+                <Bi id="articleSolutionField" />
                 <textarea
-                  name="content"
-                  defaultValue={article.content}
+                  name="expertSolution"
+                  defaultValue={article.expertSolution}
                   onChange={clearCustomValidity}
                   onInvalid={bilingualInvalidHandler}
                   minLength={20}
-                  rows={8}
+                  rows={6}
                   required
                 />
               </label>
+              {tags.length > 0 && (
+                <div>
+                  <div className="field-label"><Bi id="articleTagsField" /></div>
+                  {tags.map((tag) => (
+                    <label className="checkbox-label" key={tag.id}>
+                      <input
+                        type="checkbox"
+                        checked={selectedTagIds.includes(tag.id)}
+                        onChange={() => toggleTag(tag.id)}
+                      />
+                      {tag.name}
+                    </label>
+                  ))}
+                </div>
+              )}
               <button type="button" onClick={() => handleSave(false)} disabled={busy !== null}>
                 {busy === 'save' ? <BiValue value={strings.saving} /> : <Bi id="saveDraftButton" />}
               </button>
@@ -125,7 +195,14 @@ export function ArticleEditPage() {
             </form>
           ) : (
             <div className="card">
-              <div style={{ whiteSpace: 'pre-wrap' }}>{article.content}</div>
+              {article.symptoms && (
+                <div>
+                  <div className="field-label"><Bi id="articleSymptomsField" /></div>
+                  <div>{article.symptoms}</div>
+                </div>
+              )}
+              <div className="field-label"><Bi id="articleSolutionField" /></div>
+              <div style={{ whiteSpace: 'pre-wrap' }}>{article.expertSolution}</div>
             </div>
           )}
         </>

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { listFarms, type FarmLand } from '../api/farms';
-import { listCaseCategories, type CaseCategory } from '../api/configuration';
+import { listCaseCategories, listCrops, type CaseCategory, type Crop } from '../api/configuration';
 import { createCaseDraft, submitCase } from '../api/cases';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, caseCategoryLabel } from '../i18n/strings';
@@ -15,16 +15,18 @@ export function NewCasePage() {
   const formRef = useRef<HTMLFormElement>(null);
   const [farms, setFarms] = useState<FarmLand[]>([]);
   const [categories, setCategories] = useState<CaseCategory[]>([]);
+  const [crops, setCrops] = useState<Crop[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<'draft' | 'submit' | null>(null);
 
   useEffect(() => {
     if (!session) return;
-    Promise.all([listFarms(session.accessToken), listCaseCategories(session.accessToken)])
-      .then(([farmsResult, categoriesResult]) => {
+    Promise.all([listFarms(session.accessToken), listCaseCategories(session.accessToken), listCrops(session.accessToken)])
+      .then(([farmsResult, categoriesResult, cropsResult]) => {
         setFarms(farmsResult);
         setCategories(categoriesResult);
+        setCrops(cropsResult);
       })
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) {
@@ -49,6 +51,7 @@ export function NewCasePage() {
       const created = await createCaseDraft(session.accessToken, {
         farmLandId: String(data.get('farmLandId') ?? ''),
         categoryId: String(data.get('categoryId') ?? ''),
+        cropId: String(data.get('cropId') ?? '') || undefined,
         problemDescription: String(data.get('problemDescription') ?? ''),
         evidenceNotes: String(data.get('evidenceNotes') ?? '') || undefined,
         requestPriority: data.get('requestPriority') === 'on',
@@ -121,6 +124,18 @@ export function NewCasePage() {
                   </option>
                 );
               })}
+            </select>
+          </label>
+
+          <label>
+            <Bi id="articleCropField" />
+            <select name="cropId" defaultValue="">
+              <option value="">{biInline('selectPlaceholder')}</option>
+              {crops.map((crop) => (
+                <option key={crop.id} value={crop.id}>
+                  {crop.name}
+                </option>
+              ))}
             </select>
           </label>
 

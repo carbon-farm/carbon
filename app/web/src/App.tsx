@@ -16,7 +16,6 @@ import { AdminStaffPage } from './pages/AdminStaffPage';
 import { AdminCredentialsPage } from './pages/AdminCredentialsPage';
 import { AdminTaxonomyPage } from './pages/AdminTaxonomyPage';
 import { ExpertArticlesPage } from './pages/ExpertArticlesPage';
-import { NewArticlePage } from './pages/NewArticlePage';
 import { ArticleEditPage } from './pages/ArticleEditPage';
 import { ModeratorArticlesPage } from './pages/ModeratorArticlesPage';
 import { KnowledgeBrowsePage } from './pages/KnowledgeBrowsePage';
@@ -97,14 +96,6 @@ export function App() {
             element={
               <ProtectedRoute roles={['EXPERT']}>
                 <ExpertArticlesPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/expert/articles/new"
-            element={
-              <ProtectedRoute roles={['EXPERT']}>
-                <NewArticlePage />
               </ProtectedRoute>
             }
           />

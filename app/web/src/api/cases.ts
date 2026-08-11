@@ -22,6 +22,8 @@ export interface Case {
   farmLand: { id: string; label: string };
   categoryId: string;
   category: { id: string; name: string };
+  cropId: string | null;
+  crop: { id: string; name: string } | null;
   problemDescription: string;
   evidenceNotes: string | null;
   evidenceMediaUrls: string[];
@@ -57,7 +59,14 @@ export function getCase(token: string, id: string) {
 
 export function createCaseDraft(
   token: string,
-  data: { farmLandId: string; categoryId: string; problemDescription: string; evidenceNotes?: string; requestPriority?: boolean },
+  data: {
+    farmLandId: string;
+    categoryId: string;
+    cropId?: string;
+    problemDescription: string;
+    evidenceNotes?: string;
+    requestPriority?: boolean;
+  },
 ) {
   return apiRequest<Case>('/cases', { method: 'POST', body: data, token });
 }

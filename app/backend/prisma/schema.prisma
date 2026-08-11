@@ -141,6 +141,9 @@ model Case {
 
   categoryId          String
   category            CaseCategoryMaster @relation(fields: [categoryId], references: [id])
+  cropId              String?        // which crop the problem concerns — optional since
+  crop                CropMaster?    @relation(fields: [cropId], references: [id]) // General Advisory
+                                                                                     // cases aren't always about one
 
   problemDescription  String
   evidenceNotes       String?
@@ -165,31 +168,54 @@ model Case {
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
 
+  knowledgeArticle    KnowledgeArticle?
+
   @@index([farmerId])
   @@index([assignedExpertId])
   @@index([status])
 }
 
-// Module 5 — Knowledge Repository. Draft -> Pending Review -> Published,
-// gated by a Moderator (parallels CasesService.startReview/assign, but this
-// is a separate, simpler workflow — never a Case status). authorId is
-// EXPERT-only at the service layer, matching who actually has advisory
-// standing to publish reusable content.
+// Module 3 — Knowledge Repository. Per Charter Section 9.1: "Closed case ->
+// Draft Article (auto-generated) -> Moderator Approval -> Published" — an
+// article is never authored from scratch, only auto-created from a Closed
+// (Resolved) case by CasesService.confirm(), then refined and submitted by
+// the case's own expert. sourceCaseId is unique: at most one article per
+// case, matching "a farmer's post-closure recurrence is a new, linked
+// Case" (Charter 9.1) rather than a second article for the same case.
+//
+// Deliberately NOT modeled yet, and not hidden: References, Products Used
+// (needs Module 6 — Marketplace, which doesn't exist), and Related
+// Articles (needs real search/similarity, also not built). `version` is a
+// simple incrementing counter, not the immutable version history the
+// Charter's "never overwritten" language implies — a real version table is
+// a follow-up, not attempted half-built here.
 model KnowledgeArticle {
-  id                String                 @id @default(uuid())
-  authorId          String
-  author            User                   @relation("KnowledgeAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  title             String
-  content           String
-  categoryId        String?
-  category          CaseCategoryMaster?    @relation(fields: [categoryId], references: [id])
-  status            KnowledgeArticleStatus @default(DRAFT)
-  rejectionReason   String?                // required in spirit when rejected; enforced in service
-  reviewedByUserId  String?
-  reviewedBy        User?                  @relation("KnowledgeReviewer", fields: [reviewedByUserId], references: [id])
-  publishedAt       DateTime?
-  createdAt         DateTime               @default(now())
-  updatedAt         DateTime               @updatedAt
+  id                 String                 @id @default(uuid())
+  sourceCaseId       String                 @unique
+  sourceCase         Case                   @relation(fields: [sourceCaseId], references: [id], onDelete: Cascade)
+  authorId           String                 // Created By — the case's assigned expert
+  author             User                   @relation("KnowledgeAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  title              String
+  cropId             String?
+  crop               CropMaster?            @relation(fields: [cropId], references: [id])
+  categoryId         String?
+  category           CaseCategoryMaster?    @relation(fields: [categoryId], references: [id])
+  symptoms           String?                // clinical framing, distinct from the farmer's own
+                                              // problemDescription — left for the expert to add
+  problemDescription String
+  expertSolution     String
+  evidenceMediaUrls  String[]               @default([])
+  tags               TagMaster[]
+
+  status             KnowledgeArticleStatus @default(DRAFT)
+  rejectionReason    String?                // required in spirit when rejected; enforced in service
+  reviewedByUserId   String?
+  reviewedBy         User?                  @relation("KnowledgeReviewer", fields: [reviewedByUserId], references: [id])
+  version            Int                    @default(1)
+  publishedAt        DateTime?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
 
   @@index([authorId])
   @@index([status])
@@ -245,6 +271,9 @@ model CropMaster {
   name      String   @unique
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
+
+  cases     Case[]
+  articles  KnowledgeArticle[]
 }
 
 model CaseCategoryMaster {
@@ -263,6 +292,8 @@ model TagMaster {
   name      String   @unique
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
+
+  articles  KnowledgeArticle[]
 }
 
 model RegionMaster {

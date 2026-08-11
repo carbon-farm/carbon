@@ -5,6 +5,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { ExpertsService } from '../experts/experts.service';
 import { UploadsService } from '../uploads/uploads.service';
+import { KnowledgeService } from '../knowledge/knowledge.service';
 
 // The guarded state machine behind 000-Project-Charter.md's ten-state Case
 // Lifecycle — only ever exercised manually via curl until now. This suite
@@ -19,6 +20,7 @@ function buildCase(overrides: Partial<Case> = {}): Case {
     farmerId: 'farmer-1',
     farmLandId: 'farmland-1',
     categoryId: 'category-1',
+    cropId: null,
     problemDescription: 'Leaves have yellow spots.',
     evidenceNotes: null,
     evidenceMediaUrls: [],
@@ -47,6 +49,7 @@ describe('CasesService', () => {
   let audit: { log: jest.Mock };
   let experts: { isVerified: jest.Mock };
   let uploads: { uploadCaseEvidence: jest.Mock };
+  let knowledge: { createDraftFromCase: jest.Mock };
   let service: CasesService;
 
   beforeEach(() => {
@@ -57,11 +60,13 @@ describe('CasesService', () => {
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     experts = { isVerified: jest.fn() };
     uploads = { uploadCaseEvidence: jest.fn() };
+    knowledge = { createDraftFromCase: jest.fn().mockResolvedValue(null) };
     service = new CasesService(
       prisma as unknown as PrismaService,
       audit as unknown as AuditService,
       experts as unknown as ExpertsService,
       uploads as unknown as UploadsService,
+      knowledge as unknown as KnowledgeService,
     );
   });
 
@@ -248,6 +253,16 @@ describe('CasesService', () => {
       const result = await service.confirm('case-1', 'farmer-1');
       expect(result.status).toBe(CaseStatus.CLOSED);
       expect(result.closureReason).toBe(ClosureReason.RESOLVED);
+    });
+
+    it('confirm triggers Knowledge Article auto-generation from the closed case', async () => {
+      prisma.case.findUnique.mockResolvedValue(buildCase({ status: CaseStatus.ANSWERED, farmerId: 'farmer-1' }));
+      prisma.case.update.mockImplementation(({ data }) => Promise.resolve(buildCase({ ...data })));
+
+      await service.confirm('case-1', 'farmer-1');
+      expect(knowledge.createDraftFromCase).toHaveBeenCalledWith(
+        expect.objectContaining({ status: CaseStatus.CLOSED, closureReason: ClosureReason.RESOLVED }),
+      );
     });
 
     it('dispute sends an answered case back to EXPERT_WORKING', async () => {

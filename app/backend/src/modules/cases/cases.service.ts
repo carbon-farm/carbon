@@ -10,6 +10,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { ExpertsService } from '../experts/experts.service';
 import { UploadsService } from '../uploads/uploads.service';
+import { KnowledgeService } from '../knowledge/knowledge.service';
 import { bi } from '../../common/i18n';
 import { CreateCaseDto } from './dto/create-case.dto';
 import { UpdateCaseDto } from './dto/update-case.dto';
@@ -29,6 +30,7 @@ export class CasesService {
     private readonly audit: AuditService,
     private readonly experts: ExpertsService,
     private readonly uploads: UploadsService,
+    private readonly knowledge: KnowledgeService,
   ) {}
 
   async createDraft(farmerId: string, dto: CreateCaseDto): Promise<Case> {
@@ -38,6 +40,7 @@ export class CasesService {
         farmerId,
         farmLandId: dto.farmLandId,
         categoryId: dto.categoryId,
+        cropId: dto.cropId,
         problemDescription: dto.problemDescription,
         evidenceNotes: dto.evidenceNotes,
         priorityRequested: dto.requestPriority ?? false,
@@ -62,7 +65,7 @@ export class CasesService {
     const updated = await this.prisma.case.update({
       where: { id: caseId },
       data: dto,
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
     await this.audit.log({
       actorId: farmerId,
@@ -86,7 +89,7 @@ export class CasesService {
     const updated = await this.prisma.case.update({
       where: { id: caseId },
       data: { evidenceMediaUrls: { push: url } },
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
     await this.audit.log({
       actorId: farmerId,
@@ -108,7 +111,7 @@ export class CasesService {
         caseNumber: this.generateCaseNumber(),
         submittedAt: new Date(),
       },
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
     await this.audit.log({
       actorId: farmerId,
@@ -128,7 +131,7 @@ export class CasesService {
     const updated = await this.prisma.case.update({
       where: { id: caseId },
       data: { status: CaseStatus.UNDER_REVIEW },
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
     await this.audit.log({
       actorId: moderatorId,
@@ -156,7 +159,7 @@ export class CasesService {
     const updated = await this.prisma.case.update({
       where: { id: caseId },
       data: { status: CaseStatus.ASSIGNED, assignedExpertId: dto.expertId },
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
     await this.audit.log({
       actorId: moderatorId,
@@ -175,7 +178,7 @@ export class CasesService {
     const updated = await this.prisma.case.update({
       where: { id: caseId },
       data: { status: CaseStatus.EXPERT_WORKING },
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
     await this.audit.log({
       actorId: expertId,
@@ -193,7 +196,7 @@ export class CasesService {
     const updated = await this.prisma.case.update({
       where: { id: caseId },
       data: { status: CaseStatus.WAITING_FARMER, followUpQuestion: dto.question, followUpResponse: null },
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
     await this.audit.log({
       actorId: expertId,
@@ -212,7 +215,7 @@ export class CasesService {
     const updated = await this.prisma.case.update({
       where: { id: caseId },
       data: { status: CaseStatus.EXPERT_WORKING, followUpResponse: dto.answer },
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
     await this.audit.log({
       actorId: farmerId,
@@ -230,7 +233,7 @@ export class CasesService {
     const updated = await this.prisma.case.update({
       where: { id: caseId },
       data: { status: CaseStatus.ANSWERED, resolutionNotes: dto.resolutionNotes },
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
     await this.audit.log({
       actorId: expertId,
@@ -255,7 +258,7 @@ export class CasesService {
         closureReason: ClosureReason.RESOLVED,
         closedAt: new Date(),
       },
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
     await this.audit.log({
       actorId: farmerId,
@@ -263,6 +266,10 @@ export class CasesService {
       entityType: 'Case',
       entityId: caseId,
     });
+    // Closing a case as Resolved is what triggers the Knowledge Article
+    // Publication Workflow (Charter Section 9.1) — Abandoned closures don't,
+    // since there's no expert solution to turn into an article.
+    await this.knowledge.createDraftFromCase(updated);
     // Farmer Confirmed is real but transient — CLOSED is what the record
     // shows, exactly matching the Charter's own diagram (Answered -> Farmer
     // Confirmed -> Closed happen as one farmer action).
@@ -279,7 +286,7 @@ export class CasesService {
     const updated = await this.prisma.case.update({
       where: { id: caseId },
       data: { status: CaseStatus.EXPERT_WORKING },
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
     await this.audit.log({
       actorId: farmerId,
@@ -303,7 +310,7 @@ export class CasesService {
     const updated = await this.prisma.case.update({
       where: { id: caseId },
       data: { status: CaseStatus.CLOSED, closureReason: ClosureReason.ABANDONED, closedAt: new Date() },
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
     await this.audit.log({
       actorId,
@@ -329,7 +336,7 @@ export class CasesService {
         isPriority: dto.approve,
         priorityConfirmedBy: actorId,
       },
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
     await this.audit.log({
       actorId,
@@ -356,7 +363,7 @@ export class CasesService {
     return this.prisma.case.findMany({
       where: { farmerId },
       orderBy: [{ isPriority: 'desc' }, { updatedAt: 'desc' }],
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
   }
 
@@ -364,7 +371,7 @@ export class CasesService {
     return this.prisma.case.findMany({
       where: { assignedExpertId: expertId, status: { notIn: [CaseStatus.CLOSED] } },
       orderBy: [{ isPriority: 'desc' }, { submittedAt: 'asc' }],
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
   }
 
@@ -373,14 +380,14 @@ export class CasesService {
     return this.prisma.case.findMany({
       where: { status: { in: [CaseStatus.SUBMITTED, CaseStatus.UNDER_REVIEW] } },
       orderBy: [{ isPriority: 'desc' }, { submittedAt: 'asc' }],
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
   }
 
   async getById(caseId: string, requester: { userId: string; role: Role }) {
     const found = await this.prisma.case.findUnique({
       where: { id: caseId },
-      include: { category: true, farmLand: true },
+      include: { category: true, farmLand: true, crop: true },
     });
     if (!found) throw new NotFoundException(bi('Case not found', 'కేసు కనుగొనబడలేదు'));
 

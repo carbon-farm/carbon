@@ -143,6 +143,12 @@ export function CaseDetailPage() {
               <div className="field-label"><Bi id="categoryLabel" /></div>
               <div><BiValue value={caseCategoryLabel(theCase.category.name)} /></div>
             </div>
+            {theCase.crop && (
+              <div>
+                <div className="field-label"><Bi id="articleCropField" /></div>
+                <div>{theCase.crop.name}</div>
+              </div>
+            )}
             <div>
               <div className="field-label"><Bi id="problemLabel" /></div>
               <div>{theCase.problemDescription}</div>
