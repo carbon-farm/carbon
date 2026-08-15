@@ -3,17 +3,26 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { createFarm, listFarms, type FarmLand } from '../api/farms';
+import { listMyCases, type Case } from '../api/cases';
+import { listPublishedArticles, type Article } from '../api/knowledge';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 
-// Stage 1 dashboard: only Farm/Land is real. Charter Module 2's full
-// dashboard (membership, case counters, notifications, recommendations) is
-// Stage 2+ — this page shows what actually exists rather than faking tiles
-// for modules that aren't built yet.
+const PENDING_STATUSES = ['SUBMITTED', 'UNDER_REVIEW', 'ASSIGNED', 'EXPERT_WORKING', 'WAITING_FARMER', 'ANSWERED'];
+
+// Charter Module 2's dashboard describes a CQRS-style read model
+// aggregating six-plus modules under the low-bandwidth constraint (C3) —
+// at this data volume (one farmer's own records), that's over-engineering;
+// these are plain queries against the same endpoints the rest of the app
+// already uses. Orders/notifications/recommended-products tiles are left
+// out entirely rather than faked, since Marketplace and Notification don't
+// exist yet.
 export function DashboardPage() {
   const { session, logout } = useAuth();
   const [farms, setFarms] = useState<FarmLand[]>([]);
+  const [cases, setCases] = useState<Case[]>([]);
+  const [recentArticles, setRecentArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -22,8 +31,12 @@ export function DashboardPage() {
 
   useEffect(() => {
     if (!session) return;
-    listFarms(session.accessToken)
-      .then(setFarms)
+    Promise.all([listFarms(session.accessToken), listMyCases(session.accessToken), listPublishedArticles(session.accessToken)])
+      .then(([farmsResult, casesResult, articlesResult]) => {
+        setFarms(farmsResult);
+        setCases(casesResult);
+        setRecentArticles(articlesResult.slice(0, 3));
+      })
       .catch((err) => {
         // An expired/invalid token here isn't a "your farms failed to load"
         // problem — it's "you're not logged in anymore." Send the farmer
@@ -36,6 +49,10 @@ export function DashboardPage() {
       })
       .finally(() => setLoading(false));
   }, [session, logout]);
+
+  const askedCount = cases.filter((c) => c.status !== 'DRAFT').length;
+  const pendingCount = cases.filter((c) => PENDING_STATUSES.includes(c.status)).length;
+  const closedCount = cases.filter((c) => c.status === 'CLOSED').length;
 
   async function handleAddFarm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -99,6 +116,18 @@ export function DashboardPage() {
           <div className="value">{farms.length}</div>
           <BiValue value={strings.farmLandParcelsStat} as="div" className="label" />
         </div>
+        <div className="stat-tile">
+          <div className="value">{askedCount}</div>
+          <BiValue value={strings.casesAskedStat} as="div" className="label" />
+        </div>
+        <div className="stat-tile">
+          <div className="value">{pendingCount}</div>
+          <BiValue value={strings.casesPendingStat} as="div" className="label" />
+        </div>
+        <div className="stat-tile">
+          <div className="value">{closedCount}</div>
+          <BiValue value={strings.casesClosedStat} as="div" className="label" />
+        </div>
       </div>
 
       <Link to="/cases">
@@ -116,6 +145,17 @@ export function DashboardPage() {
       <BiValue value={strings.stage1Notice} as="p" className="hint" />
 
       {error && <div className="error-banner">{error}</div>}
+
+      {recentArticles.length > 0 && (
+        <div className="card">
+          <Bi id="recentKnowledgeHeading" as="h2" />
+          {recentArticles.map((a) => (
+            <Link to={`/knowledge/${a.id}`} key={a.id} className="case-item">
+              <div className="label">{a.title}</div>
+            </Link>
+          ))}
+        </div>
+      )}
 
       {loading ? (
         <BiValue value={strings.loading} as="p" className="hint" />

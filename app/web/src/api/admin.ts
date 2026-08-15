@@ -41,3 +41,27 @@ export function verifyCredential(token: string, expertProfileId: string, approve
     token,
   });
 }
+
+export interface AuditLogEntry {
+  id: string;
+  actorId: string | null;
+  actor: { id: string; name: string; role: string } | null;
+  action: string;
+  entityType: string;
+  entityId: string;
+  metadata: unknown;
+  createdAt: string;
+}
+
+export function listAuditLog(token: string, filters: { entityType?: string; from?: string; to?: string } = {}) {
+  const params = new URLSearchParams();
+  if (filters.entityType) params.set('entityType', filters.entityType);
+  if (filters.from) params.set('from', filters.from);
+  if (filters.to) params.set('to', filters.to);
+  const qs = params.toString();
+  return apiRequest<AuditLogEntry[]>(`/audit${qs ? `?${qs}` : ''}`, { token });
+}
+
+export function listAuditEntityTypes(token: string) {
+  return apiRequest<string[]>('/audit/entity-types', { token });
+}

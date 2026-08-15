@@ -70,6 +70,10 @@ export const strings = {
   yourFarms: { en: 'Your farms', te: 'మీ పొలాలు' },
   logoutButton: { en: 'Log out', te: 'లాగ్ అవుట్' },
   farmLandParcelsStat: { en: 'Farm/Land parcels', te: 'పొలం స్థలాలు' },
+  casesAskedStat: { en: 'Cases asked', te: 'అడిగిన కేసులు' },
+  casesPendingStat: { en: 'Pending', te: 'పెండింగ్‌లో' },
+  casesClosedStat: { en: 'Closed', te: 'మూసివేయబడింది' },
+  recentKnowledgeHeading: { en: 'Recent advice', te: 'ఇటీవలి సలహా' },
   stage1Notice: {
     en: "Learning and Marketplace aren't built yet — that's later in the Product Roadmap. Your account, your land, and reporting a problem all work today.",
     te: 'లెర్నింగ్, మార్కెట్‌ప్లేస్ ఇంకా నిర్మించలేదు — అవి ప్రొడక్ట్ రోడ్‌మ్యాప్‌లో తర్వాత భాగం. మీ ఖాతా, మీ భూమి, సమస్యను నివేదించడం ఇప్పుడు పనిచేస్తాయి.',
@@ -240,6 +244,21 @@ export const strings = {
   credentialsLinkDesc: { en: 'Approve or reject qualifications experts have submitted.', te: 'నిపుణులు సమర్పించిన అర్హతలను ఆమోదించండి లేదా తిరస్కరించండి.' },
   taxonomyLinkTitle: { en: 'Taxonomy', te: 'వర్గీకరణ' },
   taxonomyLinkDesc: { en: 'Crops, case categories, tags, and regions used across the app.', te: 'యాప్ అంతటా ఉపయోగించే పంటలు, కేసు వర్గాలు, ట్యాగ్‌లు, ప్రాంతాలు.' },
+  auditLogLinkTitle: { en: 'Audit log', te: 'ఆడిట్ లాగ్' },
+  auditLogLinkDesc: { en: 'Every material action taken across the platform, who did it, and when.', te: 'ప్లాట్‌ఫారమ్ అంతటా తీసుకున్న ప్రతి ముఖ్యమైన చర్య, ఎవరు చేశారు, ఎప్పుడు.' },
+
+  // Administrator — audit log
+  auditLogPageTitle: { en: 'Audit log', te: 'ఆడిట్ లాగ్' },
+  entityTypeFilterLabel: { en: 'Entity type', te: 'ఎంటిటీ రకం' },
+  fromDateFilterLabel: { en: 'From', te: 'నుండి' },
+  toDateFilterLabel: { en: 'To', te: 'వరకు' },
+  allEntityTypesOption: { en: 'All', te: 'అన్నీ' },
+  noAuditEntries: { en: 'No matching entries.', te: 'సరిపోలే నమోదులు లేవు.' },
+  couldNotLoadAuditLog: { en: 'Could not load the audit log.', te: 'ఆడిట్ లాగ్‌ను లోడ్ చేయలేకపోయాము.' },
+  dateColumnLabel: { en: 'Date', te: 'తేదీ' },
+  actionColumnLabel: { en: 'Action', te: 'చర్య' },
+  entityColumnLabel: { en: 'Entity', te: 'ఎంటిటీ' },
+  actorColumnLabel: { en: 'Actor', te: 'నిర్వాహకుడు' },
 
   // Administrator — staff
   staffPageTitle: { en: 'Staff accounts', te: 'సిబ్బంది ఖాతాలు' },

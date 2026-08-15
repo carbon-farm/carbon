@@ -32,6 +32,11 @@ export function AdminHomePage() {
         <BiValue value={strings.taxonomyLinkTitle} as="div" className="label" />
         <BiValue value={strings.taxonomyLinkDesc} as="div" className="meta" />
       </Link>
+
+      <Link to="/admin/audit" className="case-item">
+        <BiValue value={strings.auditLogLinkTitle} as="div" className="label" />
+        <BiValue value={strings.auditLogLinkDesc} as="div" className="meta" />
+      </Link>
     </div>
   );
 }

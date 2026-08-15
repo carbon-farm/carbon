@@ -300,6 +300,44 @@ button.secondary {
   border: 1px solid var(--card-border);
 }
 
+/* Sortable/filterable data tables (Admin audit log, and any future list
+   screen per the project's standing list-UX requirement) — .screen caps at
+   480px for the mobile-first farmer flows, so a multi-column table scrolls
+   horizontally in its own box instead of squeezing every screen narrower. */
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.data-table th, .data-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.data-table thead {
+  background: var(--accent-soft);
+}
+
+.data-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 .top-bar {
   display: flex;
   justify-content: space-between;
