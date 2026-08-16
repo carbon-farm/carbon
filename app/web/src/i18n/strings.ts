@@ -14,6 +14,31 @@ export interface Bilingual {
 export const strings = {
   brand: { en: 'Organic Carbon Farming', te: 'ఆర్గానిక్ కార్బన్ ఫార్మింగ్' },
 
+  // Landing page
+  landingTagline: {
+    en: 'Real advice from real agriculture experts, and a growing library of trusted knowledge — right from your phone.',
+    te: 'నిజమైన వ్యవసాయ నిపుణుల నుండి నిజమైన సలహా, మరియు నమ్మదగిన జ్ఞానం యొక్క పెరుగుతున్న గ్రంథాలయం — మీ ఫోన్ నుండి నేరుగా.',
+  },
+  landingFeature1Title: { en: 'Ask an expert', te: 'నిపుణుడిని అడగండి' },
+  landingFeature1Desc: {
+    en: 'Report a problem with photos and get a real diagnosis from a verified agriculture expert.',
+    te: 'ఫోటోలతో సమస్యను నివేదించండి మరియు ధృవీకరించబడిన వ్యవసాయ నిపుణుడి నుండి నిజమైన నిర్ధారణ పొందండి.',
+  },
+  landingFeature2Title: { en: 'Browse advice', te: 'సలహాలను చూడండి' },
+  landingFeature2Desc: {
+    en: 'Search a growing library of expert-reviewed advisory articles, in your language.',
+    te: 'నిపుణులు సమీక్షించిన సలహా వ్యాసాల పెరుగుతున్న గ్రంథాలయాన్ని మీ భాషలో వెతకండి.',
+  },
+  landingFeature3Title: { en: 'Track your land', te: 'మీ భూమిని ట్రాక్ చేయండి' },
+  landingFeature3Desc: {
+    en: 'Keep every Farm/Land parcel, its crops, and its case history in one place.',
+    te: 'ప్రతి పొలం స్థలం, దాని పంటలు, దాని కేసు చరిత్రను ఒకే చోట ఉంచుకోండి.',
+  },
+  landingFooterNote: {
+    en: 'Built for farmers, agriculture experts, and advisory teams.',
+    te: 'రైతులు, వ్యవసాయ నిపుణులు, సలహా బృందాల కోసం నిర్మించబడింది.',
+  },
+
   // Login
   loginTitle: { en: 'Log in', te: 'లాగిన్ అవ్వండి' },
   mobileNumberLabel: { en: 'Mobile number', te: 'మొబైల్ నంబర్' },

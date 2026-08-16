@@ -27,22 +27,11 @@ export function ExpertCasesPage() {
   }, [session, logout]);
 
   return (
-    <div className="screen">
-      <div className="top-bar">
-        <div>
-          <Bi id="expertCasesEyebrow" as="span" className="eyebrow" />
-          <Bi id="expertCasesTitle" as="h1" />
-        </div>
-        <button type="button" className="secondary" onClick={logout}>
-          <Bi id="logoutButton" />
-        </button>
+    <>
+      <div>
+        <Bi id="expertCasesEyebrow" as="span" className="eyebrow" />
+        <Bi id="expertCasesTitle" as="h1" />
       </div>
-
-      <Link to="/expert/articles">
-        <button type="button" className="secondary">
-          <Bi id="myArticlesTitle" />
-        </button>
-      </Link>
 
       {error && <div className="error-banner">{error}</div>}
 
@@ -72,6 +61,6 @@ export function ExpertCasesPage() {
           })}
         </div>
       )}
-    </div>
+    </>
   );
 }

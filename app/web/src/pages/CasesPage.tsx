@@ -27,7 +27,7 @@ export function CasesPage() {
   }, [session, logout]);
 
   return (
-    <div className="screen">
+    <>
       <div className="top-bar">
         <div>
           <Bi id="myCasesEyebrow" as="span" className="eyebrow" />
@@ -72,6 +72,6 @@ export function CasesPage() {
       <Link to="/dashboard" className="link-button">
         {strings.backButton.en} / {strings.backButton.te}
       </Link>
-    </div>
+    </>
   );
 }

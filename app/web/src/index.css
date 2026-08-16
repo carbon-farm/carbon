@@ -2,6 +2,7 @@
    visual continuity between the docs and the actual product. */
 :root {
   --bg: #EFF1E6;
+  --bg-sunk: #E4E8D8;
   --card: #FBFBF6;
   --card-border: #CBD2B9;
   --ink: #1D2A1A;
@@ -9,16 +10,23 @@
   --ink-faint: #838F76;
   --rule: #C4CCB2;
   --accent: #2F6D4F;
+  --accent-deep: #1F4E38;
   --accent-ink: #0F2A1C;
   --accent-soft: #DCE7DA;
   --danger: #A6402F;
   --danger-soft: #F3DED9;
   --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --shadow-sm: 0 1px 2px rgba(15, 42, 28, 0.06), 0 1px 1px rgba(15, 42, 28, 0.08);
+  --shadow-md: 0 4px 10px rgba(15, 42, 28, 0.08), 0 2px 4px rgba(15, 42, 28, 0.06);
+  --shadow-lg: 0 12px 28px rgba(15, 42, 28, 0.14), 0 4px 10px rgba(15, 42, 28, 0.08);
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #12160F;
+    --bg-sunk: #0C0F09;
     --card: #1A2117;
     --card-border: #3A4432;
     --ink: #EDF0E5;
@@ -26,10 +34,15 @@
     --ink-faint: #78826B;
     --rule: #3A4432;
     --accent: #5FA37E;
+    --accent-deep: #487F62;
     --accent-ink: #EAF3ED;
     --accent-soft: #223A2D;
     --danger: #E08066;
     --danger-soft: #3A241E;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.45);
   }
 }
 
@@ -47,16 +60,135 @@ body {
   color: var(--ink);
   font-family: var(--font-body);
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Persistent app shell — the header/nav span the full viewport width so the
+   product reads as one continuous application; only the content column
+   underneath stays narrow, for the mobile-first, low-literacy farmer flows
+   this was built for (01-Product/05-Target-Users.md). */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  background: var(--accent-deep);
+  box-shadow: var(--shadow-md);
+}
+
+.brand-wordmark {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: white;
+  line-height: 1.15;
+}
+
+.brand-wordmark .bi-en {
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+}
+
+.brand-wordmark .bi-te {
+  font-size: 12px;
+  opacity: 0.82;
+  margin-top: 1px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-role-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: white;
+  background: rgba(255, 255, 255, 0.16);
+  padding: 5px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.logout-icon-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: white;
+  min-height: 38px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.logout-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.app-nav {
+  position: sticky;
+  top: 58px;
+  z-index: 9;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 10px 16px;
+  background: var(--card);
+  border-bottom: 1px solid var(--card-border);
+  box-shadow: var(--shadow-sm);
+  scrollbar-width: none;
+}
+
+.app-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-pill {
+  flex: none;
+  display: block;
+  text-decoration: none;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 8px 14px;
+  border-radius: 999px;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+}
+
+.nav-pill:hover {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.nav-pill.active {
+  background: var(--accent);
+  color: white;
+}
+
+.app-main {
+  min-height: calc(100vh - 58px);
 }
 
 .screen {
   max-width: 480px;
   margin: 0 auto;
   padding: 24px 20px 60px;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.screen.wide {
+  max-width: 760px;
 }
 
 .eyebrow {
@@ -69,23 +201,27 @@ body {
 
 h1 {
   font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
   margin: 0;
   line-height: 1.2;
 }
 
 h2 {
   font-size: 18px;
+  font-weight: 700;
   margin: 0;
 }
 
 .card {
   background: var(--card);
   border: 1px solid var(--card-border);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  box-shadow: var(--shadow-sm);
 }
 
 form {
@@ -142,6 +278,7 @@ input, select, textarea, button {
   border: 1px solid var(--card-border);
   background: var(--bg);
   color: var(--ink);
+  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease), background 0.15s var(--ease), transform 0.1s var(--ease);
 }
 
 textarea {
@@ -174,17 +311,35 @@ button {
   font-weight: 600;
   cursor: pointer;
   min-height: 48px;
+  box-shadow: var(--shadow-sm);
+}
+
+button:hover:not(:disabled) {
+  background: var(--accent-deep);
+  box-shadow: var(--shadow-md);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: none;
 }
 
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 button.secondary {
   background: transparent;
   color: var(--accent);
   border: 1px solid var(--accent);
+  box-shadow: none;
+}
+
+button.secondary:hover:not(:disabled) {
+  background: var(--accent-soft);
+  box-shadow: none;
 }
 
 .error-banner {
@@ -248,6 +403,14 @@ button.secondary {
   padding: 12px 14px;
   text-decoration: none;
   color: inherit;
+  background: var(--card);
+  transition: box-shadow 0.15s var(--ease), border-color 0.15s var(--ease), transform 0.15s var(--ease);
+}
+
+a.case-item:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent);
+  transform: translateY(-1px);
 }
 
 .case-item .label {
@@ -352,4 +515,117 @@ button.secondary {
   padding: 8px 0;
   min-height: auto;
   text-decoration: underline;
+  box-shadow: none;
+}
+
+.link-button:hover {
+  background: none;
+  box-shadow: none;
+}
+
+/* Landing page — the public front door, replacing the old bare redirect
+   straight to an empty login form. */
+.hero {
+  background: linear-gradient(165deg, var(--accent-deep), var(--accent));
+  color: white;
+  padding: 56px 20px 64px;
+  text-align: center;
+}
+
+.hero-inner {
+  max-width: 560px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.hero-mark {
+  font-size: 38px;
+  line-height: 1;
+}
+
+.hero h1 {
+  font-size: 30px;
+  color: white;
+  text-wrap: balance;
+}
+
+.hero h1 .bi-te {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.hero-tagline {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 46ch;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.hero-actions button, .hero-actions a {
+  min-width: 160px;
+}
+
+.hero button.secondary {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.hero button.secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.landing-body {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.feature-card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.feature-icon {
+  font-size: 26px;
+}
+
+.feature-card h2 {
+  font-size: 16px;
+}
+
+.feature-card p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.landing-footer {
+  text-align: center;
+  padding: 24px 20px 40px;
+  color: var(--ink-faint);
+  font-size: 12px;
 }

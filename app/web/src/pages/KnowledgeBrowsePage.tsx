@@ -28,15 +28,10 @@ export function KnowledgeBrowsePage() {
   }, [session, logout]);
 
   return (
-    <div className="screen">
-      <div className="top-bar">
-        <div>
-          <Bi id="knowledgeEyebrow" as="span" className="eyebrow" />
-          <Bi id="knowledgeBrowseTitle" as="h1" />
-        </div>
-        <button type="button" className="secondary" onClick={logout}>
-          <Bi id="logoutButton" />
-        </button>
+    <>
+      <div>
+        <Bi id="knowledgeEyebrow" as="span" className="eyebrow" />
+        <Bi id="knowledgeBrowseTitle" as="h1" />
       </div>
 
       {error && <div className="error-banner">{error}</div>}
@@ -74,6 +69,6 @@ export function KnowledgeBrowsePage() {
       <Link to={session ? roleHomePath(session.role) : '/login'} className="link-button">
         {strings.backButton.en} / {strings.backButton.te}
       </Link>
-    </div>
+    </>
   );
 }

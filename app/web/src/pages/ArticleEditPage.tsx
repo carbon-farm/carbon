@@ -86,7 +86,7 @@ export function ArticleEditPage() {
   const isEditable = article && EDITABLE_STATUSES.includes(article.status);
 
   return (
-    <div className="screen">
+    <>
       <div>
         <Bi id="knowledgeEyebrow" as="span" className="eyebrow" />
         <h1>{article?.title ?? ''}</h1>
@@ -211,6 +211,6 @@ export function ArticleEditPage() {
       <Link to="/expert/articles" className="link-button">
         {strings.backButton.en} / {strings.backButton.te}
       </Link>
-    </div>
+    </>
   );
 }

@@ -80,7 +80,7 @@ export function ExpertCaseDetailPage() {
   }
 
   return (
-    <div className="screen">
+    <>
       <div>
         <Bi id="caseDetailEyebrow" as="span" className="eyebrow" />
         <h1>{theCase?.caseNumber ?? theCase?.id.slice(0, 8) ?? ''}</h1>
@@ -199,6 +199,6 @@ export function ExpertCaseDetailPage() {
       <Link to="/expert/cases" className="link-button">
         {strings.backToCasesLink.en} / {strings.backToCasesLink.te}
       </Link>
-    </div>
+    </>
   );
 }

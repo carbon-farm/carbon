@@ -100,15 +100,10 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="screen">
-      <div className="top-bar">
-        <div>
-          <Bi id="dashboardEyebrow" as="span" className="eyebrow" />
-          <Bi id="yourFarms" as="h1" />
-        </div>
-        <button type="button" className="secondary" onClick={logout}>
-          <Bi id="logoutButton" />
-        </button>
+    <>
+      <div>
+        <Bi id="dashboardEyebrow" as="span" className="eyebrow" />
+        <Bi id="yourFarms" as="h1" />
       </div>
 
       <div className="stat-row">
@@ -254,6 +249,6 @@ export function DashboardPage() {
           ))}
         </div>
       )}
-    </div>
+    </>
   );
 }

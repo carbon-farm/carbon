@@ -75,7 +75,7 @@ export function NewCasePage() {
   }
 
   return (
-    <div className="screen">
+    <>
       <div>
         <Bi id="newCaseEyebrow" as="span" className="eyebrow" />
         <Bi id="newCaseTitle" as="h1" />
@@ -174,6 +174,6 @@ export function NewCasePage() {
       <Link to="/cases" className="link-button">
         {strings.backToCasesLink.en} / {strings.backToCasesLink.te}
       </Link>
-    </div>
+    </>
   );
 }

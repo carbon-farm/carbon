@@ -67,15 +67,10 @@ export function AdminStaffPage() {
   }
 
   return (
-    <div className="screen">
-      <div className="top-bar">
-        <div>
-          <Bi id="adminEyebrow" as="span" className="eyebrow" />
-          <Bi id="staffPageTitle" as="h1" />
-        </div>
-        <button type="button" className="secondary" onClick={logout}>
-          <Bi id="logoutButton" />
-        </button>
+    <>
+      <div>
+        <Bi id="adminEyebrow" as="span" className="eyebrow" />
+        <Bi id="staffPageTitle" as="h1" />
       </div>
 
       {error && <div className="error-banner">{error}</div>}
@@ -152,6 +147,6 @@ export function AdminStaffPage() {
       <Link to="/admin" className="link-button">
         {strings.backButton.en} / {strings.backButton.te}
       </Link>
-    </div>
+    </>
   );
 }

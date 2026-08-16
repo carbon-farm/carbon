@@ -33,7 +33,7 @@ export function ArticleViewPage() {
   }, [session, id, logout]);
 
   return (
-    <div className="screen">
+    <>
       <div>
         <Bi id="knowledgeEyebrow" as="span" className="eyebrow" />
         <h1>{article?.title ?? ''}</h1>
@@ -102,6 +102,6 @@ export function ArticleViewPage() {
       <Link to="/knowledge" className="link-button">
         {strings.backButton.en} / {strings.backButton.te}
       </Link>
-    </div>
+    </>
   );
 }

@@ -1,21 +1,13 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../auth/AuthContext';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 
 export function AdminHomePage() {
-  const { logout } = useAuth();
-
   return (
-    <div className="screen">
-      <div className="top-bar">
-        <div>
-          <Bi id="adminEyebrow" as="span" className="eyebrow" />
-          <Bi id="adminHubTitle" as="h1" />
-        </div>
-        <button type="button" className="secondary" onClick={logout}>
-          <Bi id="logoutButton" />
-        </button>
+    <>
+      <div>
+        <Bi id="adminEyebrow" as="span" className="eyebrow" />
+        <Bi id="adminHubTitle" as="h1" />
       </div>
 
       <Link to="/admin/staff" className="case-item">
@@ -37,6 +29,6 @@ export function AdminHomePage() {
         <BiValue value={strings.auditLogLinkTitle} as="div" className="label" />
         <BiValue value={strings.auditLogLinkDesc} as="div" className="meta" />
       </Link>
-    </div>
+    </>
   );
 }

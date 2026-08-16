@@ -67,15 +67,10 @@ export function ModeratorArticlesPage() {
   }
 
   return (
-    <div className="screen">
-      <div className="top-bar">
-        <div>
-          <Bi id="knowledgeEyebrow" as="span" className="eyebrow" />
-          <Bi id="articleQueueTitle" as="h1" />
-        </div>
-        <button type="button" className="secondary" onClick={logout}>
-          <Bi id="logoutButton" />
-        </button>
+    <>
+      <div>
+        <Bi id="knowledgeEyebrow" as="span" className="eyebrow" />
+        <Bi id="articleQueueTitle" as="h1" />
       </div>
 
       {error && <div className="error-banner">{error}</div>}
@@ -134,6 +129,6 @@ export function ModeratorArticlesPage() {
       <Link to="/moderator/queue" className="link-button">
         {strings.backButton.en} / {strings.backButton.te}
       </Link>
-    </div>
+    </>
   );
 }

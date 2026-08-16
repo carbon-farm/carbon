@@ -115,7 +115,7 @@ export function CaseDetailPage() {
   }
 
   return (
-    <div className="screen">
+    <>
       <div>
         <Bi id="caseDetailEyebrow" as="span" className="eyebrow" />
         <h1>{theCase?.caseNumber ?? <BiValue value={strings.statusDraft} />}</h1>
@@ -243,6 +243,6 @@ export function CaseDetailPage() {
       <Link to="/cases" className="link-button">
         {strings.backToCasesLink.en} / {strings.backToCasesLink.te}
       </Link>
-    </div>
+    </>
   );
 }

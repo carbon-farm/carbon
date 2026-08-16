@@ -73,15 +73,10 @@ export function AdminAuditPage() {
   }
 
   return (
-    <div className="screen">
-      <div className="top-bar">
-        <div>
-          <Bi id="adminEyebrow" as="span" className="eyebrow" />
-          <Bi id="auditLogPageTitle" as="h1" />
-        </div>
-        <button type="button" className="secondary" onClick={logout}>
-          <Bi id="logoutButton" />
-        </button>
+    <>
+      <div>
+        <Bi id="adminEyebrow" as="span" className="eyebrow" />
+        <Bi id="auditLogPageTitle" as="h1" />
       </div>
 
       <div className="stat-row">
@@ -148,6 +143,6 @@ export function AdminAuditPage() {
       <Link to="/admin" className="link-button">
         {strings.backButton.en} / {strings.backButton.te}
       </Link>
-    </div>
+    </>
   );
 }
