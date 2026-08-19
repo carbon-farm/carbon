@@ -31,6 +31,7 @@ function SimpleListSection({
 }) {
   const [value, setValue] = useState('');
   const [busy, setBusy] = useState(false);
+  const [sortAlpha, setSortAlpha] = useState(false);
 
   async function handleAdd() {
     if (!value.trim()) return;
@@ -43,10 +44,19 @@ function SimpleListSection({
     }
   }
 
+  const visible = sortAlpha ? [...items].sort((a, b) => a.name.localeCompare(b.name)) : items;
+
   return (
     <div className="card">
-      <Bi id={headingKey} as="h2" />
-      {items.map((item) => (
+      <div className="top-bar">
+        <Bi id={headingKey} as="h2" />
+        {items.length > 1 && (
+          <button type="button" className="secondary sort-dir-btn" onClick={() => setSortAlpha((v) => !v)}>
+            {sortAlpha ? <Bi id="sortNameAZ" /> : <Bi id="sortNewestFirst" />}
+          </button>
+        )}
+      </div>
+      {visible.map((item) => (
         <div className="farm-item" key={item.id}>
           <div className="label">{item.name}</div>
         </div>
@@ -79,6 +89,7 @@ export function AdminTaxonomyPage() {
   const [regionName, setRegionName] = useState('');
   const [regionState, setRegionState] = useState('');
   const [regionBusy, setRegionBusy] = useState(false);
+  const [regionSortAlpha, setRegionSortAlpha] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -182,8 +193,15 @@ export function AdminTaxonomyPage() {
           />
 
           <div className="card">
-            <Bi id="regionsHeading" as="h2" />
-            {regions.map((region) => (
+            <div className="top-bar">
+              <Bi id="regionsHeading" as="h2" />
+              {regions.length > 1 && (
+                <button type="button" className="secondary sort-dir-btn" onClick={() => setRegionSortAlpha((v) => !v)}>
+                  {regionSortAlpha ? <Bi id="sortNameAZ" /> : <Bi id="sortNewestFirst" />}
+                </button>
+              )}
+            </div>
+            {(regionSortAlpha ? [...regions].sort((a, b) => a.name.localeCompare(b.name)) : regions).map((region) => (
               <div className="farm-item" key={region.id}>
                 <div className="label">{region.name}</div>
                 <div className="meta">{region.state}</div>

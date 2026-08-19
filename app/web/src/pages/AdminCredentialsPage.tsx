@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { listPendingCredentials, verifyCredential, type PendingCredential } from '../api/admin';
-import { Bi, BiValue } from '../i18n/Bi';
+import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
+
+type SortMode = 'oldest' | 'newest' | 'name';
 
 export function AdminCredentialsPage() {
   const { session, logout } = useAuth();
@@ -14,6 +16,7 @@ export function AdminCredentialsPage() {
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState<Record<string, string>>({});
+  const [sortMode, setSortMode] = useState<SortMode>('oldest');
 
   useEffect(() => {
     if (!session) return;
@@ -66,6 +69,21 @@ export function AdminCredentialsPage() {
     }
   }
 
+  const visible = useMemo(() => {
+    const rows = [...pending];
+    switch (sortMode) {
+      case 'newest':
+        rows.sort((a, b) => b.submittedAt.localeCompare(a.submittedAt));
+        break;
+      case 'name':
+        rows.sort((a, b) => a.user.name.localeCompare(b.user.name));
+        break;
+      default:
+        rows.sort((a, b) => a.submittedAt.localeCompare(b.submittedAt));
+    }
+    return rows;
+  }, [pending, sortMode]);
+
   return (
     <>
       <div>
@@ -75,13 +93,26 @@ export function AdminCredentialsPage() {
 
       {error && <div className="error-banner">{error}</div>}
 
+      {!loading && pending.length > 0 && (
+        <div className="list-toolbar">
+          <label>
+            <Bi id="sortByLabel" />
+            <select value={sortMode} onChange={(e) => setSortMode(e.target.value as SortMode)}>
+              <option value="oldest">{biInline('sortOldestFirst')}</option>
+              <option value="newest">{biInline('sortNewestFirst')}</option>
+              <option value="name">{biInline('sortNameAZ')}</option>
+            </select>
+          </label>
+        </div>
+      )}
+
       {loading ? (
         <BiValue value={strings.loading} as="p" className="hint" />
       ) : pending.length === 0 ? (
         <BiValue value={strings.noPendingCredentials} as="p" className="hint" />
       ) : (
         <div className="card">
-          {pending.map((cred) => {
+          {visible.map((cred) => {
             const isBusy = busyId === cred.id;
             return (
               <div className="farm-item" key={cred.id}>
