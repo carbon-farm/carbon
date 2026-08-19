@@ -237,6 +237,15 @@ export function CaseDetailPage() {
               </button>
             </div>
           )}
+
+          {theCase.knowledgeArticle?.status === 'PUBLISHED' && (
+            <div className="card">
+              <BiValue value={strings.resultingArticleNotice} as="p" className="hint" />
+              <Link to={`/knowledge/${theCase.knowledgeArticle.id}`} className="link-button">
+                {strings.viewGuideLink.en} / {strings.viewGuideLink.te}
+              </Link>
+            </div>
+          )}
         </>
       )}
 

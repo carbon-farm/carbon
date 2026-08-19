@@ -290,6 +290,7 @@ export const strings = {
   createStaffHeading: { en: 'Create a staff account', te: 'సిబ్బంది ఖాతాను సృష్టించండి' },
   temporaryPasswordField: { en: 'Temporary password', te: 'తాత్కాలిక పాస్‌వర్డ్' },
   roleFieldLabel: { en: 'Role', te: 'పాత్ర' },
+  roleFarmer: { en: 'Farmer', te: 'రైతు' },
   roleExpert: { en: 'Expert', te: 'నిపుణుడు' },
   roleModerator: { en: 'Moderator', te: 'మోడరేటర్' },
   roleVendor: { en: 'Vendor', te: 'విక్రేత' },
@@ -379,6 +380,52 @@ export const strings = {
   incorrectCodeError: { en: 'Incorrect code. Try again.', te: 'తప్పు కోడ్. మళ్ళీ ప్రయత్నించండి.' },
   couldNotLoadFarms: { en: 'Could not load your farms.', te: 'మీ పొలాలను లోడ్ చేయలేకపోయాము.' },
   couldNotAddParcel: { en: 'Could not add this parcel.', te: 'ఈ స్థలాన్ని జోడించలేకపోయాము.' },
+
+  // Case -> published Knowledge Article cross-link
+  resultingArticleNotice: {
+    en: 'This case became a published advisory guide.',
+    te: 'ఈ కేసు ప్రచురించబడిన సలహా మార్గదర్శిగా మారింది.',
+  },
+  viewGuideLink: { en: 'View the guide', te: 'మార్గదర్శిని చూడండి' },
+
+  // Generic list toolbar (sort/filter) controls, reused across list screens
+  sortByLabel: { en: 'Sort by', te: 'క్రమం' },
+  allOption: { en: 'All', te: 'అన్నీ' },
+  searchPlaceholder: { en: 'Search…', te: 'వెతకండి…' },
+  sortNewestFirst: { en: 'Newest first', te: 'కొత్తవి మొదట' },
+  sortOldestFirst: { en: 'Oldest first', te: 'పాతవి మొదట' },
+  sortPriorityFirst: { en: 'Priority first', te: 'ప్రాధాన్యత మొదట' },
+  sortStatusAZ: { en: 'Status (A–Z)', te: 'స్థితి (A–Z)' },
+  sortTitleAZ: { en: 'Title (A–Z)', te: 'శీర్షిక (A–Z)' },
+  sortNameAZ: { en: 'Name (A–Z)', te: 'పేరు (A–Z)' },
+  statusFilterLabel: { en: 'Status', te: 'స్థితి' },
+  accountStatusFilterLabel: { en: 'Account status', te: 'ఖాతా స్థితి' },
+  statusActiveOption: { en: 'Active', te: 'క్రియాశీలం' },
+  statusInactiveOption: { en: 'Inactive', te: 'నిష్క్రియం' },
+  priorityOnlyFilterLabel: { en: 'Priority only', te: 'ప్రాధాన్యత మాత్రమే' },
+
+  // Administrator — reports (Charter Module 11)
+  reportsLinkTitle: { en: 'Reports', te: 'నివేదికలు' },
+  reportsLinkDesc: {
+    en: 'Case volume, resolution time, and platform activity at a glance.',
+    te: 'కేసు పరిమాణం, పరిష్కార సమయం, ప్లాట్‌ఫారమ్ కార్యకలాపాలు ఒక చూపులో.',
+  },
+  reportsPageTitle: { en: 'Reports', te: 'నివేదికలు' },
+  couldNotLoadReports: { en: 'Could not load reports.', te: 'నివేదికలను లోడ్ చేయలేకపోయాము.' },
+  reportTotalCasesLabel: { en: 'Total cases', te: 'మొత్తం కేసులు' },
+  reportOpenCasesLabel: { en: 'Currently open', te: 'ప్రస్తుతం తెరిచి ఉంది' },
+  reportResolvedCasesLabel: { en: 'Resolved', te: 'పరిష్కరించబడింది' },
+  reportAbandonedCasesLabel: { en: 'Abandoned', te: 'వదిలివేయబడింది' },
+  reportAvgResolutionLabel: { en: 'Average time to resolve', te: 'పరిష్కరించడానికి సగటు సమయం' },
+  reportDaysUnit: { en: 'days', te: 'రోజులు' },
+  reportCasesByStatusHeading: { en: 'Cases by status', te: 'స్థితి వారీగా కేసులు' },
+  reportCasesByCategoryHeading: { en: 'Cases by category', te: 'వర్గం వారీగా కేసులు' },
+  reportCasesByCropHeading: { en: 'Cases by crop', te: 'పంట వారీగా కేసులు' },
+  reportArticlesByStatusHeading: { en: 'Knowledge articles by status', te: 'స్థితి వారీగా జ్ఞాన వ్యాసాలు' },
+  reportExpertWorkloadHeading: { en: 'Expert workload', te: 'నిపుణుల పనిభారం' },
+  reportUsersByRoleHeading: { en: 'Accounts by role', te: 'పాత్ర వారీగా ఖాతాలు' },
+  reportNoData: { en: 'No data yet.', te: 'ఇంకా డేటా లేదు.' },
+  reportAssignedCasesColumn: { en: 'Assigned (total)', te: 'కేటాయించినవి (మొత్తం)' },
 } as const satisfies Record<string, Bilingual>;
 
 export type StringKey = keyof typeof strings;

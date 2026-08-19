@@ -39,6 +39,7 @@ export interface Case {
   closedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  knowledgeArticle: { id: string; title: string; status: 'DRAFT' | 'PENDING_REVIEW' | 'PUBLISHED' | 'REJECTED' } | null;
 }
 
 export function listMyCases(token: string) {

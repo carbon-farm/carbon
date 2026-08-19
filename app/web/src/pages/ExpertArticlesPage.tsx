@@ -1,16 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { listMyArticles, type Article } from '../api/knowledge';
-import { Bi, BiValue } from '../i18n/Bi';
+import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, articleStatusLabel } from '../i18n/strings';
+
+type SortMode = 'newest' | 'oldest' | 'title' | 'status';
 
 export function ExpertArticlesPage() {
   const { session, logout } = useAuth();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sortMode, setSortMode] = useState<SortMode>('newest');
 
   useEffect(() => {
     if (!session) return;
@@ -26,6 +30,28 @@ export function ExpertArticlesPage() {
       .finally(() => setLoading(false));
   }, [session, logout]);
 
+  const statuses = useMemo(() => Array.from(new Set(articles.map((a) => a.status))), [articles]);
+
+  const visible = useMemo(() => {
+    let rows = articles;
+    if (statusFilter) rows = rows.filter((a) => a.status === statusFilter);
+    rows = [...rows];
+    switch (sortMode) {
+      case 'oldest':
+        rows.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+        break;
+      case 'title':
+        rows.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'status':
+        rows.sort((a, b) => a.status.localeCompare(b.status));
+        break;
+      default:
+        rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    }
+    return rows;
+  }, [articles, statusFilter, sortMode]);
+
   return (
     <>
       <div>
@@ -37,13 +63,43 @@ export function ExpertArticlesPage() {
 
       {error && <div className="error-banner">{error}</div>}
 
+      {!loading && articles.length > 0 && (
+        <div className="list-toolbar">
+          <label>
+            <Bi id="statusFilterLabel" />
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="">{biInline('allOption')}</option>
+              {statuses.map((s) => {
+                const label = articleStatusLabel(s);
+                return (
+                  <option key={s} value={s}>
+                    {label.en} / {label.te}
+                  </option>
+                );
+              })}
+            </select>
+          </label>
+          <label>
+            <Bi id="sortByLabel" />
+            <select value={sortMode} onChange={(e) => setSortMode(e.target.value as SortMode)}>
+              <option value="newest">{biInline('sortNewestFirst')}</option>
+              <option value="oldest">{biInline('sortOldestFirst')}</option>
+              <option value="title">{biInline('sortTitleAZ')}</option>
+              <option value="status">{biInline('sortStatusAZ')}</option>
+            </select>
+          </label>
+        </div>
+      )}
+
       {loading ? (
         <BiValue value={strings.loading} as="p" className="hint" />
       ) : articles.length === 0 ? (
         <BiValue value={strings.noArticlesYet} as="p" className="hint" />
+      ) : visible.length === 0 ? (
+        <BiValue value={strings.reportNoData} as="p" className="hint" />
       ) : (
         <div className="card">
-          {articles.map((a) => (
+          {visible.map((a) => (
             <Link to={`/expert/articles/${a.id}`} key={a.id} className="case-item">
               <div className="label">{a.title}</div>
               <div className="status-line">

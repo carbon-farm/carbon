@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { listQueueCases, startReviewCase, assignCase, type Case } from '../api/cases';
 import { listVerifiedExperts, type VerifiedExpert } from '../api/experts';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, caseCategoryLabel, caseStatusLabel } from '../i18n/strings';
+
+type SortMode = 'priority' | 'newest' | 'oldest' | 'status';
 
 export function ModeratorQueuePage() {
   const { session, logout } = useAuth();
@@ -14,6 +16,9 @@ export function ModeratorQueuePage() {
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [assignSelection, setAssignSelection] = useState<Record<string, string>>({});
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [priorityOnly, setPriorityOnly] = useState(false);
+  const [sortMode, setSortMode] = useState<SortMode>('priority');
 
   useEffect(() => {
     if (!session) return;
@@ -69,6 +74,32 @@ export function ModeratorQueuePage() {
     }
   }
 
+  const categories = useMemo(
+    () => Array.from(new Map(cases.map((c) => [c.category.id, c.category.name])).entries()),
+    [cases],
+  );
+
+  const visible = useMemo(() => {
+    let rows = cases;
+    if (categoryFilter) rows = rows.filter((c) => c.category.id === categoryFilter);
+    if (priorityOnly) rows = rows.filter((c) => c.isPriority);
+    rows = [...rows];
+    switch (sortMode) {
+      case 'newest':
+        rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        break;
+      case 'oldest':
+        rows.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+        break;
+      case 'status':
+        rows.sort((a, b) => a.status.localeCompare(b.status));
+        break;
+      default:
+        rows.sort((a, b) => Number(b.isPriority) - Number(a.isPriority) || a.createdAt.localeCompare(b.createdAt));
+    }
+    return rows;
+  }, [cases, categoryFilter, priorityOnly, sortMode]);
+
   return (
     <>
       <div>
@@ -78,13 +109,47 @@ export function ModeratorQueuePage() {
 
       {error && <div className="error-banner">{error}</div>}
 
+      {!loading && cases.length > 0 && (
+        <div className="list-toolbar">
+          <label>
+            <Bi id="categoryLabel" />
+            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+              <option value="">{biInline('allOption')}</option>
+              {categories.map(([id, name]) => {
+                const label = caseCategoryLabel(name);
+                return (
+                  <option key={id} value={id}>
+                    {label.en} / {label.te}
+                  </option>
+                );
+              })}
+            </select>
+          </label>
+          <label className="checkbox-label">
+            <input type="checkbox" checked={priorityOnly} onChange={(e) => setPriorityOnly(e.target.checked)} />
+            <Bi id="priorityOnlyFilterLabel" />
+          </label>
+          <label>
+            <Bi id="sortByLabel" />
+            <select value={sortMode} onChange={(e) => setSortMode(e.target.value as SortMode)}>
+              <option value="priority">{biInline('sortPriorityFirst')}</option>
+              <option value="newest">{biInline('sortNewestFirst')}</option>
+              <option value="oldest">{biInline('sortOldestFirst')}</option>
+              <option value="status">{biInline('sortStatusAZ')}</option>
+            </select>
+          </label>
+        </div>
+      )}
+
       {loading ? (
         <BiValue value={strings.loading} as="p" className="hint" />
       ) : cases.length === 0 ? (
         <BiValue value={strings.noCasesInQueue} as="p" className="hint" />
+      ) : visible.length === 0 ? (
+        <BiValue value={strings.reportNoData} as="p" className="hint" />
       ) : (
         <div className="card">
-          {cases.map((c) => {
+          {visible.map((c) => {
             const status = caseStatusLabel(c.status, c.closureReason);
             const category = caseCategoryLabel(c.category.name);
             const isBusy = busyId === c.id;

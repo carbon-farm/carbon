@@ -29,6 +29,11 @@ export function AdminHomePage() {
         <BiValue value={strings.auditLogLinkTitle} as="div" className="label" />
         <BiValue value={strings.auditLogLinkDesc} as="div" className="meta" />
       </Link>
+
+      <Link to="/admin/reports" className="case-item">
+        <BiValue value={strings.reportsLinkTitle} as="div" className="label" />
+        <BiValue value={strings.reportsLinkDesc} as="div" className="meta" />
+      </Link>
     </>
   );
 }

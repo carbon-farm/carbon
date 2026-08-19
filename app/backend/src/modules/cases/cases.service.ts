@@ -387,7 +387,12 @@ export class CasesService {
   async getById(caseId: string, requester: { userId: string; role: Role }) {
     const found = await this.prisma.case.findUnique({
       where: { id: caseId },
-      include: { category: true, farmLand: true, crop: true },
+      include: {
+        category: true,
+        farmLand: true,
+        crop: true,
+        knowledgeArticle: { select: { id: true, title: true, status: true } },
+      },
     });
     if (!found) throw new NotFoundException(bi('Case not found', 'కేసు కనుగొనబడలేదు'));
 

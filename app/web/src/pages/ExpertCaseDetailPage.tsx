@@ -150,6 +150,15 @@ export function ExpertCaseDetailPage() {
             <BiValue value={strings.waitingOnFarmerNotice} as="p" className="hint" />
           )}
 
+          {theCase.knowledgeArticle && (
+            <div className="card">
+              <BiValue value={strings.resultingArticleNotice} as="p" className="hint" />
+              <Link to={`/expert/articles/${theCase.knowledgeArticle.id}`} className="link-button">
+                {strings.viewGuideLink.en} / {strings.viewGuideLink.te}
+              </Link>
+            </div>
+          )}
+
           {theCase.status === 'EXPERT_WORKING' && (
             <>
               <div className="card">

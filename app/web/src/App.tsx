@@ -17,6 +17,7 @@ import { AdminStaffPage } from './pages/AdminStaffPage';
 import { AdminCredentialsPage } from './pages/AdminCredentialsPage';
 import { AdminTaxonomyPage } from './pages/AdminTaxonomyPage';
 import { AdminAuditPage } from './pages/AdminAuditPage';
+import { AdminReportingPage } from './pages/AdminReportingPage';
 import { ExpertArticlesPage } from './pages/ExpertArticlesPage';
 import { ArticleEditPage } from './pages/ArticleEditPage';
 import { ModeratorArticlesPage } from './pages/ModeratorArticlesPage';
@@ -173,6 +174,14 @@ export function App() {
             element={
               <ProtectedRoute roles={['ADMINISTRATOR']} wide>
                 <AdminAuditPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/reports"
+            element={
+              <ProtectedRoute roles={['ADMINISTRATOR']}>
+                <AdminReportingPage />
               </ProtectedRoute>
             }
           />

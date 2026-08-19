@@ -19,10 +19,12 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
   MODERATOR: [
     { to: '/moderator/queue', labelKey: 'moderatorQueueTitle' },
     { to: '/moderator/articles', labelKey: 'articleQueueTitle' },
+    { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
   ],
   EXPERT: [
     { to: '/expert/cases', labelKey: 'expertCasesTitle' },
     { to: '/expert/articles', labelKey: 'myArticlesTitle' },
+    { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
   ],
   ADMINISTRATOR: [
     { to: '/admin', labelKey: 'adminHubTitle' },
@@ -30,6 +32,8 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { to: '/admin/credentials', labelKey: 'credentialsLinkTitle' },
     { to: '/admin/taxonomy', labelKey: 'taxonomyLinkTitle' },
     { to: '/admin/audit', labelKey: 'auditLogLinkTitle' },
+    { to: '/admin/reports', labelKey: 'reportsLinkTitle' },
+    { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
   ],
 };
 
