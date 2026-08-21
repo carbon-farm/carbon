@@ -101,6 +101,7 @@ model User {
   articlesAuthored   KnowledgeArticle[] @relation("KnowledgeAuthor")
   articlesReviewed   KnowledgeArticle[] @relation("KnowledgeReviewer")
   notifications      Notification[]
+  articleFeedback    ArticleFeedback[]
 
   @@index([role])
 }
@@ -218,8 +219,32 @@ model KnowledgeArticle {
   createdAt          DateTime               @default(now())
   updatedAt          DateTime               @updatedAt
 
+  // Charter's cross-cutting Feedback utility (Section 10.1): "low-rated
+  // content automatically routed to the Moderator review queue." Flagging
+  // reuses the existing PUBLISHED->REJECTED->edit->resubmit loop rather than
+  // inventing a new status — a moderator who acts on a flag just calls the
+  // same sendBackForRevision path an ordinary rejection would use.
+  flaggedForReview   Boolean                @default(false)
+  flagReason         String?
+  feedback           ArticleFeedback[]
+
   @@index([authorId])
   @@index([status])
+}
+
+model ArticleFeedback {
+  id        String           @id @default(uuid())
+  articleId String
+  article   KnowledgeArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  helpful   Boolean
+  rating    Int              // 1-5, enforced at the DTO layer
+  comment   String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([articleId, userId])
 }
 
 // Module 10 — Administration: expert credential verification is a precondition of

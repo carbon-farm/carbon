@@ -19,6 +19,8 @@ export interface Article {
   tags: { id: string; name: string }[];
   status: ArticleStatus;
   rejectionReason: string | null;
+  flaggedForReview: boolean;
+  flagReason: string | null;
   version: number;
   publishedAt: string | null;
   createdAt: string;
@@ -62,4 +64,32 @@ export function approveArticle(token: string, id: string) {
 
 export function rejectArticle(token: string, id: string, reason: string) {
   return apiRequest<Article>(`/knowledge/${id}/reject`, { method: 'POST', body: { reason }, token });
+}
+
+export interface FeedbackSummary {
+  averageRating: number | null;
+  totalCount: number;
+  helpfulCount: number;
+  notHelpfulCount: number;
+  myFeedback: { helpful: boolean; rating: number; comment: string | null } | null;
+}
+
+export function getFeedbackSummary(token: string, id: string) {
+  return apiRequest<FeedbackSummary>(`/knowledge/${id}/feedback`, { token });
+}
+
+export function submitFeedback(token: string, id: string, data: { helpful: boolean; rating: number; comment?: string }) {
+  return apiRequest<FeedbackSummary['myFeedback']>(`/knowledge/${id}/feedback`, { method: 'POST', body: data, token });
+}
+
+export function listFlaggedArticles(token: string) {
+  return apiRequest<Article[]>('/knowledge/flagged', { token });
+}
+
+export function clearArticleFlag(token: string, id: string) {
+  return apiRequest<Article>(`/knowledge/${id}/clear-flag`, { method: 'POST', token });
+}
+
+export function sendArticleBack(token: string, id: string, reason: string) {
+  return apiRequest<Article>(`/knowledge/${id}/send-back`, { method: 'POST', body: { reason }, token });
 }

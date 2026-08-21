@@ -437,6 +437,34 @@ export const strings = {
   couldNotLoadNotifications: { en: 'Could not load notifications.', te: 'ప్రకటనలను లోడ్ చేయలేకపోయాము.' },
   showFilterLabel: { en: 'Show', te: 'చూపించు' },
   unreadOnlyOption: { en: 'Unread only', te: 'చదవనివి మాత్రమే' },
+
+  // Article feedback (Charter Section 10.1 cross-cutting Feedback utility)
+  feedbackHeading: { en: 'Was this helpful?', te: 'ఇది సహాయకరంగా ఉందా?' },
+  markHelpfulButton: { en: 'Helpful', te: 'సహాయకరం' },
+  markNotHelpfulButton: { en: 'Not helpful', te: 'సహాయకరం కాదు' },
+  ratingFieldLabel: { en: 'Your rating', te: 'మీ రేటింగ్' },
+  feedbackCommentField: { en: 'Comment (optional)', te: 'వ్యాఖ్య (ఐచ్ఛికం)' },
+  submitFeedbackButton: { en: 'Submit feedback', te: 'అభిప్రాయాన్ని సమర్పించండి' },
+  updateFeedbackButton: { en: 'Update feedback', te: 'అభిప్రాయాన్ని నవీకరించండి' },
+  submittingFeedback: { en: 'Submitting…', te: 'సమర్పిస్తోంది…' },
+  feedbackSavedNotice: { en: 'Thanks — your feedback was saved.', te: 'ధన్యవాదాలు — మీ అభిప్రాయం సేవ్ చేయబడింది.' },
+  averageRatingLabel: { en: 'Average rating', te: 'సగటు రేటింగ్' },
+  responsesCountLabel: { en: 'responses', te: 'స్పందనలు' },
+  couldNotLoadFeedback: { en: 'Could not load feedback.', te: 'అభిప్రాయాన్ని లోడ్ చేయలేకపోయాము.' },
+  couldNotSubmitFeedback: { en: 'Could not submit feedback.', te: 'అభిప్రాయాన్ని సమర్పించలేకపోయాము.' },
+
+  // Moderator — flagged articles (low-rated, still published)
+  flaggedArticlesHeading: { en: 'Flagged for review', te: 'సమీక్ష కోసం ఫ్లాగ్ చేయబడింది' },
+  flagReasonLabel: { en: 'Why it was flagged', te: 'ఎందుకు ఫ్లాగ్ చేయబడింది' },
+  clearFlagButton: { en: 'Clear flag', te: 'ఫ్లాగ్‌ను తీసివేయండి' },
+  clearingFlag: { en: 'Clearing…', te: 'తీసివేస్తోంది…' },
+  sendBackButton: { en: 'Send back for revision', te: 'సవరణ కోసం తిరిగి పంపండి' },
+  sendingBack: { en: 'Sending back…', te: 'తిరిగి పంపుతోంది…' },
+  sendBackReasonField: { en: 'Reason for sending back', te: 'తిరిగి పంపడానికి కారణం' },
+  noFlaggedArticles: { en: 'Nothing flagged.', te: 'ఏమీ ఫ్లాగ్ చేయబడలేదు.' },
+  couldNotLoadFlagged: { en: 'Could not load flagged articles.', te: 'ఫ్లాగ్ చేసిన వ్యాసాలను లోడ్ చేయలేకపోయాము.' },
+  couldNotClearFlag: { en: 'Could not clear this flag.', te: 'ఈ ఫ్లాగ్‌ను తీసివేయలేకపోయాము.' },
+  couldNotSendBack: { en: 'Could not send this back.', te: 'దీన్ని తిరిగి పంపలేకపోయాము.' },
 } as const satisfies Record<string, Bilingual>;
 
 export type StringKey = keyof typeof strings;

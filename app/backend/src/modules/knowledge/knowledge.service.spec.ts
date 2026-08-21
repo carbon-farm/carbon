@@ -22,6 +22,8 @@ function buildArticle(overrides: Partial<KnowledgeArticle> = {}): KnowledgeArtic
     reviewedByUserId: null,
     version: 1,
     publishedAt: null,
+    flaggedForReview: false,
+    flagReason: null,
     createdAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-01-01'),
     ...overrides,

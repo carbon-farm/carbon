@@ -2,7 +2,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
-import { listPendingArticles, approveArticle, rejectArticle, type Article } from '../api/knowledge';
+import {
+  listPendingArticles,
+  approveArticle,
+  rejectArticle,
+  listFlaggedArticles,
+  clearArticleFlag,
+  sendArticleBack,
+  type Article,
+} from '../api/knowledge';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
@@ -18,6 +26,9 @@ export function ModeratorArticlesPage() {
   const [rejectReason, setRejectReason] = useState<Record<string, string>>({});
   const [cropFilter, setCropFilter] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('oldest');
+  const [flagged, setFlagged] = useState<Article[]>([]);
+  const [flaggedBusyId, setFlaggedBusyId] = useState<string | null>(null);
+  const [sendBackReason, setSendBackReason] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!session) return;
@@ -28,8 +39,11 @@ export function ModeratorArticlesPage() {
   function load() {
     if (!session) return;
     setLoading(true);
-    listPendingArticles(session.accessToken)
-      .then(setArticles)
+    Promise.all([listPendingArticles(session.accessToken), listFlaggedArticles(session.accessToken)])
+      .then(([pending, flaggedResult]) => {
+        setArticles(pending);
+        setFlagged(flaggedResult);
+      })
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) {
           logout();
@@ -38,6 +52,36 @@ export function ModeratorArticlesPage() {
         setError(err instanceof ApiError ? err.message : `${strings.couldNotLoadArticleQueue.en} / ${strings.couldNotLoadArticleQueue.te}`);
       })
       .finally(() => setLoading(false));
+  }
+
+  async function handleClearFlag(id: string) {
+    if (!session) return;
+    setFlaggedBusyId(id);
+    setError(null);
+    try {
+      await clearArticleFlag(session.accessToken, id);
+      setFlagged((prev) => prev.filter((a) => a.id !== id));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : `${strings.couldNotClearFlag.en} / ${strings.couldNotClearFlag.te}`);
+    } finally {
+      setFlaggedBusyId(null);
+    }
+  }
+
+  async function handleSendBack(id: string) {
+    if (!session) return;
+    const reason = sendBackReason[id]?.trim();
+    if (!reason) return;
+    setFlaggedBusyId(id);
+    setError(null);
+    try {
+      await sendArticleBack(session.accessToken, id, reason);
+      setFlagged((prev) => prev.filter((a) => a.id !== id));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : `${strings.couldNotSendBack.en} / ${strings.couldNotSendBack.te}`);
+    } finally {
+      setFlaggedBusyId(null);
+    }
   }
 
   async function handleApprove(id: string) {
@@ -100,6 +144,52 @@ export function ModeratorArticlesPage() {
       </div>
 
       {error && <div className="error-banner">{error}</div>}
+
+      {!loading && flagged.length > 0 && (
+        <div className="card">
+          <Bi id="flaggedArticlesHeading" as="h2" />
+          {flagged.map((a) => {
+            const isBusy = flaggedBusyId === a.id;
+            return (
+              <div className="farm-item" key={a.id}>
+                <div className="label">{a.title}</div>
+                <div className="meta">
+                  {a.author?.name}
+                  {a.crop && ` · ${a.crop.name}`}
+                </div>
+                {a.flagReason && (
+                  <div>
+                    <div className="field-label"><Bi id="flagReasonLabel" /></div>
+                    <div>{a.flagReason}</div>
+                  </div>
+                )}
+                <button type="button" onClick={() => handleClearFlag(a.id)} disabled={isBusy}>
+                  {isBusy ? <BiValue value={strings.clearingFlag} /> : <Bi id="clearFlagButton" />}
+                </button>
+                <label>
+                  <Bi id="sendBackReasonField" />
+                  <input
+                    value={sendBackReason[a.id] ?? ''}
+                    onChange={(e) => {
+                      setSendBackReason((prev) => ({ ...prev, [a.id]: e.target.value }));
+                      clearCustomValidity(e);
+                    }}
+                    onInvalid={bilingualInvalidHandler}
+                  />
+                </label>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => handleSendBack(a.id)}
+                  disabled={isBusy || !sendBackReason[a.id]?.trim()}
+                >
+                  {isBusy ? <BiValue value={strings.sendingBack} /> : <Bi id="sendBackButton" />}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {!loading && articles.length > 0 && crops.length > 0 && (
         <div className="list-toolbar">

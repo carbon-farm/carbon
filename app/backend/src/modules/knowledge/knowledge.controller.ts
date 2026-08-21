@@ -3,6 +3,8 @@ import { Role } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { RejectArticleDto } from './dto/reject-article.dto';
+import { SubmitFeedbackDto } from './dto/submit-feedback.dto';
+import { SendBackArticleDto } from './dto/send-back-article.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -35,9 +37,15 @@ export class KnowledgeController {
     return this.knowledgeService.listPublished(categoryId);
   }
 
-  // Kept below the fixed /mine, /pending, /published routes deliberately —
-  // NestJS matches in declaration order, and :id would otherwise swallow
-  // those static paths as article IDs.
+  @Roles(Role.MODERATOR, Role.ADMINISTRATOR)
+  @Get('flagged')
+  listFlagged() {
+    return this.knowledgeService.listFlagged();
+  }
+
+  // Kept below the fixed /mine, /pending, /published, /flagged routes
+  // deliberately — NestJS matches in declaration order, and :id would
+  // otherwise swallow those static paths as article IDs.
   @Get(':id')
   getById(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.knowledgeService.getById(id, { userId: user.userId, role: user.role as Role });
@@ -65,5 +73,29 @@ export class KnowledgeController {
   @Post(':id/reject')
   reject(@Param('id') id: string, @Body() dto: RejectArticleDto, @CurrentUser() user: AuthenticatedUser) {
     return this.knowledgeService.reject(id, user.userId, dto);
+  }
+
+  // Open to any authenticated role, same reasoning as GET /published —
+  // Helpful/Not Helpful + rating + comment (Charter Section 10.1).
+  @Post(':id/feedback')
+  submitFeedback(@Param('id') id: string, @Body() dto: SubmitFeedbackDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.knowledgeService.submitFeedback(id, user.userId, dto);
+  }
+
+  @Get(':id/feedback')
+  getFeedbackSummary(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.knowledgeService.getFeedbackSummary(id, user.userId);
+  }
+
+  @Roles(Role.MODERATOR, Role.ADMINISTRATOR)
+  @Post(':id/clear-flag')
+  clearFlag(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.knowledgeService.clearFlag(id, user.userId);
+  }
+
+  @Roles(Role.MODERATOR, Role.ADMINISTRATOR)
+  @Post(':id/send-back')
+  sendBack(@Param('id') id: string, @Body() dto: SendBackArticleDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.knowledgeService.sendBackForRevision(id, user.userId, dto);
   }
 }
