@@ -2,7 +2,15 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
-import { getArticle, getFeedbackSummary, submitFeedback, type Article, type FeedbackSummary } from '../api/knowledge';
+import {
+  getArticle,
+  getFeedbackSummary,
+  submitFeedback,
+  isBookmarked as fetchIsBookmarked,
+  toggleBookmark,
+  type Article,
+  type FeedbackSummary,
+} from '../api/knowledge';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings, caseCategoryLabel } from '../i18n/strings';
 
@@ -23,6 +31,8 @@ export function ArticleViewPage() {
   const [comment, setComment] = useState('');
   const [feedbackBusy, setFeedbackBusy] = useState(false);
   const [feedbackSaved, setFeedbackSaved] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [bookmarkBusy, setBookmarkBusy] = useState(false);
 
   useEffect(() => {
     if (!session || !id) return;
@@ -53,6 +63,27 @@ export function ArticleViewPage() {
       // block reading the article itself, so it fails silently.
       .catch(() => {});
   }, [session, id]);
+
+  useEffect(() => {
+    if (!session || !id) return;
+    fetchIsBookmarked(session.accessToken, id)
+      .then((result) => setBookmarked(result.bookmarked))
+      .catch(() => {});
+  }, [session, id]);
+
+  async function handleToggleBookmark() {
+    if (!session || !id) return;
+    setBookmarkBusy(true);
+    setError(null);
+    try {
+      const result = await toggleBookmark(session.accessToken, id);
+      setBookmarked(result.bookmarked);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : `${strings.couldNotToggleBookmark.en} / ${strings.couldNotToggleBookmark.te}`);
+    } finally {
+      setBookmarkBusy(false);
+    }
+  }
 
   async function handleSubmitFeedback(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -86,8 +117,13 @@ export function ArticleViewPage() {
         <BiValue value={strings.articleNotFoundError} as="p" className="hint" />
       ) : (
         <div className="card">
-          <div className="meta">
-            {strings.byAuthorLabel.en} / {strings.byAuthorLabel.te} {article.author?.name}
+          <div className="top-bar">
+            <div className="meta">
+              {strings.byAuthorLabel.en} / {strings.byAuthorLabel.te} {article.author?.name}
+            </div>
+            <button type="button" className={bookmarked ? '' : 'secondary'} onClick={handleToggleBookmark} disabled={bookmarkBusy}>
+              {bookmarked ? <Bi id="bookmarkedButton" /> : <Bi id="bookmarkButton" />}
+            </button>
           </div>
           {article.crop && (
             <div>

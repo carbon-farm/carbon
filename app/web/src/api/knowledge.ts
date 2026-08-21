@@ -93,3 +93,19 @@ export function clearArticleFlag(token: string, id: string) {
 export function sendArticleBack(token: string, id: string, reason: string) {
   return apiRequest<Article>(`/knowledge/${id}/send-back`, { method: 'POST', body: { reason }, token });
 }
+
+export function toggleBookmark(token: string, id: string) {
+  return apiRequest<{ bookmarked: boolean }>(`/knowledge/${id}/bookmark`, { method: 'POST', token });
+}
+
+export function isBookmarked(token: string, id: string) {
+  return apiRequest<{ bookmarked: boolean }>(`/knowledge/${id}/bookmark`, { token });
+}
+
+export function listBookmarkedArticles(token: string) {
+  return apiRequest<Article[]>('/knowledge/bookmarks', { token });
+}
+
+export function listRecentlyViewed(token: string) {
+  return apiRequest<Article[]>('/knowledge/recently-viewed', { token });
+}

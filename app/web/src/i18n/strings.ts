@@ -465,6 +465,13 @@ export const strings = {
   couldNotLoadFlagged: { en: 'Could not load flagged articles.', te: 'ఫ్లాగ్ చేసిన వ్యాసాలను లోడ్ చేయలేకపోయాము.' },
   couldNotClearFlag: { en: 'Could not clear this flag.', te: 'ఈ ఫ్లాగ్‌ను తీసివేయలేకపోయాము.' },
   couldNotSendBack: { en: 'Could not send this back.', te: 'దీన్ని తిరిగి పంపలేకపోయాము.' },
+
+  // Bookmarks + Recently Viewed (Charter Section 10.1)
+  bookmarkButton: { en: 'Bookmark', te: 'బుక్‌మార్క్' },
+  bookmarkedButton: { en: 'Bookmarked', te: 'బుక్‌మార్క్ చేయబడింది' },
+  couldNotToggleBookmark: { en: 'Could not update this bookmark.', te: 'ఈ బుక్‌మార్క్‌ను నవీకరించలేకపోయాము.' },
+  bookmarkedOnlyOption: { en: 'Bookmarked only', te: 'బుక్‌మార్క్ చేసినవి మాత్రమే' },
+  recentlyViewedHeading: { en: 'Recently viewed', te: 'ఇటీవల చూసినవి' },
 } as const satisfies Record<string, Bilingual>;
 
 export type StringKey = keyof typeof strings;

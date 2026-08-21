@@ -63,6 +63,7 @@ describe('KnowledgeService', () => {
     knowledgeArticle: { create: jest.Mock; update: jest.Mock; findUnique: jest.Mock; findMany: jest.Mock };
     caseCategoryMaster: { findUnique: jest.Mock };
     cropMaster: { findUnique: jest.Mock };
+    articleView: { upsert: jest.Mock };
   };
   let audit: { log: jest.Mock };
   let notifications: { create: jest.Mock; notifyRole: jest.Mock };
@@ -73,6 +74,7 @@ describe('KnowledgeService', () => {
       knowledgeArticle: { create: jest.fn(), update: jest.fn(), findUnique: jest.fn(), findMany: jest.fn() },
       caseCategoryMaster: { findUnique: jest.fn() },
       cropMaster: { findUnique: jest.fn() },
+      articleView: { upsert: jest.fn().mockResolvedValue(undefined) },
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     notifications = { create: jest.fn().mockResolvedValue(undefined), notifyRole: jest.fn().mockResolvedValue(undefined) };

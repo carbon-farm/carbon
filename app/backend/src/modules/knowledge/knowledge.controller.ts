@@ -43,9 +43,19 @@ export class KnowledgeController {
     return this.knowledgeService.listFlagged();
   }
 
-  // Kept below the fixed /mine, /pending, /published, /flagged routes
-  // deliberately — NestJS matches in declaration order, and :id would
-  // otherwise swallow those static paths as article IDs.
+  @Get('bookmarks')
+  listBookmarked(@CurrentUser() user: AuthenticatedUser) {
+    return this.knowledgeService.listBookmarked(user.userId);
+  }
+
+  @Get('recently-viewed')
+  listRecentlyViewed(@CurrentUser() user: AuthenticatedUser) {
+    return this.knowledgeService.listRecentlyViewed(user.userId);
+  }
+
+  // Kept below the fixed /mine, /pending, /published, /flagged, /bookmarks,
+  // /recently-viewed routes deliberately — NestJS matches in declaration
+  // order, and :id would otherwise swallow those static paths as article IDs.
   @Get(':id')
   getById(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.knowledgeService.getById(id, { userId: user.userId, role: user.role as Role });
@@ -97,5 +107,15 @@ export class KnowledgeController {
   @Post(':id/send-back')
   sendBack(@Param('id') id: string, @Body() dto: SendBackArticleDto, @CurrentUser() user: AuthenticatedUser) {
     return this.knowledgeService.sendBackForRevision(id, user.userId, dto);
+  }
+
+  @Post(':id/bookmark')
+  toggleBookmark(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.knowledgeService.toggleBookmark(id, user.userId);
+  }
+
+  @Get(':id/bookmark')
+  isBookmarked(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.knowledgeService.isBookmarked(id, user.userId);
   }
 }

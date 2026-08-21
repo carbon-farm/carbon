@@ -102,6 +102,8 @@ model User {
   articlesReviewed   KnowledgeArticle[] @relation("KnowledgeReviewer")
   notifications      Notification[]
   articleFeedback    ArticleFeedback[]
+  articleBookmarks   ArticleBookmark[]
+  articleViews       ArticleView[]
 
   @@index([role])
 }
@@ -227,9 +229,39 @@ model KnowledgeArticle {
   flaggedForReview   Boolean                @default(false)
   flagReason         String?
   feedback           ArticleFeedback[]
+  bookmarks          ArticleBookmark[]
+  views              ArticleView[]
 
   @@index([authorId])
   @@index([status])
+}
+
+// Charter's cross-cutting Bookmarks utility (Section 10.1): "videos/
+// articles/products/solutions" — only articles exist to bookmark today.
+model ArticleBookmark {
+  id        String           @id @default(uuid())
+  articleId String
+  article   KnowledgeArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime         @default(now())
+
+  @@unique([articleId, userId])
+}
+
+// Charter's cross-cutting Recently Viewed utility (Section 10.1). One row
+// per (user, article) — a repeat view bumps viewedAt rather than growing the
+// table unbounded, since "recently viewed" only ever needs the last handful.
+model ArticleView {
+  id        String           @id @default(uuid())
+  articleId String
+  article   KnowledgeArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  viewedAt  DateTime         @default(now())
+
+  @@unique([articleId, userId])
+  @@index([userId, viewedAt])
 }
 
 model ArticleFeedback {

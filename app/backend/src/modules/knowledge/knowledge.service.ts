@@ -174,6 +174,56 @@ export class KnowledgeService {
     return updated;
   }
 
+  // Charter's cross-cutting Bookmarks utility (Section 10.1). Toggles rather
+  // than separate add/remove endpoints — the client always wants "flip
+  // whatever it currently is," never has to track state to pick the right
+  // call.
+  async toggleBookmark(articleId: string, userId: string): Promise<{ bookmarked: boolean }> {
+    const existing = await this.prisma.articleBookmark.findUnique({
+      where: { articleId_userId: { articleId, userId } },
+    });
+    if (existing) {
+      await this.prisma.articleBookmark.delete({ where: { id: existing.id } });
+      return { bookmarked: false };
+    }
+    const article = await this.getOrThrow(articleId);
+    if (article.status !== KnowledgeArticleStatus.PUBLISHED) {
+      throw new BadRequestException(
+        bi('Only published articles can be bookmarked', 'ప్రచురించిన వ్యాసాలను మాత్రమే బుక్‌మార్క్ చేయవచ్చు'),
+      );
+    }
+    await this.prisma.articleBookmark.create({ data: { articleId, userId } });
+    return { bookmarked: true };
+  }
+
+  async isBookmarked(articleId: string, userId: string): Promise<{ bookmarked: boolean }> {
+    const existing = await this.prisma.articleBookmark.findUnique({
+      where: { articleId_userId: { articleId, userId } },
+    });
+    return { bookmarked: !!existing };
+  }
+
+  async listBookmarked(userId: string) {
+    const bookmarks = await this.prisma.articleBookmark.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: { article: { include: ARTICLE_INCLUDE } },
+    });
+    return bookmarks.map((b) => b.article);
+  }
+
+  // Charter's cross-cutting Recently Viewed utility (Section 10.1) — last
+  // handful of articles this reader actually opened, newest first.
+  async listRecentlyViewed(userId: string) {
+    const views = await this.prisma.articleView.findMany({
+      where: { userId },
+      orderBy: { viewedAt: 'desc' },
+      take: 8,
+      include: { article: { include: ARTICLE_INCLUDE } },
+    });
+    return views.map((v) => v.article);
+  }
+
   // Farmer/any authenticated reader: Helpful/Not Helpful + 1-5 rating +
   // optional comment on a published article. One row per (article, user) —
   // a second submission updates rather than duplicates.
@@ -344,6 +394,18 @@ export class KnowledgeService {
     if (!isAuthor && !isStaff && !isPublished) {
       throw new ForbiddenException(bi('You do not have access to this article', 'మీకు ఈ వ్యాసానికి ప్రాప్యత లేదు'));
     }
+
+    // "Recently Viewed" only means published advisory content someone
+    // actually read — not an author checking their own draft or a
+    // moderator working the review queue.
+    if (isPublished) {
+      await this.prisma.articleView.upsert({
+        where: { articleId_userId: { articleId, userId: requester.userId } },
+        create: { articleId, userId: requester.userId },
+        update: { viewedAt: new Date() },
+      });
+    }
+
     return found;
   }
 

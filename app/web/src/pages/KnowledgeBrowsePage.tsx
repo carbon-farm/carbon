@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
-import { listPublishedArticles, type Article } from '../api/knowledge';
+import { listPublishedArticles, listBookmarkedArticles, listRecentlyViewed, type Article } from '../api/knowledge';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, caseCategoryLabel } from '../i18n/strings';
 import { roleHomePath } from '../auth/roleHome';
@@ -18,6 +18,9 @@ export function KnowledgeBrowsePage() {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [search, setSearch] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('newest');
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
+  const [bookmarkedOnly, setBookmarkedOnly] = useState(false);
+  const [recentlyViewed, setRecentlyViewed] = useState<Article[]>([]);
 
   useEffect(() => {
     if (!session) return;
@@ -32,6 +35,16 @@ export function KnowledgeBrowsePage() {
       })
       .finally(() => setLoading(false));
   }, [session, logout]);
+
+  useEffect(() => {
+    if (!session) return;
+    listBookmarkedArticles(session.accessToken)
+      .then((bookmarks) => setBookmarkedIds(new Set(bookmarks.map((a) => a.id))))
+      .catch(() => {});
+    listRecentlyViewed(session.accessToken)
+      .then(setRecentlyViewed)
+      .catch(() => {});
+  }, [session]);
 
   const crops = useMemo(
     () => Array.from(new Map(articles.filter((a) => a.crop).map((a) => [a.crop!.id, a.crop!.name])).entries()),
@@ -50,6 +63,7 @@ export function KnowledgeBrowsePage() {
       const q = search.trim().toLowerCase();
       rows = rows.filter((a) => a.title.toLowerCase().includes(q));
     }
+    if (bookmarkedOnly) rows = rows.filter((a) => bookmarkedIds.has(a.id));
     rows = [...rows];
     switch (sortMode) {
       case 'oldest':
@@ -62,7 +76,7 @@ export function KnowledgeBrowsePage() {
         rows.sort((a, b) => (b.publishedAt ?? b.createdAt).localeCompare(a.publishedAt ?? a.createdAt));
     }
     return rows;
-  }, [articles, cropFilter, categoryFilter, search, sortMode]);
+  }, [articles, cropFilter, categoryFilter, search, sortMode, bookmarkedOnly, bookmarkedIds]);
 
   return (
     <>
@@ -116,6 +130,23 @@ export function KnowledgeBrowsePage() {
               <option value="title">{biInline('sortTitleAZ')}</option>
             </select>
           </label>
+          {bookmarkedIds.size > 0 && (
+            <label className="checkbox-label">
+              <input type="checkbox" checked={bookmarkedOnly} onChange={(e) => setBookmarkedOnly(e.target.checked)} />
+              <Bi id="bookmarkedOnlyOption" />
+            </label>
+          )}
+        </div>
+      )}
+
+      {recentlyViewed.length > 0 && (
+        <div className="card">
+          <Bi id="recentlyViewedHeading" as="h2" />
+          {recentlyViewed.map((a) => (
+            <Link to={`/knowledge/${a.id}`} key={a.id} className="case-item">
+              <div className="label">{a.title}</div>
+            </Link>
+          ))}
         </div>
       )}
 
