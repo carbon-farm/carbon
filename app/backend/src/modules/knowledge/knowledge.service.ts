@@ -2,6 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException 
 import { Case, KnowledgeArticle, KnowledgeArticleStatus, Role } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { bi } from '../../common/i18n';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { RejectArticleDto } from './dto/reject-article.dto';
@@ -23,6 +24,7 @@ export class KnowledgeService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   // Called by CasesService.confirm() when a case closes as Resolved — never
@@ -106,6 +108,13 @@ export class KnowledgeService {
       entityType: 'KnowledgeArticle',
       entityId: articleId,
     });
+    await this.notifications.notifyRole(
+      Role.MODERATOR,
+      'article.submitted',
+      bi('New article awaiting review', 'కొత్త వ్యాసం సమీక్ష కోసం వేచి ఉంది'),
+      bi(`"${updated.title}" is ready for review`, `"${updated.title}" సమీక్ష కోసం సిద్ధంగా ఉంది`),
+      '/moderator/articles',
+    );
     return updated;
   }
 
@@ -123,6 +132,13 @@ export class KnowledgeService {
       entityType: 'KnowledgeArticle',
       entityId: articleId,
     });
+    await this.notifications.create(
+      updated.authorId,
+      'article.approved',
+      bi('Your article was published', 'మీ వ్యాసం ప్రచురించబడింది'),
+      bi(`"${updated.title}" is now live in Knowledge`, `"${updated.title}" ఇప్పుడు జ్ఞానంలో ప్రత్యక్షంగా ఉంది`),
+      `/expert/articles/${articleId}`,
+    );
     return updated;
   }
 
@@ -141,6 +157,13 @@ export class KnowledgeService {
       entityId: articleId,
       metadata: { reason: dto.reason },
     });
+    await this.notifications.create(
+      updated.authorId,
+      'article.rejected',
+      bi('Your article needs changes', 'మీ వ్యాసానికి మార్పులు అవసరం'),
+      bi(`"${updated.title}": ${dto.reason}`, `"${updated.title}": ${dto.reason}`),
+      `/expert/articles/${articleId}`,
+    );
     return updated;
   }
 

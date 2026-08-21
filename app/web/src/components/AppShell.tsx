@@ -1,9 +1,12 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { roleHomePath } from '../auth/roleHome';
+import { getUnreadCount } from '../api/notifications';
 import { Bi } from '../i18n/Bi';
 import { strings, type StringKey } from '../i18n/strings';
+
+const UNREAD_POLL_MS = 60_000;
 
 interface NavItem {
   to: string;
@@ -44,6 +47,26 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
 export function AppShell({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
   const { session, logout } = useAuth();
   const navItems = session ? (NAV_BY_ROLE[session.role] ?? []) : [];
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!session) return;
+    const token = session.accessToken;
+    let cancelled = false;
+    function poll() {
+      getUnreadCount(token)
+        .then((count) => {
+          if (!cancelled) setUnreadCount(count);
+        })
+        .catch(() => {});
+    }
+    poll();
+    const interval = setInterval(poll, UNREAD_POLL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [session]);
 
   return (
     <div>
@@ -54,6 +77,15 @@ export function AppShell({ children, wide = false }: { children: ReactNode; wide
         </Link>
         {session && (
           <div className="header-actions">
+            <Link to="/notifications" className="notif-bell-btn" title={strings.notificationBellLabel.en}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+              )}
+            </Link>
             <span className="header-role-badge">{session.role}</span>
             <button type="button" className="logout-icon-btn" onClick={logout}>
               <Bi id="logoutButton" />

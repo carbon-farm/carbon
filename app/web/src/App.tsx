@@ -24,6 +24,7 @@ import { ModeratorArticlesPage } from './pages/ModeratorArticlesPage';
 import { KnowledgeBrowsePage } from './pages/KnowledgeBrowsePage';
 import { ArticleViewPage } from './pages/ArticleViewPage';
 import { NoPortalPage } from './pages/NoPortalPage';
+import { NotificationsPage } from './pages/NotificationsPage';
 
 export function App() {
   return (
@@ -182,6 +183,15 @@ export function App() {
             element={
               <ProtectedRoute roles={['ADMINISTRATOR']}>
                 <AdminReportingPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <NotificationsPage />
               </ProtectedRoute>
             }
           />

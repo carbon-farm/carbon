@@ -100,6 +100,7 @@ model User {
   casesAsExpert      Case[]            @relation("CaseExpert")
   articlesAuthored   KnowledgeArticle[] @relation("KnowledgeAuthor")
   articlesReviewed   KnowledgeArticle[] @relation("KnowledgeReviewer")
+  notifications      Notification[]
 
   @@index([role])
 }
@@ -320,4 +321,26 @@ model AuditLog {
 
   @@index([entityType, entityId])
   @@index([actorId])
+}
+
+// Module 12 — Notification. Charter specifies in-app, SMS, WhatsApp, email,
+// and push channels; only in-app is buildable without a vendor decision
+// (which SMS/WhatsApp/email provider, who pays) — same reasoning that put
+// the on-screen "Temporary" OTP display in place ahead of real SMS delivery.
+// linkPath is computed and stored at creation time by the triggering
+// service, which already knows the recipient's role — simpler and more
+// robust than the client trying to infer a route from entityType per role.
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // e.g. "case.assigned", "article.rejected"
+  title     String
+  body      String
+  linkPath  String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
 }

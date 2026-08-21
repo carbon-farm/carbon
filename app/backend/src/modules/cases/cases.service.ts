@@ -11,6 +11,7 @@ import { AuditService } from '../audit/audit.service';
 import { ExpertsService } from '../experts/experts.service';
 import { UploadsService } from '../uploads/uploads.service';
 import { KnowledgeService } from '../knowledge/knowledge.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { bi } from '../../common/i18n';
 import { CreateCaseDto } from './dto/create-case.dto';
 import { UpdateCaseDto } from './dto/update-case.dto';
@@ -31,6 +32,7 @@ export class CasesService {
     private readonly experts: ExpertsService,
     private readonly uploads: UploadsService,
     private readonly knowledge: KnowledgeService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async createDraft(farmerId: string, dto: CreateCaseDto): Promise<Case> {
@@ -120,6 +122,13 @@ export class CasesService {
       entityId: caseId,
       metadata: { caseNumber: updated.caseNumber },
     });
+    await this.notifications.notifyRole(
+      Role.MODERATOR,
+      'case.submitted',
+      bi('New case submitted', 'కొత్త కేసు సమర్పించబడింది'),
+      bi(`${updated.caseNumber} is waiting for review`, `${updated.caseNumber} సమీక్ష కోసం వేచి ఉంది`),
+      '/moderator/queue',
+    );
     return updated;
   }
 
@@ -168,6 +177,13 @@ export class CasesService {
       entityId: caseId,
       metadata: { expertId: dto.expertId },
     });
+    await this.notifications.create(
+      dto.expertId,
+      'case.assigned',
+      bi('New case assigned to you', 'మీకు కొత్త కేసు కేటాయించబడింది'),
+      bi(`${updated.caseNumber ?? 'A case'} needs your review`, `${updated.caseNumber ?? 'ఒక కేసు'}కు మీ సమీక్ష అవసరం`),
+      `/expert/cases/${caseId}`,
+    );
     return updated;
   }
 
@@ -204,6 +220,13 @@ export class CasesService {
       entityType: 'Case',
       entityId: caseId,
     });
+    await this.notifications.create(
+      existing.farmerId,
+      'case.followup.requested',
+      bi('The expert has a question for you', 'నిపుణుడికి మీ కోసం ఒక ప్రశ్న ఉంది'),
+      bi(`${updated.caseNumber ?? 'Your case'}: ${dto.question}`, `${updated.caseNumber ?? 'మీ కేసు'}: ${dto.question}`),
+      `/cases/${caseId}`,
+    );
     return updated;
   }
 
@@ -223,6 +246,15 @@ export class CasesService {
       entityType: 'Case',
       entityId: caseId,
     });
+    if (updated.assignedExpertId) {
+      await this.notifications.create(
+        updated.assignedExpertId,
+        'case.followup.answered',
+        bi('The farmer responded to your question', 'రైతు మీ ప్రశ్నకు స్పందించారు'),
+        bi(`${updated.caseNumber ?? 'A case'} is ready to continue`, `${updated.caseNumber ?? 'ఒక కేసు'} కొనసాగించడానికి సిద్ధంగా ఉంది`),
+        `/expert/cases/${caseId}`,
+      );
+    }
     return updated;
   }
 
@@ -241,6 +273,13 @@ export class CasesService {
       entityType: 'Case',
       entityId: caseId,
     });
+    await this.notifications.create(
+      existing.farmerId,
+      'case.answered',
+      bi('Your case has been answered', 'మీ కేసుకు సమాధానం వచ్చింది'),
+      bi(`${updated.caseNumber ?? 'Your case'} has advice from the expert`, `${updated.caseNumber ?? 'మీ కేసు'}కు నిపుణుడి నుండి సలహా వచ్చింది`),
+      `/cases/${caseId}`,
+    );
     return updated;
   }
 
@@ -270,6 +309,15 @@ export class CasesService {
     // Publication Workflow (Charter Section 9.1) — Abandoned closures don't,
     // since there's no expert solution to turn into an article.
     await this.knowledge.createDraftFromCase(updated);
+    if (updated.assignedExpertId) {
+      await this.notifications.create(
+        updated.assignedExpertId,
+        'case.confirmed',
+        bi('Farmer confirmed your solution', 'రైతు మీ పరిష్కారాన్ని ధృవీకరించారు'),
+        bi(`${updated.caseNumber ?? 'A case'} is closed as resolved`, `${updated.caseNumber ?? 'ఒక కేసు'} పరిష్కరించబడి మూసివేయబడింది`),
+        `/expert/cases/${caseId}`,
+      );
+    }
     // Farmer Confirmed is real but transient — CLOSED is what the record
     // shows, exactly matching the Charter's own diagram (Answered -> Farmer
     // Confirmed -> Closed happen as one farmer action).
@@ -295,6 +343,15 @@ export class CasesService {
       entityId: caseId,
       metadata: { transientState: 'REOPENED' },
     });
+    if (updated.assignedExpertId) {
+      await this.notifications.create(
+        updated.assignedExpertId,
+        'case.disputed',
+        bi('Farmer disputed your answer', 'రైతు మీ సమాధానాన్ని వివాదాస్పదం చేశారు'),
+        bi(`${updated.caseNumber ?? 'A case'} needs another look`, `${updated.caseNumber ?? 'ఒక కేసు'}ను మళ్ళీ చూడాలి`),
+        `/expert/cases/${caseId}`,
+      );
+    }
     return updated;
   }
 
@@ -319,6 +376,16 @@ export class CasesService {
       entityId: caseId,
       metadata: actorId ? undefined : { trigger: 'scheduler' },
     });
+    await this.notifications.create(
+      updated.farmerId,
+      'case.abandoned',
+      bi('Your case was closed — no response received', 'మీ కేసు మూసివేయబడింది — స్పందన అందలేదు'),
+      bi(
+        `${updated.caseNumber ?? 'Your case'} was closed after waiting too long for your response`,
+        `${updated.caseNumber ?? 'మీ కేసు'} మీ స్పందన కోసం చాలా కాలం వేచిన తర్వాత మూసివేయబడింది`,
+      ),
+      `/cases/${caseId}`,
+    );
     return updated;
   }
 
@@ -344,6 +411,15 @@ export class CasesService {
       entityType: 'Case',
       entityId: caseId,
     });
+    await this.notifications.create(
+      updated.farmerId,
+      dto.approve ? 'case.priority.approved' : 'case.priority.rejected',
+      dto.approve
+        ? bi('Priority handling approved', 'ప్రాధాన్యత నిర్వహణ ఆమోదించబడింది')
+        : bi('Priority request declined', 'ప్రాధాన్యత అభ్యర్థన తిరస్కరించబడింది'),
+      bi(`${updated.caseNumber ?? 'Your case'}`, `${updated.caseNumber ?? 'మీ కేసు'}`),
+      `/cases/${caseId}`,
+    );
     return updated;
   }
 

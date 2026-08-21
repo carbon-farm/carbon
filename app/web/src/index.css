@@ -118,6 +118,38 @@ body {
   white-space: nowrap;
 }
 
+.notif-bell-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  color: white;
+  text-decoration: none;
+}
+
+.notif-bell-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.notif-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
 .logout-icon-btn {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.35);
@@ -411,6 +443,34 @@ a.case-item:hover {
   box-shadow: var(--shadow-md);
   border-color: var(--accent);
   transform: translateY(-1px);
+}
+
+button.case-item {
+  background: var(--card);
+  color: inherit;
+  text-align: left;
+  align-items: stretch;
+  width: 100%;
+  font-weight: normal;
+  min-height: auto;
+}
+
+button.case-item:hover:not(:disabled) {
+  background: var(--card);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.notification-item.unread {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.notification-item .priority-badge {
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 4px;
 }
 
 .case-item .label {

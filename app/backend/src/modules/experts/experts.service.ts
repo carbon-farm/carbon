@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CredentialStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { bi } from '../../common/i18n';
 import { SubmitCredentialsDto } from './dto/submit-credentials.dto';
 import { VerifyCredentialDto } from './dto/verify-credential.dto';
@@ -14,6 +15,7 @@ export class ExpertsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async submitCredentials(userId: string, dto: SubmitCredentialsDto) {
@@ -77,6 +79,17 @@ export class ExpertsService {
       entityId: updated.id,
       metadata: dto.reason ? { reason: dto.reason } : undefined,
     });
+    await this.notifications.create(
+      updated.userId,
+      dto.approve ? 'credential.approved' : 'credential.rejected',
+      dto.approve
+        ? bi('Your credentials were verified', 'మీ ధృవపత్రాలు ధృవీకరించబడ్డాయి')
+        : bi('Your credentials need attention', 'మీ ధృవపత్రాలకు శ్రద్ధ అవసరం'),
+      dto.approve
+        ? bi('You can now be assigned cases', 'ఇప్పుడు మీకు కేసులు కేటాయించవచ్చు')
+        : bi(dto.reason ?? '', dto.reason ?? ''),
+      '/expert/cases',
+    );
     return updated;
   }
 

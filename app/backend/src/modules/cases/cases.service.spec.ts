@@ -6,6 +6,7 @@ import { AuditService } from '../audit/audit.service';
 import { ExpertsService } from '../experts/experts.service';
 import { UploadsService } from '../uploads/uploads.service';
 import { KnowledgeService } from '../knowledge/knowledge.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 // The guarded state machine behind 000-Project-Charter.md's ten-state Case
 // Lifecycle — only ever exercised manually via curl until now. This suite
@@ -50,6 +51,7 @@ describe('CasesService', () => {
   let experts: { isVerified: jest.Mock };
   let uploads: { uploadCaseEvidence: jest.Mock };
   let knowledge: { createDraftFromCase: jest.Mock };
+  let notifications: { create: jest.Mock; notifyRole: jest.Mock };
   let service: CasesService;
 
   beforeEach(() => {
@@ -61,12 +63,14 @@ describe('CasesService', () => {
     experts = { isVerified: jest.fn() };
     uploads = { uploadCaseEvidence: jest.fn() };
     knowledge = { createDraftFromCase: jest.fn().mockResolvedValue(null) };
+    notifications = { create: jest.fn().mockResolvedValue(undefined), notifyRole: jest.fn().mockResolvedValue(undefined) };
     service = new CasesService(
       prisma as unknown as PrismaService,
       audit as unknown as AuditService,
       experts as unknown as ExpertsService,
       uploads as unknown as UploadsService,
       knowledge as unknown as KnowledgeService,
+      notifications as unknown as NotificationsService,
     );
   });
 

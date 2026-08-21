@@ -3,6 +3,7 @@ import { Case, CaseStatus, ClosureReason, KnowledgeArticle, KnowledgeArticleStat
 import { KnowledgeService } from './knowledge.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 function buildArticle(overrides: Partial<KnowledgeArticle> = {}): KnowledgeArticle {
   return {
@@ -62,6 +63,7 @@ describe('KnowledgeService', () => {
     cropMaster: { findUnique: jest.Mock };
   };
   let audit: { log: jest.Mock };
+  let notifications: { create: jest.Mock; notifyRole: jest.Mock };
   let service: KnowledgeService;
 
   beforeEach(() => {
@@ -71,7 +73,12 @@ describe('KnowledgeService', () => {
       cropMaster: { findUnique: jest.fn() },
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
-    service = new KnowledgeService(prisma as unknown as PrismaService, audit as unknown as AuditService);
+    notifications = { create: jest.fn().mockResolvedValue(undefined), notifyRole: jest.fn().mockResolvedValue(undefined) };
+    service = new KnowledgeService(
+      prisma as unknown as PrismaService,
+      audit as unknown as AuditService,
+      notifications as unknown as NotificationsService,
+    );
   });
 
   describe('createDraftFromCase', () => {

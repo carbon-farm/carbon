@@ -426,6 +426,17 @@ export const strings = {
   reportUsersByRoleHeading: { en: 'Accounts by role', te: 'పాత్ర వారీగా ఖాతాలు' },
   reportNoData: { en: 'No data yet.', te: 'ఇంకా డేటా లేదు.' },
   reportAssignedCasesColumn: { en: 'Assigned (total)', te: 'కేటాయించినవి (మొత్తం)' },
+
+  // Notifications (Module 12, in-app channel)
+  notificationsEyebrow: { en: 'Notifications', te: 'ప్రకటనలు' },
+  notificationsPageTitle: { en: 'Notifications', te: 'ప్రకటనలు' },
+  notificationBellLabel: { en: 'Notifications', te: 'ప్రకటనలు' },
+  markAllReadButton: { en: 'Mark all as read', te: 'అన్నీ చదివినట్లు గుర్తించండి' },
+  markingRead: { en: 'Marking…', te: 'గుర్తిస్తోంది…' },
+  noNotifications: { en: 'No notifications yet.', te: 'ఇంకా ప్రకటనలు లేవు.' },
+  couldNotLoadNotifications: { en: 'Could not load notifications.', te: 'ప్రకటనలను లోడ్ చేయలేకపోయాము.' },
+  showFilterLabel: { en: 'Show', te: 'చూపించు' },
+  unreadOnlyOption: { en: 'Unread only', te: 'చదవనివి మాత్రమే' },
 } as const satisfies Record<string, Bilingual>;
 
 export type StringKey = keyof typeof strings;
