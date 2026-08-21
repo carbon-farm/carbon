@@ -12,6 +12,7 @@ import { ConfigurationModule } from './modules/configuration/configuration.modul
 import { CasesModule } from './modules/cases/cases.module';
 import { KnowledgeModule } from './modules/knowledge/knowledge.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { LearningModule } from './modules/learning/learning.module';
 import { HealthController } from './health/health.controller';
 
 @Module({
@@ -29,6 +30,7 @@ import { HealthController } from './health/health.controller';
     CasesModule,
     KnowledgeModule,
     ReportsModule,
+    LearningModule,
   ],
   controllers: [HealthController],
 })

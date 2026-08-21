@@ -25,6 +25,11 @@ import { KnowledgeBrowsePage } from './pages/KnowledgeBrowsePage';
 import { ArticleViewPage } from './pages/ArticleViewPage';
 import { NoPortalPage } from './pages/NoPortalPage';
 import { NotificationsPage } from './pages/NotificationsPage';
+import { CoursesBrowsePage } from './pages/CoursesBrowsePage';
+import { CourseDetailPage } from './pages/CourseDetailPage';
+import { LessonViewPage } from './pages/LessonViewPage';
+import { CoursesManagePage } from './pages/CoursesManagePage';
+import { CourseEditPage } from './pages/CourseEditPage';
 
 export function App() {
   return (
@@ -183,6 +188,47 @@ export function App() {
             element={
               <ProtectedRoute roles={['ADMINISTRATOR']}>
                 <AdminReportingPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/courses"
+            element={
+              <ProtectedRoute>
+                <CoursesBrowsePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/manage"
+            element={
+              <ProtectedRoute roles={['MODERATOR', 'ADMINISTRATOR']}>
+                <CoursesManagePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/manage/:id"
+            element={
+              <ProtectedRoute roles={['MODERATOR', 'ADMINISTRATOR']}>
+                <CourseEditPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/:id"
+            element={
+              <ProtectedRoute>
+                <CourseDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/:id/lessons/:lessonId"
+            element={
+              <ProtectedRoute>
+                <LessonViewPage />
               </ProtectedRoute>
             }
           />

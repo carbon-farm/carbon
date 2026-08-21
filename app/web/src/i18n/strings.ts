@@ -472,6 +472,54 @@ export const strings = {
   couldNotToggleBookmark: { en: 'Could not update this bookmark.', te: 'ఈ బుక్‌మార్క్‌ను నవీకరించలేకపోయాము.' },
   bookmarkedOnlyOption: { en: 'Bookmarked only', te: 'బుక్‌మార్క్ చేసినవి మాత్రమే' },
   recentlyViewedHeading: { en: 'Recently viewed', te: 'ఇటీవల చూసినవి' },
+
+  // Learning Management (Module 5, shell)
+  coursesEyebrow: { en: 'Courses', te: 'కోర్సులు' },
+  coursesBrowseTitle: { en: 'Courses', te: 'కోర్సులు' },
+  coursesManageTitle: { en: 'Manage courses', te: 'కోర్సులను నిర్వహించండి' },
+  noCoursesYet: { en: 'Nothing here yet.', te: 'ఇంకా ఇక్కడ ఏమీ లేదు.' },
+  couldNotLoadCourses: { en: 'Could not load courses.', te: 'కోర్సులను లోడ్ చేయలేకపోయాము.' },
+  couldNotLoadCourse: { en: 'Could not load this course.', te: 'ఈ కోర్సును లోడ్ చేయలేకపోయాము.' },
+  courseNotFoundError: { en: 'Course not found.', te: 'కోర్సు కనుగొనబడలేదు.' },
+  courseTitleField: { en: 'Title', te: 'శీర్షిక' },
+  courseDescriptionField: { en: 'Description', te: 'వివరణ' },
+  createCourseButton: { en: 'Create course', te: 'కోర్సును సృష్టించండి' },
+  creatingCourse: { en: 'Creating…', te: 'సృష్టిస్తోంది…' },
+  couldNotCreateCourse: { en: 'Could not create this course.', te: 'ఈ కోర్సును సృష్టించలేకపోయాము.' },
+  couldNotSaveCourse: { en: 'Could not save this course.', te: 'ఈ కోర్సును సేవ్ చేయలేకపోయాము.' },
+  courseStatusDraft: { en: 'Draft', te: 'డ్రాఫ్ట్' },
+  courseStatusPublished: { en: 'Published', te: 'ప్రచురించబడింది' },
+  publishButton: { en: 'Publish', te: 'ప్రచురించండి' },
+  publishingCourse: { en: 'Publishing…', te: 'ప్రచురిస్తోంది…' },
+  unpublishButton: { en: 'Unpublish', te: 'ప్రచురణ తీసివేయండి' },
+  unpublishingCourse: { en: 'Unpublishing…', te: 'ప్రచురణ తీసివేస్తోంది…' },
+  couldNotChangeCourseStatus: { en: 'Could not change this course\'s status.', te: 'ఈ కోర్సు స్థితిని మార్చలేకపోయాము.' },
+  lessonsHeading: { en: 'Lessons', te: 'పాఠాలు' },
+  noLessonsYet: { en: 'No lessons yet.', te: 'ఇంకా పాఠాలు లేవు.' },
+  addLessonButton: { en: 'Add lesson', te: 'పాఠాన్ని జోడించండి' },
+  addingLesson: { en: 'Adding…', te: 'జోడిస్తోంది…' },
+  couldNotAddLesson: { en: 'Could not add this lesson.', te: 'ఈ పాఠాన్ని జోడించలేకపోయాము.' },
+  lessonTitleField: { en: 'Lesson title', te: 'పాఠం శీర్షిక' },
+  lessonContentTypeField: { en: 'Content type', te: 'కంటెంట్ రకం' },
+  contentTypeVideo: { en: 'Video', te: 'వీడియో' },
+  contentTypeAudio: { en: 'Audio', te: 'ఆడియో' },
+  contentTypePdf: { en: 'PDF', te: 'PDF' },
+  contentTypeAssignment: { en: 'Assignment', te: 'అసైన్‌మెంట్' },
+  assignmentInstructionsField: { en: 'Assignment instructions', te: 'అసైన్‌మెంట్ సూచనలు' },
+  uploadContentButton: { en: 'Upload file', te: 'ఫైల్ అప్‌లోడ్ చేయండి' },
+  uploadingContent: { en: 'Uploading…', te: 'అప్‌లోడ్ చేస్తోంది…' },
+  couldNotUploadContent: { en: 'Could not upload this file.', te: 'ఈ ఫైల్‌ను అప్‌లోడ్ చేయలేకపోయాము.' },
+  noContentUploadedYet: { en: 'No file uploaded yet.', te: 'ఇంకా ఫైల్ అప్‌లోడ్ చేయలేదు.' },
+  openContentLink: { en: 'Open', te: 'తెరవండి' },
+  lessonCompletedBadge: { en: 'Completed', te: 'పూర్తయింది' },
+  markCompleteButton: { en: 'Mark complete', te: 'పూర్తయినట్లు గుర్తించండి' },
+  markingComplete: { en: 'Marking…', te: 'గుర్తిస్తోంది…' },
+  couldNotMarkComplete: { en: 'Could not mark this lesson complete.', te: 'ఈ పాఠాన్ని పూర్తయినట్లు గుర్తించలేకపోయాము.' },
+  lessonNotFoundError: { en: 'Lesson not found.', te: 'పాఠం కనుగొనబడలేదు.' },
+  courseProgressLabel: { en: 'Progress', te: 'పురోగతి' },
+  certificateEarnedNotice: { en: 'Certificate earned!', te: 'సర్టిఫికేట్ సంపాదించారు!' },
+  myCertificatesHeading: { en: 'My certificates', te: 'నా సర్టిఫికెట్లు' },
+  noCertificatesYet: { en: 'No certificates yet.', te: 'ఇంకా సర్టిఫికెట్లు లేవు.' },
 } as const satisfies Record<string, Bilingual>;
 
 export type StringKey = keyof typeof strings;
@@ -539,4 +587,26 @@ const ARTICLE_STATUS_KEYS: Record<string, StringKey> = {
 export function articleStatusLabel(status: string): Bilingual {
   const key = ARTICLE_STATUS_KEYS[status];
   return key ? strings[key] : { en: status, te: status };
+}
+
+const COURSE_STATUS_KEYS: Record<string, StringKey> = {
+  DRAFT: 'courseStatusDraft',
+  PUBLISHED: 'courseStatusPublished',
+};
+
+export function courseStatusLabel(status: string): Bilingual {
+  const key = COURSE_STATUS_KEYS[status];
+  return key ? strings[key] : { en: status, te: status };
+}
+
+const LESSON_CONTENT_TYPE_KEYS: Record<string, StringKey> = {
+  VIDEO: 'contentTypeVideo',
+  AUDIO: 'contentTypeAudio',
+  PDF: 'contentTypePdf',
+  ASSIGNMENT: 'contentTypeAssignment',
+};
+
+export function lessonContentTypeLabel(type: string): Bilingual {
+  const key = LESSON_CONTENT_TYPE_KEYS[type];
+  return key ? strings[key] : { en: type, te: type };
 }

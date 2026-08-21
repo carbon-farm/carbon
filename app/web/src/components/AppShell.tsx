@@ -18,11 +18,13 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { to: '/dashboard', labelKey: 'dashboardEyebrow' },
     { to: '/cases', labelKey: 'myCasesTitle' },
     { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
+    { to: '/courses', labelKey: 'coursesEyebrow' },
   ],
   MODERATOR: [
     { to: '/moderator/queue', labelKey: 'moderatorQueueTitle' },
     { to: '/moderator/articles', labelKey: 'articleQueueTitle' },
     { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
+    { to: '/courses/manage', labelKey: 'coursesManageTitle' },
   ],
   EXPERT: [
     { to: '/expert/cases', labelKey: 'expertCasesTitle' },
@@ -37,6 +39,7 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { to: '/admin/audit', labelKey: 'auditLogLinkTitle' },
     { to: '/admin/reports', labelKey: 'reportsLinkTitle' },
     { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
+    { to: '/courses/manage', labelKey: 'coursesManageTitle' },
   ],
 };
 
