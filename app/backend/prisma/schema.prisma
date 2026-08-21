@@ -1,8 +1,11 @@
 // Stage 1 (Foundation): Identity & Membership, Farm/Land, Configuration
 // taxonomy, Expert credentialing, and the Audit Trail.
 // Stage 2 (Core Trust Loop): Case Management, Knowledge Repository
-// publication workflow. Learning, Marketplace, and Soil Laboratory are
-// still not modeled — see 01-Product/04-Product-Roadmap.md.
+// publication workflow, Reporting, Notification (in-app), article
+// Feedback/Bookmarks/Recently-Viewed, Learning Management (shell), and
+// Soil Laboratory (generic, no lab-partner integration). Marketplace,
+// Finance, and real SMS/WhatsApp/email delivery remain blocked on business
+// decisions — see 01-Product/04-Product-Roadmap.md.
 
 generator client {
   provider = "prisma-client-js"
@@ -91,6 +94,22 @@ enum LessonContentType {
   ASSIGNMENT
 }
 
+// Module 7 — Soil Laboratory, built generic per explicit product decision
+// (no specific lab partner yet). Charter's own lifecycle: "collection video
+// watched -> sample created -> sample ID generated -> ID printed/written ->
+// dispatched -> received -> tested -> report uploaded -> available to the
+// farmer." Collapsed to five real states below — ID generation and
+// printing aren't separate workflow-gating states, just things that are
+// true about a sample from the moment it's CREATED (sampleCode is always
+// assigned at creation; idPrintedAt is a timestamp checkbox, not a status).
+enum SoilSampleStatus {
+  CREATED
+  DISPATCHED
+  RECEIVED
+  TESTED
+  REPORT_AVAILABLE
+}
+
 model User {
   id                 String   @id @default(uuid())
   mobileNumber       String   @unique
@@ -123,6 +142,7 @@ model User {
   coursesAuthored    Course[]          @relation("CourseAuthor")
   lessonCompletions  LessonCompletion[]
   certificates       Certificate[]
+  soilSamples        SoilSample[]      @relation("SoilSampleFarmer")
 
   @@index([role])
 }
@@ -144,6 +164,7 @@ model FarmLand {
   updatedAt      DateTime @updatedAt
 
   cases          Case[]
+  soilSamples    SoilSample[]
 
   @@index([farmerId])
 }
@@ -192,6 +213,7 @@ model Case {
   updatedAt           DateTime       @updatedAt
 
   knowledgeArticle    KnowledgeArticle?
+  soilSamples         SoilSample[]
 
   @@index([farmerId])
   @@index([assignedExpertId])
@@ -486,4 +508,27 @@ model Certificate {
   issuedAt DateTime @default(now())
 
   @@unique([courseId, userId])
+}
+
+model SoilSample {
+  id                      String           @id @default(uuid())
+  sampleCode              String           @unique // farmer-readable ID, assigned at creation
+  farmerId                String
+  farmer                  User             @relation("SoilSampleFarmer", fields: [farmerId], references: [id], onDelete: Cascade)
+  farmLandId              String
+  farmLand                FarmLand         @relation(fields: [farmLandId], references: [id], onDelete: Cascade)
+  caseId                  String?          // optional link to the Case that prompted testing
+  case                    Case?            @relation(fields: [caseId], references: [id])
+  collectionVideoWatched  Boolean          @default(false) // farmer confirms before a sample can be created
+  status                  SoilSampleStatus @default(CREATED)
+  dispatchedAt            DateTime?
+  receivedAt              DateTime?
+  testedAt                DateTime?
+  reportUrl               String?
+  reportAvailableAt       DateTime?
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+
+  @@index([farmerId])
+  @@index([status])
 }

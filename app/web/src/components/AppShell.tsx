@@ -19,12 +19,14 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { to: '/cases', labelKey: 'myCasesTitle' },
     { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
     { to: '/courses', labelKey: 'coursesEyebrow' },
+    { to: '/soil-samples', labelKey: 'soilSamplesEyebrow' },
   ],
   MODERATOR: [
     { to: '/moderator/queue', labelKey: 'moderatorQueueTitle' },
     { to: '/moderator/articles', labelKey: 'articleQueueTitle' },
     { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
     { to: '/courses/manage', labelKey: 'coursesManageTitle' },
+    { to: '/soil-samples/manage', labelKey: 'sampleQueueTitle' },
   ],
   EXPERT: [
     { to: '/expert/cases', labelKey: 'expertCasesTitle' },
@@ -40,6 +42,7 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { to: '/admin/reports', labelKey: 'reportsLinkTitle' },
     { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
     { to: '/courses/manage', labelKey: 'coursesManageTitle' },
+    { to: '/soil-samples/manage', labelKey: 'sampleQueueTitle' },
   ],
 };
 

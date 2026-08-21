@@ -30,6 +30,9 @@ import { CourseDetailPage } from './pages/CourseDetailPage';
 import { LessonViewPage } from './pages/LessonViewPage';
 import { CoursesManagePage } from './pages/CoursesManagePage';
 import { CourseEditPage } from './pages/CourseEditPage';
+import { SoilSamplesPage } from './pages/SoilSamplesPage';
+import { SoilSampleDetailPage } from './pages/SoilSampleDetailPage';
+import { SoilLabQueuePage } from './pages/SoilLabQueuePage';
 
 export function App() {
   return (
@@ -229,6 +232,31 @@ export function App() {
             element={
               <ProtectedRoute>
                 <LessonViewPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/soil-samples"
+            element={
+              <ProtectedRoute roles={['FARMER']}>
+                <SoilSamplesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/soil-samples/manage"
+            element={
+              <ProtectedRoute roles={['MODERATOR', 'ADMINISTRATOR']}>
+                <SoilLabQueuePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/soil-samples/:id"
+            element={
+              <ProtectedRoute>
+                <SoilSampleDetailPage />
               </ProtectedRoute>
             }
           />

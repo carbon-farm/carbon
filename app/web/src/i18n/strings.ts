@@ -520,6 +520,37 @@ export const strings = {
   certificateEarnedNotice: { en: 'Certificate earned!', te: 'సర్టిఫికేట్ సంపాదించారు!' },
   myCertificatesHeading: { en: 'My certificates', te: 'నా సర్టిఫికెట్లు' },
   noCertificatesYet: { en: 'No certificates yet.', te: 'ఇంకా సర్టిఫికెట్లు లేవు.' },
+
+  // Soil Laboratory (Module 7, generic — no lab partner integrated)
+  soilSamplesEyebrow: { en: 'Soil Testing', te: 'నేల పరీక్ష' },
+  soilSamplesTitle: { en: 'Soil Testing', te: 'నేల పరీక్ష' },
+  newSampleButton: { en: 'Request a soil test', te: 'నేల పరీక్షను అభ్యర్థించండి' },
+  creatingSample: { en: 'Submitting…', te: 'సమర్పిస్తోంది…' },
+  couldNotCreateSample: { en: 'Could not submit this sample.', te: 'ఈ నమూనాను సమర్పించలేకపోయాము.' },
+  couldNotLoadSamples: { en: 'Could not load soil samples.', te: 'నేల నమూనాలను లోడ్ చేయలేకపోయాము.' },
+  couldNotLoadSample: { en: 'Could not load this sample.', te: 'ఈ నమూనాను లోడ్ చేయలేకపోయాము.' },
+  noSamplesYet: { en: 'No soil samples yet.', te: 'ఇంకా నేల నమూనాలు లేవు.' },
+  sampleNotFoundError: { en: 'Sample not found.', te: 'నమూనా కనుగొనబడలేదు.' },
+  collectionVideoConfirmLabel: {
+    en: 'I have watched the sample collection instructions and collected the sample correctly',
+    te: 'నేను నమూనా సేకరణ సూచనలను చూశాను మరియు నమూనాను సరిగ్గా సేకరించాను',
+  },
+  linkToCaseField: { en: 'Link to a case (optional)', te: 'కేసుకు లింక్ చేయండి (ఐచ్ఛికం)' },
+  sampleStatusCreated: { en: 'Submitted', te: 'సమర్పించబడింది' },
+  sampleStatusDispatched: { en: 'Dispatched to lab', te: 'ల్యాబ్‌కు పంపబడింది' },
+  sampleStatusReceived: { en: 'Received by lab', te: 'ల్యాబ్ ద్వారా స్వీకరించబడింది' },
+  sampleStatusTested: { en: 'Testing complete', te: 'పరీక్ష పూర్తయింది' },
+  sampleStatusReportAvailable: { en: 'Report available', te: 'నివేదిక అందుబాటులో ఉంది' },
+  dispatchButton: { en: 'Mark dispatched', te: 'పంపినట్లు గుర్తించండి' },
+  dispatchingSample: { en: 'Marking…', te: 'గుర్తిస్తోంది…' },
+  markReceivedButton: { en: 'Mark received', te: 'స్వీకరించినట్లు గుర్తించండి' },
+  markTestedButton: { en: 'Mark tested', te: 'పరీక్షించినట్లు గుర్తించండి' },
+  uploadReportButton: { en: 'Upload report', te: 'నివేదికను అప్‌లోడ్ చేయండి' },
+  uploadingReport: { en: 'Uploading…', te: 'అప్‌లోడ్ చేస్తోంది…' },
+  couldNotAdvanceSample: { en: 'Could not update this sample.', te: 'ఈ నమూనాను నవీకరించలేకపోయాము.' },
+  couldNotUploadReport: { en: 'Could not upload this report.', te: 'ఈ నివేదికను అప్‌లోడ్ చేయలేకపోయాము.' },
+  viewReportLink: { en: 'View report', te: 'నివేదికను చూడండి' },
+  sampleQueueTitle: { en: 'Soil sample queue', te: 'నేల నమూనా క్యూ' },
 } as const satisfies Record<string, Bilingual>;
 
 export type StringKey = keyof typeof strings;
@@ -609,4 +640,17 @@ const LESSON_CONTENT_TYPE_KEYS: Record<string, StringKey> = {
 export function lessonContentTypeLabel(type: string): Bilingual {
   const key = LESSON_CONTENT_TYPE_KEYS[type];
   return key ? strings[key] : { en: type, te: type };
+}
+
+const SAMPLE_STATUS_KEYS: Record<string, StringKey> = {
+  CREATED: 'sampleStatusCreated',
+  DISPATCHED: 'sampleStatusDispatched',
+  RECEIVED: 'sampleStatusReceived',
+  TESTED: 'sampleStatusTested',
+  REPORT_AVAILABLE: 'sampleStatusReportAvailable',
+};
+
+export function sampleStatusLabel(status: string): Bilingual {
+  const key = SAMPLE_STATUS_KEYS[status];
+  return key ? strings[key] : { en: status, te: status };
 }

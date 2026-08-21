@@ -13,6 +13,7 @@ import { CasesModule } from './modules/cases/cases.module';
 import { KnowledgeModule } from './modules/knowledge/knowledge.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { LearningModule } from './modules/learning/learning.module';
+import { SoilLabModule } from './modules/soil-lab/soil-lab.module';
 import { HealthController } from './health/health.controller';
 
 @Module({
@@ -31,6 +32,7 @@ import { HealthController } from './health/health.controller';
     KnowledgeModule,
     ReportsModule,
     LearningModule,
+    SoilLabModule,
   ],
   controllers: [HealthController],
 })
