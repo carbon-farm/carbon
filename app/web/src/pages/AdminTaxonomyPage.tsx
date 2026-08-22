@@ -16,6 +16,7 @@ import {
   type Tag,
   type Region,
 } from '../api/configuration';
+import { listCategories as listProductCategories, createCategory as createProductCategory, type ProductCategory } from '../api/marketplace';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, type StringKey } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
@@ -85,6 +86,7 @@ export function AdminTaxonomyPage() {
   const [crops, setCrops] = useState<Crop[]>([]);
   const [categories, setCategories] = useState<CaseCategory[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
+  const [productCategories, setProductCategories] = useState<ProductCategory[]>([]);
   const [regions, setRegions] = useState<Region[]>([]);
   const [regionName, setRegionName] = useState('');
   const [regionState, setRegionState] = useState('');
@@ -107,12 +109,14 @@ export function AdminTaxonomyPage() {
       listCaseCategories(session.accessToken),
       listTags(session.accessToken),
       listRegions(session.accessToken),
+      listProductCategories(session.accessToken),
     ])
-      .then(([cropsResult, categoriesResult, tagsResult, regionsResult]) => {
+      .then(([cropsResult, categoriesResult, tagsResult, regionsResult, productCategoriesResult]) => {
         setCrops(cropsResult);
         setCategories(categoriesResult);
         setTags(tagsResult);
         setRegions(regionsResult);
+        setProductCategories(productCategoriesResult);
       })
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) {
@@ -188,6 +192,18 @@ export function AdminTaxonomyPage() {
                 if (!session) return;
                 const created = await createTag(session.accessToken, name);
                 setTags((prev) => [...prev, created]);
+              })
+            }
+          />
+
+          <SimpleListSection
+            headingKey="productCategoriesHeading"
+            items={productCategories}
+            onAdd={(name) =>
+              guarded(async () => {
+                if (!session) return;
+                const created = await createProductCategory(session.accessToken, name);
+                setProductCategories((prev) => [...prev, created]);
               })
             }
           />

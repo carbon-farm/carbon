@@ -21,6 +21,9 @@ const LESSON_CONTENT_MIME_TYPES = [
 const SOIL_REPORT_BUCKET = 'soil-reports';
 const SOIL_REPORT_MIME_TYPES = ['application/pdf'];
 
+const PRODUCT_IMAGE_BUCKET = 'product-images';
+const PRODUCT_IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
 export const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25MB — generous for a phone photo, tight enough that a
 // farmer on mobile data doesn't stall uploading a multi-minute video.
 
@@ -77,6 +80,16 @@ export class UploadsService {
       allowedMimeTypes: SOIL_REPORT_MIME_TYPES,
       pathPrefix: `samples/${sampleId}`,
       typeErrorMessage: bi('Only PDF files are allowed', 'PDF ఫైళ్లు మాత్రమే అనుమతించబడతాయి'),
+    });
+  }
+
+  async uploadProductImage(productId: string, file: Express.Multer.File): Promise<string> {
+    return this.upload({
+      file,
+      bucket: PRODUCT_IMAGE_BUCKET,
+      allowedMimeTypes: PRODUCT_IMAGE_MIME_TYPES,
+      pathPrefix: `products/${productId}`,
+      typeErrorMessage: bi('Only JPEG/PNG/WEBP photos are allowed', 'JPEG/PNG/WEBP ఫోటోలు మాత్రమే అనుమతించబడతాయి'),
     });
   }
 

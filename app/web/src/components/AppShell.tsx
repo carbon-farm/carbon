@@ -20,6 +20,8 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
     { to: '/courses', labelKey: 'coursesEyebrow' },
     { to: '/soil-samples', labelKey: 'soilSamplesEyebrow' },
+    { to: '/marketplace', labelKey: 'marketplaceEyebrow' },
+    { to: '/marketplace/orders', labelKey: 'myOrdersTitle' },
   ],
   MODERATOR: [
     { to: '/moderator/queue', labelKey: 'moderatorQueueTitle' },
@@ -33,6 +35,10 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { to: '/expert/articles', labelKey: 'myArticlesTitle' },
     { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
   ],
+  VENDOR: [
+    { to: '/marketplace/vendor', labelKey: 'vendorDashboardTitle' },
+    { to: '/marketplace', labelKey: 'marketplaceEyebrow' },
+  ],
   ADMINISTRATOR: [
     { to: '/admin', labelKey: 'adminHubTitle' },
     { to: '/admin/staff', labelKey: 'staffLinkTitle' },
@@ -43,6 +49,9 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
     { to: '/courses/manage', labelKey: 'coursesManageTitle' },
     { to: '/soil-samples/manage', labelKey: 'sampleQueueTitle' },
+    { to: '/marketplace/manage/vendors', labelKey: 'vendorApprovalsTitle' },
+    { to: '/marketplace/manage/products', labelKey: 'productsManageTitle' },
+    { to: '/marketplace/manage/orders', labelKey: 'ordersQueueTitle' },
   ],
 };
 

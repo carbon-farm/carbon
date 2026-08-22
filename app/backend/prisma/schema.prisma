@@ -143,6 +143,12 @@ model User {
   lessonCompletions  LessonCompletion[]
   certificates       Certificate[]
   soilSamples        SoilSample[]      @relation("SoilSampleFarmer")
+  vendorProfile      VendorProfile?    @relation("VendorUser")
+  vendorApprovals    VendorProfile[]   @relation("VendorApprover")
+  cartItems          CartItem[]
+  orders             Order[]
+  productReviews     ProductReview[]
+  productWishlists   ProductWishlist[]
 
   @@index([role])
 }
@@ -531,4 +537,156 @@ model SoilSample {
 
   @@index([farmerId])
   @@index([status])
+}
+
+// Module 6/9 — Marketplace, built as a working catalog+cart+order loop with
+// Payment/Finance deliberately deferred (explicit product decision: "ignore
+// payment, next"). paymentMethod is hardcoded to Cash on Delivery — same
+// on-screen-placeholder precedent as OTP and the rest of this session's
+// blocked-module workarounds, swappable once a gateway is chosen. Coupons
+// and Returns from the Charter's fuller e-commerce scope are not attempted
+// here — genuinely separate features, not corner-cut versions of this one.
+//
+// "who sells" was answered "both": a Product's vendorId is nullable —
+// null means platform/owner-sold, set means a third-party VendorProfile
+// sold it. Per Charter Section 10.1's explicit Administration/Moderation
+// split ("Administration covers... products, orders"; Moderation's list
+// does not mention either), vendor approval, product oversight, and order
+// fulfillment are Administrator-only here, unlike Knowledge/Learning/Soil
+// Lab where Moderator shares those duties.
+enum OrderStatus {
+  PLACED
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model ProductCategoryMaster {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+
+  products  Product[]
+}
+
+// Mirrors ExpertProfile's shape deliberately — a vendor's products aren't
+// publicly listed until Administrator approval, same trust gate as an
+// expert being assignable to cases only once VERIFIED.
+model VendorProfile {
+  id               String    @id @default(uuid())
+  userId           String    @unique
+  user             User      @relation("VendorUser", fields: [userId], references: [id], onDelete: Cascade)
+  businessName     String
+  description      String?
+  isApproved       Boolean   @default(false)
+  approvedByUserId String?
+  approvedBy       User?     @relation("VendorApprover", fields: [approvedByUserId], references: [id])
+  approvedAt       DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  products         Product[]
+
+  @@index([isApproved])
+}
+
+model Product {
+  id             String                @id @default(uuid())
+  name           String
+  description    String
+  price          Float
+  unit           String                // e.g. "per kg", "per bag" — free text, not a controlled unit taxonomy
+  stockQuantity  Int                   @default(0)
+  imageUrls      String[]              @default([])
+  categoryId     String?
+  category       ProductCategoryMaster? @relation(fields: [categoryId], references: [id])
+  vendorId       String?               // null = platform/owner-sold
+  vendor         VendorProfile?        @relation(fields: [vendorId], references: [id])
+  isActive       Boolean               @default(true)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+  reviews        ProductReview[]
+  wishlistedBy   ProductWishlist[]
+
+  @@index([categoryId])
+  @@index([vendorId])
+  @@index([isActive])
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  orderNumber     String      @unique
+  farmerId        String
+  farmer          User        @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  status          OrderStatus @default(PLACED)
+  totalAmount     Float
+  deliveryAddress String
+  paymentMethod   String      @default("COD")
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  items           OrderItem[]
+
+  @@index([farmerId])
+  @@index([status])
+}
+
+// Snapshots product name/price/vendor at order time — a later price change
+// or vendor edit must never rewrite what a farmer actually agreed to pay.
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  vendorId    String?
+  productName String
+  unitPrice   Float
+  quantity    Int
+  lineTotal   Float
+
+  @@index([orderId])
+}
+
+model ProductReview {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId, userId])
+}
+
+model ProductWishlist {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([productId, userId])
 }

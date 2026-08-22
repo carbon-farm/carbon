@@ -33,6 +33,16 @@ import { CourseEditPage } from './pages/CourseEditPage';
 import { SoilSamplesPage } from './pages/SoilSamplesPage';
 import { SoilSampleDetailPage } from './pages/SoilSampleDetailPage';
 import { SoilLabQueuePage } from './pages/SoilLabQueuePage';
+import { MarketplacePage } from './pages/MarketplacePage';
+import { ProductDetailPage } from './pages/ProductDetailPage';
+import { CartPage } from './pages/CartPage';
+import { OrdersPage } from './pages/OrdersPage';
+import { OrderDetailPage } from './pages/OrderDetailPage';
+import { VendorDashboardPage } from './pages/VendorDashboardPage';
+import { ProductEditPage } from './pages/ProductEditPage';
+import { VendorApprovalsPage } from './pages/VendorApprovalsPage';
+import { ProductsManagePage } from './pages/ProductsManagePage';
+import { OrdersManagePage } from './pages/OrdersManagePage';
 
 export function App() {
   return (
@@ -257,6 +267,87 @@ export function App() {
             element={
               <ProtectedRoute>
                 <SoilSampleDetailPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/marketplace"
+            element={
+              <ProtectedRoute>
+                <MarketplacePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marketplace/products/:id"
+            element={
+              <ProtectedRoute>
+                <ProductDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marketplace/cart"
+            element={
+              <ProtectedRoute roles={['FARMER']}>
+                <CartPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marketplace/orders"
+            element={
+              <ProtectedRoute roles={['FARMER']}>
+                <OrdersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marketplace/orders/:id"
+            element={
+              <ProtectedRoute>
+                <OrderDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marketplace/vendor"
+            element={
+              <ProtectedRoute roles={['VENDOR']}>
+                <VendorDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marketplace/manage/products"
+            element={
+              <ProtectedRoute roles={['ADMINISTRATOR']}>
+                <ProductsManagePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marketplace/manage/products/:id"
+            element={
+              <ProtectedRoute roles={['VENDOR', 'ADMINISTRATOR']}>
+                <ProductEditPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marketplace/manage/vendors"
+            element={
+              <ProtectedRoute roles={['ADMINISTRATOR']}>
+                <VendorApprovalsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marketplace/manage/orders"
+            element={
+              <ProtectedRoute roles={['ADMINISTRATOR']}>
+                <OrdersManagePage />
               </ProtectedRoute>
             }
           />
