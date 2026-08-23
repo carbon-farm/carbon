@@ -11,7 +11,8 @@ Practical guide for clicking through the live app. Not a formal SDLC document (s
 |---|---|---|---|
 | Administrator | `9999999999` | `ChangeMe123!` | Seeded account. **Change this password** — it's been sitting at the default since seeding; flagged repeatedly, not yet rotated. |
 | Moderator / Expert / Vendor / Support Agent | — | — | Create via Admin → Staff accounts, with any temporary password you choose. |
-| Farmer | — | — | Self-register via the public "Create an account" link. |
+| Farmer | — | — | Self-register via the public "Create an account" link (`/register`). |
+| Customer (HARIHARAA) | — | — | Self-register via the separate HARIHARAA landing page's "Register to subscribe" link (`/hariharaa/register`) — a completely different signup entry point from the Farmer one above. |
 
 **OTP is on-screen, not SMS'd.** Registration and password-reset OTP appear directly on screen behind a red "Temporary" banner — deliberate, until a real SMS/WhatsApp vendor is chosen. Don't treat a missing SMS as a bug.
 
@@ -50,9 +51,26 @@ Practical guide for clicking through the live app. Not a formal SDLC document (s
 2. Once approved: create a product (name, description, price, unit, stock, category), upload an image, edit price/stock later, deactivate/reactivate it.
 3. Confirm a deactivated product disappears from the public catalog immediately, and that other vendors' products don't show up under "My products."
 
+### Customer (HARIHARAA Natural Food Stores)
+A completely separate storefront on the same site — different branding, different catalog, subscription-gated. Not the same thing as the Farmer's Marketplace.
+1. Visit `/hariharaa` while logged out — confirm you see only branding, 6 testimonial videos, and a subscribe/QR section. Nothing else about the business should be visible.
+2. Click "Register to subscribe" → register/OTP-verify → you should land on the HARIHARAA shop, not the Farmer dashboard.
+3. Before subscribing, confirm the shop shows "An active HARIHARAA subscription is required."
+4. Go to My subscription, submit a payment reference (any text works pre-gateway) — status moves to "Submitted."
+5. Once an Administrator approves it (see below), refresh the shop — the catalog should now be browsable.
+6. Add a product to cart, checkout (Cash on Delivery only, same as the Farmer Marketplace), confirm the order appears under My orders.
+7. Confirm you can **not** view an OCF Marketplace product by its direct URL — HARIHARAA and OCF catalogs are fully separated.
+
+### Support Agent (dispatch)
+1. Log in — you should land on the Dispatch queue, not a "not built" page.
+2. Open any order from the queue (works for both OCF and HARIHARAA orders — dispatch is shared across both storefronts).
+3. Toggle an order item between Pending and Sent.
+4. Confirm you do **not** see the whole-order Confirm/Ship/Deliver/Cancel buttons — those stay Administrator-only.
+5. Confirm an Administrator can still move the whole order to Shipped/Delivered even while some items are still Pending — that's the intended "send what's in stock" behavior, not a bug.
+
 ### Administrator
 1. Log in with the seeded account above.
-2. Staff accounts: create Moderator/Expert/Vendor/Support Agent accounts.
+2. Staff accounts: create Moderator/Expert/Vendor/Support Agent/Customer accounts.
 3. Expert credentials: approve/reject pending qualifications.
 4. Taxonomy: manage crops, case categories, tags, regions, and product categories.
 5. Audit log: every material action platform-wide, filterable by entity type and date.
@@ -60,9 +78,13 @@ Practical guide for clicking through the live app. Not a formal SDLC document (s
 7. Vendor approvals: approve/reject pending vendor profiles.
 8. Manage products: oversight of every product (platform + all vendors), filter by seller/status.
 9. Order queue: move an order Placed → Confirmed → Shipped → Delivered, or cancel one and confirm the stock restocks.
+10. HARIHARAA subscriptions (`/admin/hariharaa-subscriptions`): approve/reject pending payment claims.
+11. HARIHARAA settings (`/admin/hariharaa-settings`): edit the monthly price and both UPI IDs — takes effect immediately, no deploy needed.
 
 ## What's new this round — worth specifically checking
 
+- **HARIHARAA Natural Food Stores** (`/hariharaa`) — a second, subscription-gated storefront bolted onto the same app: public testimonials + UPI QR page, Customer self-registration, manual payment-claim approval, its own product catalog fully separated from the OCF Marketplace.
+- **Per-order dispatch tracking** (Support Agent's Dispatch queue) — each order line can be marked Sent/Pending independently of the whole order's status.
 - **Learning Management** (Courses tab / Manage Courses) — full course → lesson → completion → certificate loop.
 - **Soil Laboratory** (Soil Testing tab / staff queue) — sample request through report delivery.
 - **Marketplace** (Marketplace tab) — real product catalog (27 OCF SPIN products), cart, Cash-on-Delivery checkout, vendor onboarding, order fulfillment.
@@ -78,6 +100,7 @@ Practical guide for clicking through the live app. Not a formal SDLC document (s
 - Learning Management has no real course content yet — the structure works, but courses need to be authored.
 - The 27 seeded Marketplace products have placeholder stock (999) and no photos.
 - Real SMS/WhatsApp/email/push notifications aren't wired yet — in-app notifications are live now as the interim.
+- HARIHARAA's subscription price (₹499) and product catalog (3 placeholder items) are placeholders pending the real numbers/catalog.
 
 ## Reporting a bug
 

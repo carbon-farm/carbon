@@ -8,9 +8,9 @@ An interactive version of this report (with a clickable test-plan checklist) is 
 ## Snapshot
 
 - **11 of 14** Charter modules fully built
-- **63** backend tests, all passing
-- **27** real products live in the Marketplace catalog
-- **14** database migrations applied to production
+- **68** backend tests, all passing
+- **27** real products live in the OCF Marketplace catalog, plus a second, fully separate storefront (HARIHARAA Natural Food Stores) with its own subscription-gated catalog
+- **15** database migrations applied to production
 
 ## Module status
 
@@ -80,6 +80,16 @@ An interactive version of this report (with a clickable test-plan checklist) is 
 - Rebuilt the frontend as a real portal after direct feedback that the previous build read as disconnected pages — persistent branded header, role-aware nav, a real landing page.
 - Bilingual (English + Telugu, stacked) on every farmer-facing string without exception.
 
+### HARIHARAA Natural Food Stores (new, 2026-08-23) — a second, unrelated storefront on the same platform
+- Public landing page (`/hariharaa`, no login) shows only 6 customer-testimonial videos and a dynamic UPI QR code until a visitor subscribes — nothing else about the business is visible, per the explicit "nothing else till they pay and subscribe" instruction.
+- New `CUSTOMER` role, kept fully separate from `FARMER` — its own registration entry point (`/hariharaa/register`), its own dashboard/shop, its own order history (reusing the same Order/Cart tables, partitioned by role so neither storefront's customers can see or buy from the other's catalog).
+- Subscription is monthly and manual for now: customer pays via UPI, submits a payment reference, an Administrator reviews and approves it (same submit → pending → approve/reject shape as Expert-credential and Vendor approval) — 30 days of access per approval. Built so a later swap to an automated payment gateway only changes how a claim gets created, not the approval/notification/audit plumbing.
+- HARIHARAA's product catalog is its own `VendorProfile` (created and approved through the exact same Staff-account + vendor-approval flow as any OCF vendor) — reuses the existing Vendor dashboard for product management, no new admin UI needed there.
+- Price and both UPI IDs are Administrator-editable (`/admin/hariharaa-settings`) — no code deploy needed to change them.
+- Per-line **dispatch tracking** (Pending/Sent) added to every Marketplace order, independent of the whole-order status — an order can ship while some lines are still pending (stock shortage on the seller's side: send what's available, the rest waits). Handled by the `SUPPORT_AGENT` role, which existed in the schema but had zero real screens until now — it now has its own dispatch queue (`/support/dispatch-queue`).
+- Verified live end to end: public landing → CUSTOMER register/OTP → blocked pre-subscription → claim submitted → Administrator notified/approved → catalog unlocked → COD checkout → order placed with the item defaulting to Pending → SUPPORT_AGENT login → dispatch queue → marked Sent → whole-order status untouched by the item-level change. Cross-tenant isolation confirmed both directions: a CUSTOMER hitting an OCF product's URL directly is rejected, and a FARMER's `/marketplace` still shows exactly the 27 OCF products with no HARIHARAA products mixed in.
+- **Real bug caught and fixed during this verification**: the filter meant to exclude HARIHARAA's products from the general OCF catalog used a top-level `NOT: { vendorId: X }`, which — due to SQL's NULL-comparison rules — silently excluded every platform-sold product too (`vendor_id != X` evaluates to NULL, not true, when `vendor_id IS NULL`). This briefly emptied the entire 27-product OCF catalog for every role in production before being caught by the live regression check and fixed (exclusion moved inside the vendor-sold branch specifically, where it can't touch the null-vendor branch).
+
 ## Deferred & blocked
 
 | Item | Needs |
@@ -90,6 +100,8 @@ An interactive version of this report (with a clickable test-plan checklist) is 
 | Learning content | Actual course material |
 | Product photos & real stock counts | Photos + real inventory numbers |
 | Marketplace coupons & returns | Scoping decision if wanted |
+| HARIHARAA real subscription price | Currently a ₹499 placeholder — set the real number in `/admin/hariharaa-settings` |
+| HARIHARAA real product catalog | Currently 3 placeholder products (oil, millet flour, honey) — replace via the Vendor dashboard |
 
 ## Regression pass findings (2026-08-23)
 
@@ -113,6 +125,9 @@ See the interactive report for a clickable checklist. Summary by role:
 - **Vendor**: profile submission + approval gate, product create/edit/image/deactivate, deactivated products disappearing from the public catalog.
 - **Administrator**: staff/credential management, taxonomy CRUD, audit log + reports sanity check, vendor approval, full order fulfillment + cancel/restock, spot-check the 27 seeded products.
 - **Cross-cutting**: sort/filter on every list screen, mobile-width nav for every role, dark mode, bilingual coverage, a hard-refresh mid-session to catch stale PWA cache.
+- **HARIHARAA CUSTOMER**: land on `/hariharaa` unauthenticated (testimonials + QR only), register via `/hariharaa/register`, confirm blocked pre-subscription, submit a claim, confirm access unlocks after Administrator approval, browse/buy the HARIHARAA catalog, confirm OCF products stay inaccessible.
+- **HARIHARAA Administrator**: review/approve/reject subscription claims, edit price/UPI IDs in settings.
+- **SUPPORT_AGENT**: confirm login lands on `/support/dispatch-queue`, can toggle an order item Pending/Sent, cannot see the whole-order confirm/ship/deliver/cancel buttons.
 
 ## Security & hygiene pending
 
@@ -124,6 +139,9 @@ See the interactive report for a clickable checklist. Summary by role:
 - **7 more test accounts added during the 2026-08-23 regression pass**, same deferred status — no admin deactivate/delete endpoint exists yet for any account, so none of these (old or new) can be cleaned up without direct database access:
   Regression Test Farmer (9123456622), Regression API Test (9123456633), Regression Test Farmer — abandoned registration, never OTP-verified (9123456611), Regression Moderator (9123456711), Regression Expert (9123456712), Regression Vendor (9123456713).
   Associated test records left in place (all in normal terminal states, not broken): case CASE-2026-665835DB (Closed), its auto-generated Published knowledge article "Chilli — Pest", order ORD-2026-CA4ED1C6 (Delivered), soil sample SOIL-2026-96EF7980, course "Regression Test Course: Organic Pest Management" (Published, 1 lesson), vendor profile "Regression Test Agro Supplies" (Approved), product "Regression Test Bio Booster" (Deactivated, so it's already hidden from the public catalog).
+- **2 more test accounts from HARIHARAA build verification (2026-08-23)**, same deferred status:
+  Regression Test Customer (9123456800, role CUSTOMER, active HARIHARAA subscriber), Regression Dispatch Agent (9123456900, role SUPPORT_AGENT).
+  Associated test records: order ORD-2026-25DD3C87 (Placed, item marked Sent). Note the HARIHARAA vendor account (9876500001, "HARIHARAA Natural Food Stores") and its 3 seeded products are **not** test data — they're the real infrastructure the storefront runs on; only their product listings (oil/flour/honey) are placeholders pending your actual catalog.
 
 ## Deployment
 
@@ -147,4 +165,5 @@ Migrations applied (14, all live):
 20260821115826_add_learning_management
 20260821121910_add_soil_laboratory
 20260822015831_add_marketplace
+20260823151259_add_hariharaa_customer_storefront
 ```
