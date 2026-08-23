@@ -60,12 +60,13 @@ export function CaseDetailPage() {
   async function handleRespond(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!session || !theCase) return;
-    const answer = String(new FormData(event.currentTarget).get('answer') ?? '');
+    const formEl = event.currentTarget;
+    const answer = String(new FormData(formEl).get('answer') ?? '');
     setBusy(true);
     setError(null);
     try {
       setCase(await respondToFollowUp(session.accessToken, theCase.id, answer));
-      event.currentTarget.reset();
+      formEl.reset();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.couldNotRespond.en} / ${strings.couldNotRespond.te}`);
     } finally {

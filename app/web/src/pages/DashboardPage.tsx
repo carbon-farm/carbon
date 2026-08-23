@@ -57,11 +57,12 @@ export function DashboardPage() {
   async function handleAddFarm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!session) return;
-    const form = new FormData(event.currentTarget);
-    const label = String(form.get('label') ?? '');
-    const address = String(form.get('address') ?? '');
-    const landSizeAcres = Number(form.get('landSizeAcres') ?? 0);
-    const primaryCrops = String(form.get('primaryCrops') ?? '')
+    const formEl = event.currentTarget;
+    const formData = new FormData(formEl);
+    const label = String(formData.get('label') ?? '');
+    const address = String(formData.get('address') ?? '');
+    const landSizeAcres = Number(formData.get('landSizeAcres') ?? 0);
+    const primaryCrops = String(formData.get('primaryCrops') ?? '')
       .split(',')
       .map((c) => c.trim())
       .filter(Boolean);
@@ -77,7 +78,7 @@ export function DashboardPage() {
       setFarms((prev) => [farm, ...prev]);
       setShowAddForm(false);
       setCoords(null);
-      event.currentTarget.reset();
+      formEl.reset();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.couldNotAddParcel.en} / ${strings.couldNotAddParcel.te}`);
     }
