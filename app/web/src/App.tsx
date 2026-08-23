@@ -11,6 +11,7 @@ import { NewCasePage } from './pages/NewCasePage';
 import { CaseDetailPage } from './pages/CaseDetailPage';
 import { ModeratorQueuePage } from './pages/ModeratorQueuePage';
 import { ExpertCasesPage } from './pages/ExpertCasesPage';
+import { ExpertCredentialsPage } from './pages/ExpertCredentialsPage';
 import { ExpertCaseDetailPage } from './pages/ExpertCaseDetailPage';
 import { AdminHomePage } from './pages/AdminHomePage';
 import { AdminStaffPage } from './pages/AdminStaffPage';
@@ -101,6 +102,14 @@ export function App() {
             element={
               <ProtectedRoute roles={['EXPERT']}>
                 <ExpertCasesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/expert/credentials"
+            element={
+              <ProtectedRoute roles={['EXPERT']}>
+                <ExpertCredentialsPage />
               </ProtectedRoute>
             }
           />

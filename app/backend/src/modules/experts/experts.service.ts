@@ -41,6 +41,12 @@ export class ExpertsService {
     return updated;
   }
 
+  async getMyProfile(userId: string) {
+    const profile = await this.prisma.expertProfile.findUnique({ where: { userId } });
+    if (!profile) throw new NotFoundException(bi('Expert profile not found', 'నిపుణుల ప్రొఫైల్ కనుగొనబడలేదు'));
+    return profile;
+  }
+
   async listPendingReview() {
     return this.prisma.expertProfile.findMany({
       where: { credentialStatus: CredentialStatus.PENDING_REVIEW },

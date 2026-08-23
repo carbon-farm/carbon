@@ -231,6 +231,34 @@ export const strings = {
   couldNotStartReview: { en: 'Could not start review on this case.', te: 'ఈ కేసుపై సమీక్ష ప్రారంభించలేకపోయాము.' },
   couldNotAssign: { en: 'Could not assign this case.', te: 'ఈ కేసును కేటాయించలేకపోయాము.' },
 
+  // Expert — my credentials
+  myCredentialsLinkTitle: { en: 'My credentials', te: 'నా ధృవపత్రాలు' },
+  myCredentialsTitle: { en: 'My credentials', te: 'నా ధృవపత్రాలు' },
+  credentialStatusLabel: { en: 'Status', te: 'స్థితి' },
+  credentialNotSubmitted: {
+    en: 'Not submitted yet — you need to submit your qualification before you can be assigned cases.',
+    te: 'ఇంకా సమర్పించలేదు — కేసులు కేటాయించబడాలంటే మీరు మీ అర్హతను సమర్పించాలి.',
+  },
+  credentialPendingReview: {
+    en: 'Submitted — waiting for an Administrator to review it.',
+    te: 'సమర్పించారు — అడ్మినిస్ట్రేటర్ సమీక్ష కోసం వేచి ఉంది.',
+  },
+  credentialVerified: { en: 'Verified — you can be assigned cases.', te: 'ధృవీకరించబడింది — మీకు కేసులు కేటాయించవచ్చు.' },
+  credentialRejected: {
+    en: 'Rejected — check your notifications for the reason, then resubmit below.',
+    te: 'తిరస్కరించబడింది — కారణం కోసం మీ ప్రకటనలను చూడండి, తర్వాత క్రింద మళ్ళీ సమర్పించండి.',
+  },
+  qualificationFieldHint: {
+    en: 'Your farming/agronomy qualification or relevant experience.',
+    te: 'మీ వ్యవసాయం/అగ్రోనమీ అర్హత లేదా సంబంధిత అనుభవం.',
+  },
+  licenseFieldOptionalHint: { en: 'Optional — if you hold a professional license.', te: 'ఐచ్ఛికం — మీకు వృత్తిపరమైన లైసెన్స్ ఉంటే.' },
+  submitCredentialsButton: { en: 'Submit for review', te: 'సమీక్ష కోసం సమర్పించండి' },
+  resubmitCredentialsButton: { en: 'Resubmit for review', te: 'మళ్ళీ సమీక్ష కోసం సమర్పించండి' },
+  submittingCredentials: { en: 'Submitting…', te: 'సమర్పిస్తోంది…' },
+  couldNotLoadMyCredentials: { en: 'Could not load your credential status.', te: 'మీ ధృవపత్ర స్థితిని లోడ్ చేయలేకపోయాము.' },
+  couldNotSubmitCredentials: { en: 'Could not submit your credentials.', te: 'మీ ధృవపత్రాలను సమర్పించలేకపోయాము.' },
+
   // Expert — assigned cases
   expertCasesEyebrow: { en: 'Expert', te: 'నిపుణుడు' },
   expertCasesTitle: { en: 'My assigned cases', te: 'నాకు కేటాయించిన కేసులు' },

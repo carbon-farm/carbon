@@ -14,6 +14,12 @@ export class ExpertsController {
   constructor(private readonly expertsService: ExpertsService) {}
 
   @Roles(Role.EXPERT)
+  @Get('me')
+  getMyProfile(@CurrentUser() user: AuthenticatedUser) {
+    return this.expertsService.getMyProfile(user.userId);
+  }
+
+  @Roles(Role.EXPERT)
   @Patch('me/credentials')
   submitCredentials(@Body() dto: SubmitCredentialsDto, @CurrentUser() user: AuthenticatedUser) {
     return this.expertsService.submitCredentials(user.userId, dto);

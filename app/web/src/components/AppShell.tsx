@@ -33,6 +33,7 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
   EXPERT: [
     { to: '/expert/cases', labelKey: 'expertCasesTitle' },
     { to: '/expert/articles', labelKey: 'myArticlesTitle' },
+    { to: '/expert/credentials', labelKey: 'myCredentialsLinkTitle' },
     { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
   ],
   VENDOR: [
