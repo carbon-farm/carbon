@@ -77,7 +77,12 @@ export function HariharaaLandingPage() {
               <div>₹{settings.subscriptionPriceInr.toFixed(2)}</div>
 
               <div style={{ background: '#fff', padding: 16, width: 'fit-content', margin: '16px 0' }}>
-                <QRCode value={upiLink} size={200} />
+                {/* level="Q" (~25% damage tolerance) instead of the library's
+                    default "L" (~7%) — this is scanned screen-to-screen
+                    (phone camera off a laptop/phone screen) far more often
+                    than printed, so the extra error-correction headroom
+                    matters more than the slightly denser module grid. */}
+                <QRCode value={upiLink} size={200} level="Q" />
               </div>
               <BiValue value={strings.hariharaaScanToPayHint} as="p" className="hint" />
 
