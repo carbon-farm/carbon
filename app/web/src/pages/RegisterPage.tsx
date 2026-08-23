@@ -2,13 +2,17 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
+import { roleHomePath } from '../auth/roleHome';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings, otpSentTo } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 
 // Two steps only, per 01-Product/05-Target-Users.md — Ravi's journey has no
 // patience for a long form: name/mobile/password, then a single OTP field.
-export function RegisterPage() {
+// forcedRole lets a second entry point (HARIHARAA's /hariharaa/register)
+// reuse this exact flow for a different role and different branding copy,
+// without exposing a role picker on the regular public /register page.
+export function RegisterPage({ forcedRole }: { forcedRole?: 'CUSTOMER' } = {}) {
   const { register, verifyRegistrationOtp } = useAuth();
   const navigate = useNavigate();
 
@@ -26,7 +30,7 @@ export function RegisterPage() {
     setError(null);
     setSubmitting(true);
     try {
-      const result = await register(mobileNumber, password, name);
+      const result = await register(mobileNumber, password, name, forcedRole);
       setDevOtpHint(result.devOtp ?? null);
       setStep('otp');
     } catch (err) {
@@ -41,8 +45,8 @@ export function RegisterPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await verifyRegistrationOtp(mobileNumber, otp);
-      navigate('/dashboard');
+      const { role } = await verifyRegistrationOtp(mobileNumber, otp);
+      navigate(roleHomePath(role));
     } catch (err) {
       setError(
         err instanceof ApiError ? err.message : `${strings.incorrectCodeError.en} / ${strings.incorrectCodeError.te}`,
@@ -97,8 +101,8 @@ export function RegisterPage() {
   return (
     <div className="screen">
       <div>
-        <Bi id="registerStep1" as="span" className="eyebrow" />
-        <Bi id="createAccountTitle" as="h1" />
+        <Bi id={forcedRole ? 'hariharaaRegisterEyebrow' : 'registerStep1'} as="span" className="eyebrow" />
+        <Bi id={forcedRole ? 'hariharaaCreateAccountTitle' : 'createAccountTitle'} as="h1" />
       </div>
 
       {error && <div className="error-banner">{error}</div>}

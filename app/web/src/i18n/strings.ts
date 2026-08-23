@@ -673,6 +673,96 @@ export const strings = {
   productCategoriesHeading: { en: 'Product categories', te: 'ఉత్పత్తి వర్గాలు' },
   vendorFilterLabel: { en: 'Seller', te: 'విక్రేత' },
   platformSoldOption: { en: 'Platform', te: 'ప్లాట్‌ఫారమ్' },
+
+  // HARIHARAA Natural Food Stores — nav labels
+  hariharaaShopNavTitle: { en: 'Shop', te: 'షాప్' },
+  hariharaaSubscriptionNavTitle: { en: 'My subscription', te: 'నా సభ్యత్వం' },
+  dispatchQueueNavTitle: { en: 'Dispatch queue', te: 'డిస్పాచ్ క్యూ' },
+  hariharaaSubscriptionsAdminNavTitle: { en: 'HARIHARAA subscriptions', te: 'HARIHARAA సభ్యత్వాలు' },
+  hariharaaSettingsAdminNavTitle: { en: 'HARIHARAA settings', te: 'HARIHARAA సెట్టింగ్‌లు' },
+
+  // HARIHARAA — public landing page
+  hariharaaBrandTagline: { en: 'Real natural food, from our kitchen to yours', te: 'నిజమైన సహజ ఆహారం, మా వంటగది నుండి మీ వరకు' },
+  hariharaaTestimonialsHeading: { en: 'What our customers say', te: 'మా కస్టమర్లు ఏమంటున్నారు' },
+  hariharaaTestimonial1: { en: 'Customer story 1', te: 'కస్టమర్ కథ 1' },
+  hariharaaTestimonial2: { en: 'Customer story 2', te: 'కస్టమర్ కథ 2' },
+  hariharaaTestimonial3: { en: 'Customer story 3', te: 'కస్టమర్ కథ 3' },
+  hariharaaTestimonial4: { en: 'Customer story 4', te: 'కస్టమర్ కథ 4' },
+  hariharaaTestimonial5: { en: 'Customer story 5', te: 'కస్టమర్ కథ 5' },
+  hariharaaTestimonial6: { en: 'Customer story 6', te: 'కస్టమర్ కథ 6' },
+  hariharaaSubscribeHeading: { en: 'Subscribe to shop', te: 'షాపింగ్ చేయడానికి సభ్యత్వం తీసుకోండి' },
+  hariharaaSubscribeDescription: {
+    en: 'Pay the monthly subscription below, then register and submit your payment reference — we activate access within a day.',
+    te: 'క్రింద ఉన్న నెలవారీ సభ్యత్వాన్ని చెల్లించండి, తర్వాత నమోదు చేసుకుని మీ చెల్లింపు రిఫరెన్స్‌ను సమర్పించండి — మేము ఒక రోజులో ప్రాప్యతను యాక్టివేట్ చేస్తాము.',
+  },
+  hariharaaScanToPayHint: { en: 'Scan with any UPI app', te: 'ఏదైనా UPI యాప్‌తో స్కాన్ చేయండి' },
+  hariharaaPriceLabel: { en: 'Monthly subscription', te: 'నెలవారీ సభ్యత్వం' },
+  hariharaaRegisterCta: { en: 'Register to subscribe', te: 'సభ్యత్వం కోసం నమోదు చేసుకోండి' },
+  hariharaaSettingsUnavailable: {
+    en: 'Subscription details are not available right now — check back soon.',
+    te: 'సభ్యత్వ వివరాలు ప్రస్తుతం అందుబాటులో లేవు — త్వరలో మళ్ళీ చూడండి.',
+  },
+
+  // HARIHARAA — registration (forcedRole="CUSTOMER" on the shared RegisterPage)
+  hariharaaRegisterEyebrow: { en: 'HARIHARAA', te: 'HARIHARAA' },
+  hariharaaCreateAccountTitle: { en: 'Create your HARIHARAA account', te: 'మీ HARIHARAA ఖాతాను సృష్టించండి' },
+
+  // HARIHARAA — customer subscription status + claim
+  hariharaaSubscriptionTitle: { en: 'My subscription', te: 'నా సభ్యత్వం' },
+  hariharaaStatusLabel: { en: 'Status', te: 'స్థితి' },
+  hariharaaStatusNotSubmitted: {
+    en: 'Not submitted yet — pay via the QR code and submit your payment reference below.',
+    te: 'ఇంకా సమర్పించలేదు — QR కోడ్ ద్వారా చెల్లించి క్రింద మీ చెల్లింపు రిఫరెన్స్‌ను సమర్పించండి.',
+  },
+  hariharaaStatusPendingReview: {
+    en: 'Submitted — waiting for an Administrator to review it.',
+    te: 'సమర్పించారు — అడ్మినిస్ట్రేటర్ సమీక్ష కోసం వేచి ఉంది.',
+  },
+  hariharaaStatusActive: { en: 'Active — you can shop the full catalog.', te: 'యాక్టివ్ — మీరు పూర్తి కేటలాగ్‌ను షాపింగ్ చేయవచ్చు.' },
+  hariharaaStatusRejected: {
+    en: 'Rejected — check your notifications for the reason, then resubmit below.',
+    te: 'తిరస్కరించబడింది — కారణం కోసం మీ ప్రకటనలను చూడండి, తర్వాత క్రింద మళ్ళీ సమర్పించండి.',
+  },
+  hariharaaStatusExpired: { en: 'Expired — renew below to continue shopping.', te: 'గడువు ముగిసింది — షాపింగ్ కొనసాగించడానికి క్రింద పునరుద్ధరించండి.' },
+  hariharaaActiveUntilLabel: { en: 'Active until', te: 'వరకు యాక్టివ్' },
+  hariharaaPaymentReferenceField: { en: 'Payment reference / UTR number', te: 'చెల్లింపు రిఫరెన్స్ / UTR నంబర్' },
+  hariharaaNoteField: { en: 'Note (optional)', te: 'గమనిక (ఐచ్ఛికం)' },
+  hariharaaSubmitClaimButton: { en: 'Submit for review', te: 'సమీక్ష కోసం సమర్పించండి' },
+  hariharaaResubmitClaimButton: { en: 'Resubmit for review', te: 'మళ్ళీ సమీక్ష కోసం సమర్పించండి' },
+  hariharaaSubmittingClaim: { en: 'Submitting…', te: 'సమర్పిస్తోంది…' },
+  couldNotLoadHariharaaSubscription: { en: 'Could not load your subscription status.', te: 'మీ సభ్యత్వ స్థితిని లోడ్ చేయలేకపోయాము.' },
+  couldNotSubmitHariharaaClaim: { en: 'Could not submit your claim.', te: 'మీ దావాను సమర్పించలేకపోయాము.' },
+
+  // HARIHARAA — admin subscription review
+  hariharaaSubscriptionsAdminTitle: { en: 'HARIHARAA subscriptions', te: 'HARIHARAA సభ్యత్వాలు' },
+  noHariharaaSubscriptionsPending: { en: 'Nothing pending review.', te: 'సమీక్ష కోసం ఏమీ పెండింగ్‌లో లేదు.' },
+  couldNotLoadHariharaaSubscriptions: { en: 'Could not load pending claims.', te: 'పెండింగ్ దావాలను లోడ్ చేయలేకపోయాము.' },
+  couldNotReviewHariharaaSubscription: { en: 'Could not save this decision.', te: 'ఈ నిర్ణయాన్ని సేవ్ చేయలేకపోయాము.' },
+  hariharaaPaymentReferenceLabel: { en: 'Payment reference', te: 'చెల్లింపు రిఫరెన్స్' },
+
+  // HARIHARAA — admin settings
+  hariharaaSettingsAdminTitle: { en: 'HARIHARAA settings', te: 'HARIHARAA సెట్టింగ్‌లు' },
+  hariharaaPriceField: { en: 'Monthly subscription price (₹)', te: 'నెలవారీ సభ్యత్వ ధర (₹)' },
+  hariharaaPayeeNameField: { en: 'Payee name (shown on QR)', te: 'చెల్లింపుదారు పేరు (QRలో చూపబడుతుంది)' },
+  hariharaaPrimaryUpiField: { en: 'Primary UPI ID', te: 'ప్రధాన UPI ID' },
+  hariharaaSecondaryUpiField: { en: 'Secondary UPI ID (optional)', te: 'ద్వితీయ UPI ID (ఐచ్ఛికం)' },
+  hariharaaSaveSettingsButton: { en: 'Save settings', te: 'సెట్టింగ్‌లను సేవ్ చేయండి' },
+  couldNotLoadHariharaaSettings: { en: 'Could not load settings.', te: 'సెట్టింగ్‌లను లోడ్ చేయలేకపోయాము.' },
+  couldNotSaveHariharaaSettings: { en: 'Could not save settings.', te: 'సెట్టింగ్‌లను సేవ్ చేయలేకపోయాము.' },
+
+  // HARIHARAA — shop
+  hariharaaShopTitle: { en: 'HARIHARAA catalog', te: 'HARIHARAA కేటలాగ్' },
+  noHariharaaProductsYet: { en: 'No products yet — check back soon.', te: 'ఇంకా ఉత్పత్తులు లేవు — త్వరలో మళ్ళీ చూడండి.' },
+
+  // Dispatch queue (SUPPORT_AGENT) + per-item status, shared with OrderDetailPage
+  dispatchQueueTitle: { en: 'Dispatch queue', te: 'డిస్పాచ్ క్యూ' },
+  dispatchStatusLabel: { en: 'Dispatch status', te: 'డిస్పాచ్ స్థితి' },
+  dispatchStatusPending: { en: 'Pending', te: 'పెండింగ్‌లో' },
+  dispatchStatusSent: { en: 'Sent', te: 'పంపబడింది' },
+  markSentButton: { en: 'Mark sent', te: 'పంపినట్లు గుర్తించండి' },
+  markPendingButton: { en: 'Mark pending', te: 'పెండింగ్‌గా గుర్తించండి' },
+  updatingDispatchStatus: { en: 'Updating…', te: 'నవీకరిస్తోంది…' },
+  couldNotUpdateDispatchStatus: { en: 'Could not update this item.', te: 'ఈ అంశాన్ని నవీకరించలేకపోయాము.' },
 } as const satisfies Record<string, Bilingual>;
 
 export type StringKey = keyof typeof strings;
@@ -787,5 +877,28 @@ const ORDER_STATUS_KEYS: Record<string, StringKey> = {
 
 export function orderStatusLabel(status: string): Bilingual {
   const key = ORDER_STATUS_KEYS[status];
+  return key ? strings[key] : { en: status, te: status };
+}
+
+const DISPATCH_STATUS_KEYS: Record<string, StringKey> = {
+  PENDING: 'dispatchStatusPending',
+  SENT: 'dispatchStatusSent',
+};
+
+export function dispatchStatusLabel(status: string): Bilingual {
+  const key = DISPATCH_STATUS_KEYS[status];
+  return key ? strings[key] : { en: status, te: status };
+}
+
+const HARIHARAA_SUBSCRIPTION_STATUS_KEYS: Record<string, StringKey> = {
+  NOT_SUBMITTED: 'hariharaaStatusNotSubmitted',
+  PENDING_REVIEW: 'hariharaaStatusPendingReview',
+  ACTIVE: 'hariharaaStatusActive',
+  REJECTED: 'hariharaaStatusRejected',
+  EXPIRED: 'hariharaaStatusExpired',
+};
+
+export function hariharaaSubscriptionStatusLabel(status: string): Bilingual {
+  const key = HARIHARAA_SUBSCRIPTION_STATUS_KEYS[status];
   return key ? strings[key] : { en: status, te: status };
 }

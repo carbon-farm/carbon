@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { MarketplaceService } from './marketplace.service';
 import { CheckoutDto } from './dto/checkout.dto';
+import { SetDispatchStatusDto } from './dto/dispatch-status.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -12,19 +13,19 @@ import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-
 export class OrdersController {
   constructor(private readonly marketplaceService: MarketplaceService) {}
 
-  @Roles(Role.FARMER)
+  @Roles(Role.FARMER, Role.CUSTOMER)
   @Post('checkout')
   checkout(@Body() dto: CheckoutDto, @CurrentUser() user: AuthenticatedUser) {
-    return this.marketplaceService.checkout(user.userId, dto);
+    return this.marketplaceService.checkout(user.userId, user.role as Role, dto);
   }
 
-  @Roles(Role.FARMER)
+  @Roles(Role.FARMER, Role.CUSTOMER)
   @Get('mine')
   listMine(@CurrentUser() user: AuthenticatedUser) {
     return this.marketplaceService.listMyOrders(user.userId);
   }
 
-  @Roles(Role.ADMINISTRATOR)
+  @Roles(Role.ADMINISTRATOR, Role.SUPPORT_AGENT)
   @Get('manage')
   listQueueForAdmin() {
     return this.marketplaceService.listQueueForAdmin();
@@ -60,5 +61,20 @@ export class OrdersController {
   @Post(':id/cancel')
   cancel(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.marketplaceService.cancelOrder(id, user.userId);
+  }
+
+  // Per-line fulfillment status — separate from the whole-order state
+  // machine above. Available to the dispatch team (SUPPORT_AGENT) as well
+  // as Administrators, unlike confirm/ship/deliver/cancel which stay
+  // Administrator-only per this module's documented design intent.
+  @Roles(Role.SUPPORT_AGENT, Role.ADMINISTRATOR)
+  @Post(':id/items/:itemId/dispatch-status')
+  setItemDispatchStatus(
+    @Param('id') id: string,
+    @Param('itemId') itemId: string,
+    @Body() dto: SetDispatchStatusDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.marketplaceService.markItemDispatchStatus(id, itemId, dto.status, user.userId);
   }
 }

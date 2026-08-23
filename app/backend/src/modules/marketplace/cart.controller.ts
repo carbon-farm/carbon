@@ -8,7 +8,7 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.FARMER)
+@Roles(Role.FARMER, Role.CUSTOMER)
 @Controller('marketplace/cart')
 export class CartController {
   constructor(private readonly marketplaceService: MarketplaceService) {}
@@ -20,7 +20,7 @@ export class CartController {
 
   @Post()
   setCartItem(@Body() dto: AddToCartDto, @CurrentUser() user: AuthenticatedUser) {
-    return this.marketplaceService.setCartItem(user.userId, dto);
+    return this.marketplaceService.setCartItem(user.userId, user.role as Role, dto);
   }
 
   @Post(':productId/remove')

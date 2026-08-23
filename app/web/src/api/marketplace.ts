@@ -47,6 +47,8 @@ export interface Cart {
   total: number;
 }
 
+export type DispatchStatus = 'PENDING' | 'SENT';
+
 export interface OrderItemEntry {
   id: string;
   productId: string;
@@ -54,6 +56,7 @@ export interface OrderItemEntry {
   unitPrice: number;
   quantity: number;
   lineTotal: number;
+  dispatchStatus: DispatchStatus;
 }
 
 export interface Order {
@@ -220,4 +223,18 @@ export function deliverOrder(token: string, id: string) {
 
 export function cancelOrder(token: string, id: string) {
   return apiRequest<Order>(`/marketplace/orders/${id}/cancel`, { method: 'POST', token });
+}
+
+export function setItemDispatchStatus(token: string, orderId: string, itemId: string, status: DispatchStatus) {
+  return apiRequest<Order>(`/marketplace/orders/${orderId}/items/${itemId}/dispatch-status`, {
+    method: 'POST',
+    body: { status },
+    token,
+  });
+}
+
+// ---------- HARIHARAA storefront catalog (CUSTOMER only) ----------
+
+export function listHariharaaCatalog(token: string) {
+  return apiRequest<Product[]>('/marketplace/products/hariharaa', { token });
 }

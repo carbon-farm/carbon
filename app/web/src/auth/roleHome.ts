@@ -1,7 +1,4 @@
-// Where each role lands after login. FARMER/MODERATOR/EXPERT/ADMINISTRATOR/
-// VENDOR have real screens; SUPPORT_AGENT doesn't yet — it falls through to
-// the not-built notice rather than hitting a role-gated endpoint and
-// crashing.
+// Where each role lands after login. Every role now has a real screen.
 export function roleHomePath(role: string): string {
   switch (role) {
     case 'FARMER':
@@ -14,6 +11,10 @@ export function roleHomePath(role: string): string {
       return '/admin';
     case 'VENDOR':
       return '/marketplace/vendor';
+    case 'CUSTOMER':
+      return '/hariharaa/shop';
+    case 'SUPPORT_AGENT':
+      return '/support/dispatch-queue';
     default:
       return '/no-portal';
   }

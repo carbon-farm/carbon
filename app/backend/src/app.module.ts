@@ -15,6 +15,7 @@ import { ReportsModule } from './modules/reports/reports.module';
 import { LearningModule } from './modules/learning/learning.module';
 import { SoilLabModule } from './modules/soil-lab/soil-lab.module';
 import { MarketplaceModule } from './modules/marketplace/marketplace.module';
+import { HariharaaModule } from './modules/hariharaa/hariharaa.module';
 import { HealthController } from './health/health.controller';
 
 @Module({
@@ -35,6 +36,7 @@ import { HealthController } from './health/health.controller';
     LearningModule,
     SoilLabModule,
     MarketplaceModule,
+    HariharaaModule,
   ],
   controllers: [HealthController],
 })

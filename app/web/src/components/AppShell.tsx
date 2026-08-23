@@ -53,7 +53,15 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { to: '/marketplace/manage/vendors', labelKey: 'vendorApprovalsTitle' },
     { to: '/marketplace/manage/products', labelKey: 'productsManageTitle' },
     { to: '/marketplace/manage/orders', labelKey: 'ordersQueueTitle' },
+    { to: '/admin/hariharaa-subscriptions', labelKey: 'hariharaaSubscriptionsAdminNavTitle' },
+    { to: '/admin/hariharaa-settings', labelKey: 'hariharaaSettingsAdminNavTitle' },
   ],
+  CUSTOMER: [
+    { to: '/hariharaa/shop', labelKey: 'hariharaaShopNavTitle' },
+    { to: '/marketplace/orders', labelKey: 'myOrdersTitle' },
+    { to: '/hariharaa/subscription', labelKey: 'hariharaaSubscriptionNavTitle' },
+  ],
+  SUPPORT_AGENT: [{ to: '/support/dispatch-queue', labelKey: 'dispatchQueueNavTitle' }],
 };
 
 // Persistent header + role-aware nav — every authenticated page renders
@@ -88,8 +96,17 @@ export function AppShell({ children, wide = false }: { children: ReactNode; wide
     <div>
       <header className="app-header">
         <Link to={session ? roleHomePath(session.role) : '/'} className="brand-wordmark">
-          <span className="bi-en">Organic Carbon Farming</span>
-          <span className="bi-te">ఆర్గానిక్ కార్బన్ ఫార్మింగ్</span>
+          {session?.role === 'CUSTOMER' ? (
+            <>
+              <span className="bi-en">HARIHARAA Natural Food Stores</span>
+              <span className="bi-te">HARIHARAA నేచురల్ ఫుడ్ స్టోర్స్</span>
+            </>
+          ) : (
+            <>
+              <span className="bi-en">Organic Carbon Farming</span>
+              <span className="bi-te">ఆర్గానిక్ కార్బన్ ఫార్మింగ్</span>
+            </>
+          )}
         </Link>
         {session && (
           <div className="header-actions">

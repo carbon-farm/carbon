@@ -6,9 +6,10 @@ import { CartController } from './cart.controller';
 import { OrdersController } from './orders.controller';
 import { WishlistController } from './wishlist.controller';
 import { UploadsModule } from '../uploads/uploads.module';
+import { HariharaaModule } from '../hariharaa/hariharaa.module';
 
 @Module({
-  imports: [UploadsModule],
+  imports: [UploadsModule, HariharaaModule],
   controllers: [MarketplaceController, ProductsController, CartController, OrdersController, WishlistController],
   providers: [MarketplaceService],
 })

@@ -1,10 +1,11 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { Order, OrderStatus, Product, Role, VendorProfile } from '@prisma/client';
+import { DispatchStatus, Order, OrderStatus, Product, Role, VendorProfile } from '@prisma/client';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { UploadsService } from '../uploads/uploads.service';
+import { HariharaaService } from '../hariharaa/hariharaa.service';
 import { bi } from '../../common/i18n';
 import { SubmitVendorProfileDto, VerifyVendorDto } from './dto/vendor-profile.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -12,6 +13,7 @@ import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 import { AddToCartDto } from './dto/cart.dto';
 import { CheckoutDto } from './dto/checkout.dto';
 import { SubmitReviewDto } from './dto/review.dto';
+import { SetDispatchStatusDto } from './dto/dispatch-status.dto';
 
 const PRODUCT_INCLUDE = {
   category: true,
@@ -30,7 +32,26 @@ export class MarketplaceService {
     private readonly audit: AuditService,
     private readonly notifications: NotificationsService,
     private readonly uploads: UploadsService,
+    private readonly hariharaa: HariharaaService,
   ) {}
+
+  // Shared gate for cart-add and checkout: a HARIHARAA product requires an
+  // active-subscriber CUSTOMER; every other (OCF) product requires the
+  // requester to NOT be a CUSTOMER. Keeps the two storefronts' carts/orders
+  // fully partitioned even though they share the same CartItem/Order tables.
+  private async assertShopperCanTransact(userId: string, role: Role, product: Product): Promise<void> {
+    const hariharaaVendorId = await this.hariharaa.getHariharaaVendorId();
+    const isHariharaaProduct = hariharaaVendorId !== null && product.vendorId === hariharaaVendorId;
+    if (isHariharaaProduct) {
+      if (role !== Role.CUSTOMER || !(await this.hariharaa.isActiveSubscriber(userId))) {
+        throw new ForbiddenException(bi('An active HARIHARAA subscription is required', 'యాక్టివ్ HARIHARAA సభ్యత్వం అవసరం'));
+      }
+      return;
+    }
+    if (role === Role.CUSTOMER) {
+      throw new ForbiddenException(bi('This product is not part of the HARIHARAA catalog', 'ఈ ఉత్పత్తి HARIHARAA కేటలాగ్‌లో భాగం కాదు'));
+    }
+  }
 
   // ---------- Vendor profile ----------
 
@@ -160,13 +181,37 @@ export class MarketplaceService {
   // products stay invisible to farmers even if the vendor already created
   // them, same trust gate as Knowledge's PUBLISHED-only farmer visibility.
   async listPublished(categoryId?: string, search?: string) {
+    const hariharaaVendorId = await this.hariharaa.getHariharaaVendorId();
     return this.prisma.product.findMany({
       where: {
         isActive: true,
         OR: [{ vendorId: null }, { vendor: { isApproved: true } }],
+        // HARIHARAA is a completely separate, subscription-gated storefront —
+        // its products never appear in the general OCF catalog for any role.
+        ...(hariharaaVendorId ? { NOT: { vendorId: hariharaaVendorId } } : {}),
         ...(categoryId ? { categoryId } : {}),
         ...(search ? { name: { contains: search, mode: 'insensitive' } } : {}),
       },
+      orderBy: { updatedAt: 'desc' },
+      include: PRODUCT_INCLUDE,
+    });
+  }
+
+  // CUSTOMER-only, gated on an active HARIHARAA subscription — the
+  // equivalent of listPublished() but for the HARIHARAA storefront's own
+  // vendor rather than the general OCF catalog.
+  async listHariharaaCatalog(requesterId: string) {
+    if (!(await this.hariharaa.isActiveSubscriber(requesterId))) {
+      throw new ForbiddenException(
+        bi('An active HARIHARAA subscription is required', 'యాక్టివ్ HARIHARAA సభ్యత్వం అవసరం'),
+      );
+    }
+    const vendorId = await this.hariharaa.getHariharaaVendorId();
+    if (!vendorId) {
+      throw new NotFoundException(bi('The HARIHARAA catalog is not set up yet', 'HARIHARAA కేటలాగ్ ఇంకా సెటప్ చేయలేదు'));
+    }
+    return this.prisma.product.findMany({
+      where: { vendorId, isActive: true },
       orderBy: { updatedAt: 'desc' },
       include: PRODUCT_INCLUDE,
     });
@@ -184,11 +229,31 @@ export class MarketplaceService {
 
   async getById(productId: string, requester: { userId: string; role: Role }): Promise<Product> {
     const found = await this.getProductOrThrow(productId);
-    const isPublic = found.isActive && (found.vendorId === null || (await this.isVendorApproved(found.vendorId)));
-    if (isPublic) return found;
     const isOwner = found.vendorId && (await this.prisma.vendorProfile.findUnique({ where: { id: found.vendorId } }))?.userId === requester.userId;
     const isAdmin = requester.role === Role.ADMINISTRATOR;
-    if (!isOwner && !isAdmin) {
+    if (isOwner || isAdmin) return found;
+
+    const hariharaaVendorId = await this.hariharaa.getHariharaaVendorId();
+    const isHariharaaProduct = hariharaaVendorId !== null && found.vendorId === hariharaaVendorId;
+    if (isHariharaaProduct) {
+      // HARIHARAA products are visible only to an active-subscriber CUSTOMER
+      // — never through the general OCF isVendorApproved rule below.
+      const isActiveCustomer =
+        requester.role === Role.CUSTOMER && found.isActive && (await this.hariharaa.isActiveSubscriber(requester.userId));
+      if (!isActiveCustomer) {
+        throw new ForbiddenException(bi('This product is not available', 'ఈ ఉత్పత్తి అందుబాటులో లేదు'));
+      }
+      return found;
+    }
+
+    // A CUSTOMER never sees the general OCF catalog — the two storefronts
+    // are fully partitioned by role, same as the checkout-side check.
+    if (requester.role === Role.CUSTOMER) {
+      throw new ForbiddenException(bi('This product is not available', 'ఈ ఉత్పత్తి అందుబాటులో లేదు'));
+    }
+
+    const isPublic = found.isActive && (found.vendorId === null || (await this.isVendorApproved(found.vendorId)));
+    if (!isPublic) {
       throw new ForbiddenException(bi('This product is not available', 'ఈ ఉత్పత్తి అందుబాటులో లేదు'));
     }
     return found;
@@ -216,11 +281,12 @@ export class MarketplaceService {
 
   // ---------- Cart ----------
 
-  async setCartItem(userId: string, dto: AddToCartDto) {
+  async setCartItem(userId: string, role: Role, dto: AddToCartDto) {
     const product = await this.getProductOrThrow(dto.productId);
     if (!product.isActive) {
       throw new BadRequestException(bi('This product is no longer available', 'ఈ ఉత్పత్తి ఇకపై అందుబాటులో లేదు'));
     }
+    await this.assertShopperCanTransact(userId, role, product);
     await this.prisma.cartItem.upsert({
       where: { userId_productId: { userId, productId: dto.productId } },
       create: { userId, productId: dto.productId, quantity: dto.quantity },
@@ -246,7 +312,7 @@ export class MarketplaceService {
 
   // ---------- Orders ----------
 
-  async checkout(userId: string, dto: CheckoutDto): Promise<Order> {
+  async checkout(userId: string, role: Role, dto: CheckoutDto): Promise<Order> {
     const cart = await this.prisma.cartItem.findMany({ where: { userId }, include: { product: true } });
     if (cart.length === 0) {
       throw new BadRequestException(bi('Your cart is empty', 'మీ కార్ట్ ఖాళీగా ఉంది'));
@@ -262,6 +328,9 @@ export class MarketplaceService {
           bi(`Not enough stock for "${item.product.name}"`, `"${item.product.name}"కు తగినంత స్టాక్ లేదు`),
         );
       }
+      // Defense in depth — setCartItem already enforces this at add-to-cart
+      // time, but a subscription can lapse between adding and checking out.
+      await this.assertShopperCanTransact(userId, role, item.product);
     }
 
     const totalAmount = cart.reduce((sum, item) => sum + item.quantity * item.product.price, 0);
@@ -324,11 +393,34 @@ export class MarketplaceService {
     const found = await this.prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
     if (!found) throw new NotFoundException(bi('Order not found', 'ఆర్డర్ కనుగొనబడలేదు'));
     const isOwner = found.farmerId === requester.userId;
-    const isAdmin = requester.role === Role.ADMINISTRATOR;
-    if (!isOwner && !isAdmin) {
+    const isStaff = requester.role === Role.ADMINISTRATOR || requester.role === Role.SUPPORT_AGENT;
+    if (!isOwner && !isStaff) {
       throw new ForbiddenException(bi('You do not have access to this order', 'మీకు ఈ ఆర్డర్‌కు ప్రాప్యత లేదు'));
     }
     return found;
+  }
+
+  // Per-line fulfillment visibility only — deliberately does not touch
+  // Order.status. An Administrator can still move the whole order to
+  // SHIPPED while some lines are still PENDING (stock shortage on the
+  // seller's side: what's available ships, the rest waits) — that's the
+  // exact scenario this was built for, not a bug to guard against.
+  async markItemDispatchStatus(orderId: string, itemId: string, status: DispatchStatus, actorId: string): Promise<Order> {
+    const item = await this.prisma.orderItem.findUnique({ where: { id: itemId } });
+    if (!item || item.orderId !== orderId) {
+      throw new NotFoundException(bi('Order item not found', 'ఆర్డర్ అంశం కనుగొనబడలేదు'));
+    }
+    await this.prisma.orderItem.update({ where: { id: itemId }, data: { dispatchStatus: status } });
+    await this.audit.log({
+      actorId,
+      action: 'order.item.dispatch_status.update',
+      entityType: 'OrderItem',
+      entityId: itemId,
+      metadata: { status },
+    });
+    const updated = await this.prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
+    if (!updated) throw new NotFoundException(bi('Order not found', 'ఆర్డర్ కనుగొనబడలేదు'));
+    return updated;
   }
 
   async confirmOrder(orderId: string, adminId: string): Promise<Order> {

@@ -14,9 +14,9 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL") // Supabase transaction-mode pooler (6543) — app runtime
-  directUrl = env("DIRECT_URL")   // Supabase session-mode pooler (5432) — migrations only;
-                                   // transaction mode doesn't support the advisory locks and
-                                   // DDL Prisma's migration engine needs
+  directUrl = env("DIRECT_URL") // Supabase session-mode pooler (5432) — migrations only;
+  // transaction mode doesn't support the advisory locks and
+  // DDL Prisma's migration engine needs
 }
 
 enum Role {
@@ -26,6 +26,7 @@ enum Role {
   ADMINISTRATOR
   VENDOR
   SUPPORT_AGENT
+  CUSTOMER
 }
 
 enum MembershipStatus {
@@ -111,44 +112,47 @@ enum SoilSampleStatus {
 }
 
 model User {
-  id                 String   @id @default(uuid())
-  mobileNumber       String   @unique
-  passwordHash       String
-  role               Role
-  name               String
-  preferredLanguage  String   @default("te") // Telugu, per 01-Product/05-Target-Users.md
-  isActive           Boolean  @default(true)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                String   @id @default(uuid())
+  mobileNumber      String   @unique
+  passwordHash      String
+  role              Role
+  name              String
+  preferredLanguage String   @default("te") // Telugu, per 01-Product/05-Target-Users.md
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   // Membership fields apply to FARMER role only; left nullable for other roles.
-  membershipTier     String?
-  membershipStatus   MembershipStatus?
-  membershipExpiry   DateTime?
+  membershipTier   String?
+  membershipStatus MembershipStatus?
+  membershipExpiry DateTime?
 
-  farmLands          FarmLand[]
-  expertProfile      ExpertProfile?
-  refreshTokens      RefreshToken[]
-  auditLogs          AuditLog[]        @relation("AuditActor")
-  verifiedExperts    ExpertProfile[]   @relation("CredentialVerifier")
-  casesAsFarmer      Case[]            @relation("CaseFarmer")
-  casesAsExpert      Case[]            @relation("CaseExpert")
-  articlesAuthored   KnowledgeArticle[] @relation("KnowledgeAuthor")
-  articlesReviewed   KnowledgeArticle[] @relation("KnowledgeReviewer")
-  notifications      Notification[]
-  articleFeedback    ArticleFeedback[]
-  articleBookmarks   ArticleBookmark[]
-  articleViews       ArticleView[]
-  coursesAuthored    Course[]          @relation("CourseAuthor")
-  lessonCompletions  LessonCompletion[]
-  certificates       Certificate[]
-  soilSamples        SoilSample[]      @relation("SoilSampleFarmer")
-  vendorProfile      VendorProfile?    @relation("VendorUser")
-  vendorApprovals    VendorProfile[]   @relation("VendorApprover")
-  cartItems          CartItem[]
-  orders             Order[]
-  productReviews     ProductReview[]
-  productWishlists   ProductWishlist[]
+  farmLands                    FarmLand[]
+  expertProfile                ExpertProfile?
+  refreshTokens                RefreshToken[]
+  auditLogs                    AuditLog[]              @relation("AuditActor")
+  verifiedExperts              ExpertProfile[]         @relation("CredentialVerifier")
+  casesAsFarmer                Case[]                  @relation("CaseFarmer")
+  casesAsExpert                Case[]                  @relation("CaseExpert")
+  articlesAuthored             KnowledgeArticle[]      @relation("KnowledgeAuthor")
+  articlesReviewed             KnowledgeArticle[]      @relation("KnowledgeReviewer")
+  notifications                Notification[]
+  articleFeedback              ArticleFeedback[]
+  articleBookmarks             ArticleBookmark[]
+  articleViews                 ArticleView[]
+  coursesAuthored              Course[]                @relation("CourseAuthor")
+  lessonCompletions            LessonCompletion[]
+  certificates                 Certificate[]
+  soilSamples                  SoilSample[]            @relation("SoilSampleFarmer")
+  vendorProfile                VendorProfile?          @relation("VendorUser")
+  vendorApprovals              VendorProfile[]         @relation("VendorApprover")
+  cartItems                    CartItem[]
+  orders                       Order[]
+  productReviews               ProductReview[]
+  productWishlists             ProductWishlist[]
+  hariharaaSubscription        HariharaaSubscription?  @relation("HariharaaSubscriber")
+  hariharaaSubscriptionReviews HariharaaSubscription[] @relation("HariharaaSubscriptionReviewer")
+  hariharaaSettingsUpdates     HariharaaSettings[]     @relation("HariharaaSettingsUpdater")
 
   @@index([role])
 }
@@ -157,20 +161,20 @@ model User {
 // than one; Cases and Soil Reports (Stage 2+) link to the specific parcel, not the
 // farmer generally.
 model FarmLand {
-  id             String   @id @default(uuid())
-  farmerId       String
-  farmer         User     @relation(fields: [farmerId], references: [id], onDelete: Cascade)
-  label          String   // farmer-facing name, e.g. "North field"
-  address        String
-  landSizeAcres  Float
-  primaryCrops   String[] // crop names, validated against CropMaster at the API layer
-  latitude       Float?   // optional GPS pin, captured via the browser's Geolocation
-  longitude      Float?   // API — easier for a farmer standing in the field than typing an address
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(uuid())
+  farmerId      String
+  farmer        User     @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  label         String // farmer-facing name, e.g. "North field"
+  address       String
+  landSizeAcres Float
+  primaryCrops  String[] // crop names, validated against CropMaster at the API layer
+  latitude      Float? // optional GPS pin, captured via the browser's Geolocation
+  longitude     Float? // API — easier for a farmer standing in the field than typing an address
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  cases          Case[]
-  soilSamples    SoilSample[]
+  cases       Case[]
+  soilSamples SoilSample[]
 
   @@index([farmerId])
 }
@@ -181,45 +185,45 @@ model FarmLand {
 // path (Charter v0.3.0) — a farmer requesting priority alone doesn't grant
 // it, per the anti-abuse rule already in Section 9.1 of the Charter.
 model Case {
-  id                  String         @id @default(uuid())
-  caseNumber          String?        @unique // set on Submitted, null while Draft
+  id         String  @id @default(uuid())
+  caseNumber String? @unique // set on Submitted, null while Draft
 
-  farmerId            String
-  farmer              User           @relation("CaseFarmer", fields: [farmerId], references: [id], onDelete: Cascade)
-  farmLandId          String
-  farmLand            FarmLand       @relation(fields: [farmLandId], references: [id], onDelete: Cascade)
+  farmerId   String
+  farmer     User     @relation("CaseFarmer", fields: [farmerId], references: [id], onDelete: Cascade)
+  farmLandId String
+  farmLand   FarmLand @relation(fields: [farmLandId], references: [id], onDelete: Cascade)
 
-  categoryId          String
-  category            CaseCategoryMaster @relation(fields: [categoryId], references: [id])
-  cropId              String?        // which crop the problem concerns — optional since
-  crop                CropMaster?    @relation(fields: [cropId], references: [id]) // General Advisory
-                                                                                     // cases aren't always about one
+  categoryId String
+  category   CaseCategoryMaster @relation(fields: [categoryId], references: [id])
+  cropId     String? // which crop the problem concerns — optional since
+  crop       CropMaster?        @relation(fields: [cropId], references: [id]) // General Advisory
+  // cases aren't always about one
 
-  problemDescription  String
-  evidenceNotes       String?
-  evidenceMediaUrls   String[]       @default([]) // Supabase Storage public URLs (photos/videos)
+  problemDescription String
+  evidenceNotes      String?
+  evidenceMediaUrls  String[] @default([]) // Supabase Storage public URLs (photos/videos)
 
-  status              CaseStatus     @default(DRAFT)
-  closureReason       ClosureReason?
+  status        CaseStatus     @default(DRAFT)
+  closureReason ClosureReason?
 
-  assignedExpertId    String?
-  assignedExpert      User?          @relation("CaseExpert", fields: [assignedExpertId], references: [id])
+  assignedExpertId String?
+  assignedExpert   User?   @relation("CaseExpert", fields: [assignedExpertId], references: [id])
 
-  priorityRequested   Boolean        @default(false) // the farmer's ask, alone, grants nothing
-  isPriority          Boolean        @default(false) // true only after a Moderator/Administrator confirms — the actual anti-abuse gate
-  priorityConfirmedBy String?        // userId of the Moderator/Administrator who confirmed it
+  priorityRequested   Boolean @default(false) // the farmer's ask, alone, grants nothing
+  isPriority          Boolean @default(false) // true only after a Moderator/Administrator confirms — the actual anti-abuse gate
+  priorityConfirmedBy String? // userId of the Moderator/Administrator who confirmed it
 
-  followUpQuestion    String?        // set when Expert Working -> Waiting Farmer
-  followUpResponse    String?        // set when the farmer responds, before returning to Expert Working
-  resolutionNotes     String?        // the expert's prescription/solution, set at Answered
+  followUpQuestion String? // set when Expert Working -> Waiting Farmer
+  followUpResponse String? // set when the farmer responds, before returning to Expert Working
+  resolutionNotes  String? // the expert's prescription/solution, set at Answered
 
-  submittedAt         DateTime?
-  closedAt            DateTime?
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
+  submittedAt DateTime?
+  closedAt    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  knowledgeArticle    KnowledgeArticle?
-  soilSamples         SoilSample[]
+  knowledgeArticle KnowledgeArticle?
+  soilSamples      SoilSample[]
 
   @@index([farmerId])
   @@index([assignedExpertId])
@@ -241,43 +245,43 @@ model Case {
 // Charter's "never overwritten" language implies — a real version table is
 // a follow-up, not attempted half-built here.
 model KnowledgeArticle {
-  id                 String                 @id @default(uuid())
-  sourceCaseId       String                 @unique
-  sourceCase         Case                   @relation(fields: [sourceCaseId], references: [id], onDelete: Cascade)
-  authorId           String                 // Created By — the case's assigned expert
-  author             User                   @relation("KnowledgeAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  id           String @id @default(uuid())
+  sourceCaseId String @unique
+  sourceCase   Case   @relation(fields: [sourceCaseId], references: [id], onDelete: Cascade)
+  authorId     String // Created By — the case's assigned expert
+  author       User   @relation("KnowledgeAuthor", fields: [authorId], references: [id], onDelete: Cascade)
 
   title              String
   cropId             String?
-  crop               CropMaster?            @relation(fields: [cropId], references: [id])
+  crop               CropMaster?         @relation(fields: [cropId], references: [id])
   categoryId         String?
-  category           CaseCategoryMaster?    @relation(fields: [categoryId], references: [id])
-  symptoms           String?                // clinical framing, distinct from the farmer's own
-                                              // problemDescription — left for the expert to add
+  category           CaseCategoryMaster? @relation(fields: [categoryId], references: [id])
+  symptoms           String? // clinical framing, distinct from the farmer's own
+  // problemDescription — left for the expert to add
   problemDescription String
   expertSolution     String
-  evidenceMediaUrls  String[]               @default([])
+  evidenceMediaUrls  String[]            @default([])
   tags               TagMaster[]
 
-  status             KnowledgeArticleStatus @default(DRAFT)
-  rejectionReason    String?                // required in spirit when rejected; enforced in service
-  reviewedByUserId   String?
-  reviewedBy         User?                  @relation("KnowledgeReviewer", fields: [reviewedByUserId], references: [id])
-  version            Int                    @default(1)
-  publishedAt        DateTime?
-  createdAt          DateTime               @default(now())
-  updatedAt          DateTime               @updatedAt
+  status           KnowledgeArticleStatus @default(DRAFT)
+  rejectionReason  String? // required in spirit when rejected; enforced in service
+  reviewedByUserId String?
+  reviewedBy       User?                  @relation("KnowledgeReviewer", fields: [reviewedByUserId], references: [id])
+  version          Int                    @default(1)
+  publishedAt      DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
 
   // Charter's cross-cutting Feedback utility (Section 10.1): "low-rated
   // content automatically routed to the Moderator review queue." Flagging
   // reuses the existing PUBLISHED->REJECTED->edit->resubmit loop rather than
   // inventing a new status — a moderator who acts on a flag just calls the
   // same sendBackForRevision path an ordinary rejection would use.
-  flaggedForReview   Boolean                @default(false)
-  flagReason         String?
-  feedback           ArticleFeedback[]
-  bookmarks          ArticleBookmark[]
-  views              ArticleView[]
+  flaggedForReview Boolean           @default(false)
+  flagReason       String?
+  feedback         ArticleFeedback[]
+  bookmarks        ArticleBookmark[]
+  views            ArticleView[]
 
   @@index([authorId])
   @@index([status])
@@ -318,7 +322,7 @@ model ArticleFeedback {
   userId    String
   user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   helpful   Boolean
-  rating    Int              // 1-5, enforced at the DTO layer
+  rating    Int // 1-5, enforced at the DTO layer
   comment   String?
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
@@ -329,41 +333,41 @@ model ArticleFeedback {
 // Module 10 — Administration: expert credential verification is a precondition of
 // Expert Portal activation, per Charter v0.4.0 / Risk R9 mitigation.
 model ExpertProfile {
-  id                 String            @id @default(uuid())
-  userId             String            @unique
-  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  qualification      String? // null until the expert submits credentials (ExpertsService.submitCredentials)
-  licenseNumber      String?
-  credentialStatus   CredentialStatus  @default(NOT_SUBMITTED)
-  verifiedByUserId   String?
-  verifiedBy         User?             @relation("CredentialVerifier", fields: [verifiedByUserId], references: [id])
-  verifiedAt         DateTime?
-  submittedAt        DateTime?
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
+  id               String           @id @default(uuid())
+  userId           String           @unique
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  qualification    String? // null until the expert submits credentials (ExpertsService.submitCredentials)
+  licenseNumber    String?
+  credentialStatus CredentialStatus @default(NOT_SUBMITTED)
+  verifiedByUserId String?
+  verifiedBy       User?            @relation("CredentialVerifier", fields: [verifiedByUserId], references: [id])
+  verifiedAt       DateTime?
+  submittedAt      DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 }
 
 model RefreshToken {
-  id         String   @id @default(uuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokenHash  String   @unique
-  expiresAt  DateTime
-  revoked    Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
 
   @@index([userId])
 }
 
 model OtpVerification {
-  id            String     @id @default(uuid())
-  mobileNumber  String
-  codeHash      String
-  purpose       OtpPurpose
-  expiresAt     DateTime
-  consumed      Boolean    @default(false)
-  attempts      Int        @default(0)
-  createdAt     DateTime   @default(now())
+  id           String     @id @default(uuid())
+  mobileNumber String
+  codeHash     String
+  purpose      OtpPurpose
+  expiresAt    DateTime
+  consumed     Boolean    @default(false)
+  attempts     Int        @default(0)
+  createdAt    DateTime   @default(now())
 
   @@index([mobileNumber, purpose])
 }
@@ -377,20 +381,20 @@ model CropMaster {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
-  cases     Case[]
-  articles  KnowledgeArticle[]
-  courses   Course[]
+  cases    Case[]
+  articles KnowledgeArticle[]
+  courses  Course[]
 }
 
 model CaseCategoryMaster {
-  id          String   @id @default(uuid())
-  name        String   @unique // Disease, Pest, Nutrient Deficiency, Weather Damage,
-                                // Unknown Problem, General Advisory/Planning (Charter v0.3.0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  id        String   @id @default(uuid())
+  name      String   @unique // Disease, Pest, Nutrient Deficiency, Weather Damage,
+  // Unknown Problem, General Advisory/Planning (Charter v0.3.0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 
-  cases       Case[]
-  articles    KnowledgeArticle[]
+  cases    Case[]
+  articles KnowledgeArticle[]
 }
 
 model TagMaster {
@@ -399,16 +403,16 @@ model TagMaster {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
-  articles  KnowledgeArticle[]
-  courses   Course[]
+  articles KnowledgeArticle[]
+  courses  Course[]
 }
 
 model RegionMaster {
-  id         String   @id @default(uuid())
-  name       String
-  state      String
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
+  id        String   @id @default(uuid())
+  name      String
+  state     String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 
   @@unique([name, state])
 }
@@ -416,14 +420,14 @@ model RegionMaster {
 // Cross-cutting: Audit Trail is a binding Charter principle from day one, not a
 // Stage-5 hardening afterthought.
 model AuditLog {
-  id          String   @id @default(uuid())
-  actorId     String?
-  actor       User?    @relation("AuditActor", fields: [actorId], references: [id])
-  action      String   // e.g. "user.register", "expert.credential.verify"
-  entityType  String
-  entityId    String
-  metadata    Json?
-  createdAt   DateTime @default(now())
+  id         String   @id @default(uuid())
+  actorId    String?
+  actor      User?    @relation("AuditActor", fields: [actorId], references: [id])
+  action     String // e.g. "user.register", "expert.credential.verify"
+  entityType String
+  entityId   String
+  metadata   Json?
+  createdAt  DateTime @default(now())
 
   @@index([entityType, entityId])
   @@index([actorId])
@@ -440,7 +444,7 @@ model Notification {
   id        String   @id @default(uuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String   // e.g. "case.assigned", "article.rejected"
+  type      String // e.g. "case.assigned", "article.rejected"
   title     String
   body      String
   linkPath  String?
@@ -482,8 +486,8 @@ model Lesson {
   order          Int
   title          String
   contentType    LessonContentType
-  contentUrl     String?           // Supabase Storage URL — VIDEO/AUDIO/PDF
-  assignmentText String?           // ASSIGNMENT type only
+  contentUrl     String? // Supabase Storage URL — VIDEO/AUDIO/PDF
+  assignmentText String? // ASSIGNMENT type only
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
@@ -517,23 +521,23 @@ model Certificate {
 }
 
 model SoilSample {
-  id                      String           @id @default(uuid())
-  sampleCode              String           @unique // farmer-readable ID, assigned at creation
-  farmerId                String
-  farmer                  User             @relation("SoilSampleFarmer", fields: [farmerId], references: [id], onDelete: Cascade)
-  farmLandId              String
-  farmLand                FarmLand         @relation(fields: [farmLandId], references: [id], onDelete: Cascade)
-  caseId                  String?          // optional link to the Case that prompted testing
-  case                    Case?            @relation(fields: [caseId], references: [id])
-  collectionVideoWatched  Boolean          @default(false) // farmer confirms before a sample can be created
-  status                  SoilSampleStatus @default(CREATED)
-  dispatchedAt            DateTime?
-  receivedAt              DateTime?
-  testedAt                DateTime?
-  reportUrl               String?
-  reportAvailableAt       DateTime?
-  createdAt               DateTime         @default(now())
-  updatedAt               DateTime         @updatedAt
+  id                     String           @id @default(uuid())
+  sampleCode             String           @unique // farmer-readable ID, assigned at creation
+  farmerId               String
+  farmer                 User             @relation("SoilSampleFarmer", fields: [farmerId], references: [id], onDelete: Cascade)
+  farmLandId             String
+  farmLand               FarmLand         @relation(fields: [farmLandId], references: [id], onDelete: Cascade)
+  caseId                 String? // optional link to the Case that prompted testing
+  case                   Case?            @relation(fields: [caseId], references: [id])
+  collectionVideoWatched Boolean          @default(false) // farmer confirms before a sample can be created
+  status                 SoilSampleStatus @default(CREATED)
+  dispatchedAt           DateTime?
+  receivedAt             DateTime?
+  testedAt               DateTime?
+  reportUrl              String?
+  reportAvailableAt      DateTime?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
 
   @@index([farmerId])
   @@index([status])
@@ -562,13 +566,22 @@ enum OrderStatus {
   CANCELLED
 }
 
-model ProductCategoryMaster {
-  id        String    @id @default(uuid())
-  name      String    @unique
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
+// Per-line fulfillment visibility, independent of Order.status — a whole
+// order can move to SHIPPED while some lines are still PENDING (stock
+// shortage on the seller's side; what's available ships, the rest waits).
+// Deliberately does not participate in the Order state machine above.
+enum DispatchStatus {
+  PENDING
+  SENT
+}
 
-  products  Product[]
+model ProductCategoryMaster {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  products Product[]
 }
 
 // Mirrors ExpertProfile's shape deliberately — a vendor's products aren't
@@ -587,31 +600,32 @@ model VendorProfile {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  products         Product[]
+  products          Product[]
+  hariharaaSettings HariharaaSettings[]
 
   @@index([isApproved])
 }
 
 model Product {
-  id             String                @id @default(uuid())
-  name           String
-  description    String
-  price          Float
-  unit           String                // e.g. "per kg", "per bag" — free text, not a controlled unit taxonomy
-  stockQuantity  Int                   @default(0)
-  imageUrls      String[]              @default([])
-  categoryId     String?
-  category       ProductCategoryMaster? @relation(fields: [categoryId], references: [id])
-  vendorId       String?               // null = platform/owner-sold
-  vendor         VendorProfile?        @relation(fields: [vendorId], references: [id])
-  isActive       Boolean               @default(true)
-  createdAt      DateTime              @default(now())
-  updatedAt      DateTime              @updatedAt
+  id            String                 @id @default(uuid())
+  name          String
+  description   String
+  price         Float
+  unit          String // e.g. "per kg", "per bag" — free text, not a controlled unit taxonomy
+  stockQuantity Int                    @default(0)
+  imageUrls     String[]               @default([])
+  categoryId    String?
+  category      ProductCategoryMaster? @relation(fields: [categoryId], references: [id])
+  vendorId      String? // null = platform/owner-sold
+  vendor        VendorProfile?         @relation(fields: [vendorId], references: [id])
+  isActive      Boolean                @default(true)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
 
-  cartItems      CartItem[]
-  orderItems     OrderItem[]
-  reviews        ProductReview[]
-  wishlistedBy   ProductWishlist[]
+  cartItems    CartItem[]
+  orderItems   OrderItem[]
+  reviews      ProductReview[]
+  wishlistedBy ProductWishlist[]
 
   @@index([categoryId])
   @@index([vendorId])
@@ -643,7 +657,7 @@ model Order {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
-  items           OrderItem[]
+  items OrderItem[]
 
   @@index([farmerId])
   @@index([status])
@@ -652,16 +666,17 @@ model Order {
 // Snapshots product name/price/vendor at order time — a later price change
 // or vendor edit must never rewrite what a farmer actually agreed to pay.
 model OrderItem {
-  id          String   @id @default(uuid())
-  orderId     String
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId   String
-  product     Product  @relation(fields: [productId], references: [id])
-  vendorId    String?
-  productName String
-  unitPrice   Float
-  quantity    Int
-  lineTotal   Float
+  id             String         @id @default(uuid())
+  orderId        String
+  order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product        @relation(fields: [productId], references: [id])
+  vendorId       String?
+  productName    String
+  unitPrice      Float
+  quantity       Int
+  lineTotal      Float
+  dispatchStatus DispatchStatus @default(PENDING)
 
   @@index([orderId])
 }
@@ -689,4 +704,55 @@ model ProductWishlist {
   createdAt DateTime @default(now())
 
   @@unique([productId, userId])
+}
+
+// HARIHARAA Natural Food Stores — a second, unrelated storefront bolted onto
+// this same platform for CUSTOMER-role subscribers. Payment is manual for
+// now (a farmer-facing UPI QR + a submitted reference number, reviewed by
+// an Administrator) — mirrors ExpertProfile's submit/verify shape exactly
+// so a later swap to automated gateway verification only changes how a
+// claim gets created, not this approval/notification/audit plumbing.
+enum HariharaaSubscriptionStatus {
+  PENDING_REVIEW
+  ACTIVE
+  REJECTED
+  EXPIRED
+}
+
+model HariharaaSubscription {
+  id               String                      @id @default(uuid())
+  userId           String                      @unique
+  user             User                        @relation("HariharaaSubscriber", fields: [userId], references: [id], onDelete: Cascade)
+  status           HariharaaSubscriptionStatus @default(PENDING_REVIEW)
+  paymentReference String?
+  note             String?
+  submittedAt      DateTime                    @default(now())
+  reviewedByUserId String?
+  reviewedBy       User?                       @relation("HariharaaSubscriptionReviewer", fields: [reviewedByUserId], references: [id])
+  reviewedAt       DateTime?
+  activeUntil      DateTime? // set to submission/approval time + 30 days on approve; the load-bearing
+  // "is this customer currently subscribed" check compares this against
+  // now(), not just status === ACTIVE, so a lapsed month reads correctly
+  // even before any explicit expiry job runs.
+  createdAt        DateTime                    @default(now())
+  updatedAt        DateTime                    @updatedAt
+
+  @@index([status])
+}
+
+// Singleton (enforced at the service layer via a fixed well-known id, not a
+// DB constraint — matches this codebase's style elsewhere). Admin-editable
+// so the subscription price and UPI IDs never need a code deploy to change.
+model HariharaaSettings {
+  id                   String         @id @default(uuid())
+  subscriptionPriceInr Float
+  payeeName            String         @default("HARIHARAA Natural Food Stores")
+  primaryUpiId         String
+  secondaryUpiId       String?
+  vendorProfileId      String?
+  vendorProfile        VendorProfile? @relation(fields: [vendorProfileId], references: [id])
+  updatedByUserId      String?
+  updatedBy            User?          @relation("HariharaaSettingsUpdater", fields: [updatedByUserId], references: [id])
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
 }

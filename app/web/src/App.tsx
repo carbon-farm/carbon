@@ -44,6 +44,12 @@ import { ProductEditPage } from './pages/ProductEditPage';
 import { VendorApprovalsPage } from './pages/VendorApprovalsPage';
 import { ProductsManagePage } from './pages/ProductsManagePage';
 import { OrdersManagePage } from './pages/OrdersManagePage';
+import { HariharaaLandingPage } from './pages/hariharaa/HariharaaLandingPage';
+import { HariharaaShopPage } from './pages/hariharaa/HariharaaShopPage';
+import { HariharaaSubscriptionPage } from './pages/hariharaa/HariharaaSubscriptionPage';
+import { AdminHariharaaSubscriptionsPage } from './pages/hariharaa/AdminHariharaaSubscriptionsPage';
+import { AdminHariharaaSettingsPage } from './pages/hariharaa/AdminHariharaaSettingsPage';
+import { DispatchQueuePage } from './pages/hariharaa/DispatchQueuePage';
 
 export function App() {
   return (
@@ -54,6 +60,9 @@ export function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+          <Route path="/hariharaa" element={<HariharaaLandingPage />} />
+          <Route path="/hariharaa/register" element={<RegisterPage forcedRole="CUSTOMER" />} />
 
           <Route
             path="/dashboard"
@@ -299,7 +308,7 @@ export function App() {
           <Route
             path="/marketplace/cart"
             element={
-              <ProtectedRoute roles={['FARMER']}>
+              <ProtectedRoute roles={['FARMER', 'CUSTOMER']}>
                 <CartPage />
               </ProtectedRoute>
             }
@@ -307,7 +316,7 @@ export function App() {
           <Route
             path="/marketplace/orders"
             element={
-              <ProtectedRoute roles={['FARMER']}>
+              <ProtectedRoute roles={['FARMER', 'CUSTOMER']}>
                 <OrdersPage />
               </ProtectedRoute>
             }
@@ -357,6 +366,47 @@ export function App() {
             element={
               <ProtectedRoute roles={['ADMINISTRATOR']}>
                 <OrdersManagePage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/hariharaa/shop"
+            element={
+              <ProtectedRoute roles={['CUSTOMER']}>
+                <HariharaaShopPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/hariharaa/subscription"
+            element={
+              <ProtectedRoute roles={['CUSTOMER']}>
+                <HariharaaSubscriptionPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/hariharaa-subscriptions"
+            element={
+              <ProtectedRoute roles={['ADMINISTRATOR']}>
+                <AdminHariharaaSubscriptionsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/hariharaa-settings"
+            element={
+              <ProtectedRoute roles={['ADMINISTRATOR']}>
+                <AdminHariharaaSettingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/support/dispatch-queue"
+            element={
+              <ProtectedRoute roles={['SUPPORT_AGENT']}>
+                <DispatchQueuePage />
               </ProtectedRoute>
             }
           />

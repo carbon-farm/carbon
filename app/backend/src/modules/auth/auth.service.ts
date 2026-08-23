@@ -62,7 +62,7 @@ export class AuthService {
             mobileNumber: dto.mobileNumber,
             passwordHash,
             name: dto.name,
-            role: Role.FARMER,
+            role: dto.role ?? Role.FARMER,
             preferredLanguage: dto.preferredLanguage ?? 'te',
             isActive: false, // activated once REGISTRATION OTP is verified
           },
@@ -170,7 +170,7 @@ export class AuthService {
         entityId: user.id,
       });
       const tokens = await this.issueTokenPair(user.id, user.role, user.mobileNumber);
-      return { verified: true, ...tokens };
+      return { verified: true, role: user.role, ...tokens };
     }
 
     // PASSWORD_RESET: issue a short-lived, single-purpose reset token instead of

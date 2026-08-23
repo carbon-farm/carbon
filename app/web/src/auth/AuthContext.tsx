@@ -20,8 +20,8 @@ interface RequestOtpResult {
 
 interface AuthContextValue {
   session: Session | null;
-  register: (mobileNumber: string, password: string, name: string) => Promise<RegisterResult>;
-  verifyRegistrationOtp: (mobileNumber: string, code: string) => Promise<void>;
+  register: (mobileNumber: string, password: string, name: string, role?: 'FARMER' | 'CUSTOMER') => Promise<RegisterResult>;
+  verifyRegistrationOtp: (mobileNumber: string, code: string) => Promise<{ role: string }>;
   login: (mobileNumber: string, password: string) => Promise<{ role: string }>;
   logout: () => void;
   requestPasswordResetOtp: (mobileNumber: string) => Promise<RequestOtpResult>;
@@ -47,19 +47,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [session]);
 
-  const register = useCallback((mobileNumber: string, password: string, name: string) => {
+  const register = useCallback((mobileNumber: string, password: string, name: string, role?: 'FARMER' | 'CUSTOMER') => {
     return apiRequest<RegisterResult>('/auth/register', {
       method: 'POST',
-      body: { mobileNumber, password, name },
+      body: { mobileNumber, password, name, ...(role ? { role } : {}) },
     });
   }, []);
 
   const verifyRegistrationOtp = useCallback(async (mobileNumber: string, code: string) => {
-    const result = await apiRequest<{ accessToken: string; refreshToken: string }>('/auth/otp/verify', {
+    const result = await apiRequest<{ accessToken: string; refreshToken: string; role: string }>('/auth/otp/verify', {
       method: 'POST',
       body: { mobileNumber, code, purpose: 'REGISTRATION' },
     });
-    setSession({ accessToken: result.accessToken, refreshToken: result.refreshToken, role: 'FARMER' });
+    setSession({ accessToken: result.accessToken, refreshToken: result.refreshToken, role: result.role });
+    return { role: result.role };
   }, []);
 
   const login = useCallback(async (mobileNumber: string, password: string) => {
