@@ -91,6 +91,18 @@ An interactive version of this report (with a clickable test-plan checklist) is 
 | Product photos & real stock counts | Photos + real inventory numbers |
 | Marketplace coupons & returns | Scoping decision if wanted |
 
+## Regression pass findings (2026-08-23)
+
+A full live regression pass ran a real farmer through parcel → case → knowledge → soil sample → marketplace purchase, then through Expert/Moderator/Vendor/Administrator to close the loop end to end. Five real issues were found and fixed, all committed and deployed:
+
+- **Missing Expert credential-submission page** — the backend endpoint for an Expert to submit their qualification always worked, but no frontend page ever called it. A newly created Expert account had no way to get verified or assigned cases. Added the page (`/expert/credentials`) plus a supporting `GET /experts/me` endpoint.
+- **False "could not add" errors on Add Parcel and case follow-up reply** — both handlers read `event.currentTarget` after an `await`, which the DOM nulls out once the event finishes dispatching, so the save actually succeeded but the UI reported failure every time.
+- **Stale Farmer Dashboard notice** — still claimed "Learning and Marketplace aren't built yet" long after both shipped.
+- **Confirm/Dispute buttons shared one busy flag** — clicking either button on an Answered case made both show their "in progress" label at once.
+- **Product edit page mislabeled its save button "Save as draft"** — copied from the Article/Case editors, which do have a draft status; products don't.
+
+Everything else exercised — registration/OTP, farm parcels, case lifecycle, Knowledge bookmarks/feedback, Soil Lab, Marketplace cart/checkout/fulfillment, Learning course/lesson/certificate, Vendor onboarding/product create/deactivate, Admin staff/audit/reports, dark mode, and mobile-width layout — worked correctly on the first or second pass.
+
 ## Test plan
 
 See the interactive report for a clickable checklist. Summary by role:
@@ -109,6 +121,9 @@ See the interactive report for a clickable checklist. Summary by role:
 - **13 test/QA accounts still in production**, cleanup deferred by mutual agreement:
   Pavan (9000000000), Test Farmer (9123456780), Prod Mode Test (9123456799), Visual Check (9123456798), Visual Check 2 (9123456797), Live Verify (9123456700), Live Vercel Check (9123456701), Stuck Test User Fixed Name (9123450011), Live Resend Check (9123450022), Test Expert (9123456782), Pending Credential Expert (9123450088), Test Moderator (9123456781), Test Support Agent (9123450099).
   Three more are ambiguous and were left alone: Paindla Vamshi Vardhan Reddy (9502829167 — may be a real site visitor), Vani (9382828484), "122" (9849957645).
+- **7 more test accounts added during the 2026-08-23 regression pass**, same deferred status — no admin deactivate/delete endpoint exists yet for any account, so none of these (old or new) can be cleaned up without direct database access:
+  Regression Test Farmer (9123456622), Regression API Test (9123456633), Regression Test Farmer — abandoned registration, never OTP-verified (9123456611), Regression Moderator (9123456711), Regression Expert (9123456712), Regression Vendor (9123456713).
+  Associated test records left in place (all in normal terminal states, not broken): case CASE-2026-665835DB (Closed), its auto-generated Published knowledge article "Chilli — Pest", order ORD-2026-CA4ED1C6 (Delivered), soil sample SOIL-2026-96EF7980, course "Regression Test Course: Organic Pest Management" (Published, 1 lesson), vendor profile "Regression Test Agro Supplies" (Approved), product "Regression Test Bio Booster" (Deactivated, so it's already hidden from the public catalog).
 
 ## Deployment
 
