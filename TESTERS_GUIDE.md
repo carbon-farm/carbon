@@ -24,42 +24,61 @@ Practical guide for clicking through the live app. Not a formal SDLC document (s
 4. Submit the case.
 5. Once a moderator/expert has acted: answer any follow-up question asked; once answered, confirm or dispute the resolution.
 6. After confirming, check Knowledge or the dashboard's "Recent advice" — the resolved case auto-generates a draft guide that shows up here once a moderator publishes it, with a link back from the case detail page itself.
-7. Watch the notification bell (top-right) — it should light up at each stage above.
+7. Rate/review the guide, bookmark it, check Recently Viewed.
+8. Enroll in a course (Courses tab), complete every lesson, confirm a certificate appears once done.
+9. Request a soil sample (Soil Testing tab) — you must tick the collection-instructions checkbox to submit.
+10. Browse the Marketplace, add a product to cart, checkout with a delivery address (Cash on Delivery only — there's no payment gateway yet), track the order status.
+11. Wishlist a product, leave a product review.
+12. Watch the notification bell (top-right) — it should light up at every stage above.
 
 ### Moderator
 1. Log in as a moderator.
 2. Moderator Queue: start review on a submitted case, then assign it to a *verified* expert.
-3. Article Queue: approve or reject articles experts submit (rejection requires a reason).
-4. Try the sort/filter toolbar on both queues.
+3. Article Queue: approve or reject articles experts submit (rejection requires a reason); check the "Flagged for review" section for articles a farmer rated 2★ or below.
+4. Manage Courses: publish/unpublish a course (needs at least one lesson to publish).
+5. Soil sample queue: dispatch → receive → mark tested → upload a report PDF.
+6. Try the sort/filter toolbar on every queue.
 
 ### Expert
 1. Submit qualification/credentials once (Expert Portal) — an Administrator must verify before you can be assigned cases.
 2. On an assigned case: start work, optionally ask the farmer a follow-up question, then answer.
-3. Once the farmer confirms, check My Articles — a draft auto-generates from the closed case; edit it and submit for moderator review.
+3. Once the farmer confirms, check My Articles — a draft auto-generates from the closed case; edit it and submit for moderator review. If it comes back rejected (including from a low-rating flag), edit and resubmit.
 4. Watch the notification bell for new assignments and farmer responses.
+
+### Vendor
+1. Submit a vendor profile (business name + description) from the Vendor tab — you can't list products until an Administrator approves it.
+2. Once approved: create a product (name, description, price, unit, stock, category), upload an image, edit price/stock later, deactivate/reactivate it.
+3. Confirm a deactivated product disappears from the public catalog immediately, and that other vendors' products don't show up under "My products."
 
 ### Administrator
 1. Log in with the seeded account above.
 2. Staff accounts: create Moderator/Expert/Vendor/Support Agent accounts.
 3. Expert credentials: approve/reject pending qualifications.
-4. Taxonomy: manage crops, case categories, tags, regions.
+4. Taxonomy: manage crops, case categories, tags, regions, and product categories.
 5. Audit log: every material action platform-wide, filterable by entity type and date.
 6. Reports: case volume by status/category/crop, average resolution time, article funnel, expert workload, accounts by role.
+7. Vendor approvals: approve/reject pending vendor profiles.
+8. Manage products: oversight of every product (platform + all vendors), filter by seller/status.
+9. Order queue: move an order Placed → Confirmed → Shipped → Delivered, or cancel one and confirm the stock restocks.
 
 ## What's new this round — worth specifically checking
 
-- **Reports** page (Admin → Reports).
-- **Notification bell** (every role, top-right of header) — unread badge, click-through to the relevant screen, mark-as-read / mark-all-read.
-- **Sort + filter toolbar** on every list screen: My Cases, Moderator Queue, Expert Cases, My Articles, Article Queue, Knowledge Browse, Staff Accounts, Expert Credentials, Taxonomy.
-- Case detail pages (farmer + expert) now link through to the resulting Knowledge guide once it publishes.
-- Knowledge nav link is now available to every role, not just Farmer.
+- **Learning Management** (Courses tab / Manage Courses) — full course → lesson → completion → certificate loop.
+- **Soil Laboratory** (Soil Testing tab / staff queue) — sample request through report delivery.
+- **Marketplace** (Marketplace tab) — real product catalog (27 OCF SPIN products), cart, Cash-on-Delivery checkout, vendor onboarding, order fulfillment.
+- **Knowledge feedback** — rating/review an article; a rating of 2★ or below auto-flags it into the Moderator's "Flagged for review" queue.
+- **Bookmarks & Recently Viewed** on Knowledge articles.
+- Every list screen in the app has a sort + filter toolbar — 16 screens total.
 
 ## Known intentional limitations (not bugs)
 
 - OTP is shown on-screen, not sent via SMS (see above).
-- No Payment, Marketplace, Soil Laboratory, Finance, or Learning Management yet — each is blocked on a business decision (payment gateway, product catalog, lab partner, course content) that hasn't been made.
+- Marketplace checkout is Cash on Delivery only — no payment gateway is wired up yet.
+- No Finance module (invoicing/GST/refunds) — it depends on the payment gateway decision above.
+- Learning Management has no real course content yet — the structure works, but courses need to be authored.
+- The 27 seeded Marketplace products have placeholder stock (999) and no photos.
 - Real SMS/WhatsApp/email/push notifications aren't wired yet — in-app notifications are live now as the interim.
 
 ## Reporting a bug
 
-Include: your role, exact steps taken, expected vs. actual result, and — if applicable — the case or article ID from the URL.
+Include: your role, exact steps taken, expected vs. actual result, and — if applicable — the case/article/order/sample ID from the URL.
