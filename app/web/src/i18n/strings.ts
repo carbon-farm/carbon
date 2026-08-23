@@ -99,10 +99,6 @@ export const strings = {
   casesPendingStat: { en: 'Pending', te: 'పెండింగ్‌లో' },
   casesClosedStat: { en: 'Closed', te: 'మూసివేయబడింది' },
   recentKnowledgeHeading: { en: 'Recent advice', te: 'ఇటీవలి సలహా' },
-  stage1Notice: {
-    en: "Learning and Marketplace aren't built yet — that's later in the Product Roadmap. Your account, your land, and reporting a problem all work today.",
-    te: 'లెర్నింగ్, మార్కెట్‌ప్లేస్ ఇంకా నిర్మించలేదు — అవి ప్రొడక్ట్ రోడ్‌మ్యాప్‌లో తర్వాత భాగం. మీ ఖాతా, మీ భూమి, సమస్యను నివేదించడం ఇప్పుడు పనిచేస్తాయి.',
-  },
   farmLandParcelsHeading: { en: 'Farm/Land parcels', te: 'పొలం స్థలాలు' },
   addParcelButton: { en: '+ Add parcel', te: '+ స్థలం జోడించండి' },
   cancelButton: { en: 'Cancel', te: 'రద్దు చేయండి' },

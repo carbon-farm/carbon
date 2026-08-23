@@ -137,8 +137,6 @@ export function DashboardPage() {
         </button>
       </Link>
 
-      <BiValue value={strings.stage1Notice} as="p" className="hint" />
-
       {error && <div className="error-banner">{error}</div>}
 
       {recentArticles.length > 0 && (
