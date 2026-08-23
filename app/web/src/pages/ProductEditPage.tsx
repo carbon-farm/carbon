@@ -146,7 +146,7 @@ export function ProductEditPage() {
                 <input name="stockQuantity" type="number" step="1" min="0" defaultValue={product.stockQuantity} onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler} required />
               </label>
               <button type="submit" disabled={saving}>
-                {saving ? <BiValue value={strings.saving} /> : <Bi id="saveDraftButton" />}
+                {saving ? <BiValue value={strings.saving} /> : <Bi id="saveChangesButton" />}
               </button>
             </form>
 

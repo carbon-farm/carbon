@@ -170,6 +170,7 @@ export const strings = {
     te: 'ఇది అత్యవసరం — ప్రాధాన్యతా చికిత్సను అభ్యర్థించండి',
   },
   saveDraftButton: { en: 'Save as draft', te: 'డ్రాఫ్ట్‌గా సేవ్ చేయండి' },
+  saveChangesButton: { en: 'Save changes', te: 'మార్పులను సేవ్ చేయండి' },
   submitCaseButton: { en: 'Submit case', te: 'కేసును సమర్పించండి' },
   saving: { en: 'Saving…', te: 'సేవ్ చేస్తోంది…' },
   submitting: { en: 'Submitting…', te: 'సమర్పిస్తోంది…' },
