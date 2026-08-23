@@ -185,10 +185,17 @@ export class MarketplaceService {
     return this.prisma.product.findMany({
       where: {
         isActive: true,
-        OR: [{ vendorId: null }, { vendor: { isApproved: true } }],
         // HARIHARAA is a completely separate, subscription-gated storefront —
         // its products never appear in the general OCF catalog for any role.
-        ...(hariharaaVendorId ? { NOT: { vendorId: hariharaaVendorId } } : {}),
+        // The exclusion is nested inside the vendor-sold branch specifically
+        // (not a top-level NOT) — a top-level `NOT: { vendorId: X }` would
+        // also silently exclude every platform-sold product (vendorId null),
+        // since SQL's `vendor_id != X` evaluates to NULL, not true, when
+        // vendor_id IS NULL.
+        OR: [
+          { vendorId: null },
+          { vendor: { isApproved: true, ...(hariharaaVendorId ? { id: { not: hariharaaVendorId } } : {}) } },
+        ],
         ...(categoryId ? { categoryId } : {}),
         ...(search ? { name: { contains: search, mode: 'insensitive' } } : {}),
       },
