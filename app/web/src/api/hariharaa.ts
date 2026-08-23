@@ -39,7 +39,13 @@ export function getAdminSettings(token: string) {
 
 export function updateSettings(
   token: string,
-  data: { subscriptionPriceInr: number; payeeName?: string; primaryUpiId: string; secondaryUpiId?: string },
+  data: {
+    subscriptionPriceInr: number;
+    payeeName?: string;
+    primaryUpiId: string;
+    secondaryUpiId?: string;
+    vendorProfileId?: string;
+  },
 ) {
   return apiRequest<AdminSettings>('/hariharaa/settings', { method: 'PATCH', body: data, token });
 }

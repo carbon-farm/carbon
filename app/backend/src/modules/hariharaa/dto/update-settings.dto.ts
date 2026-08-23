@@ -16,4 +16,12 @@ export class UpdateSettingsDto {
   @IsOptional()
   @IsString()
   secondaryUpiId?: string;
+
+  // Which VendorProfile's products make up the HARIHARAA catalog — set once,
+  // after the vendor account is created and approved via the normal
+  // Staff-account + vendor-approval flow (no separate product-management UI
+  // needed; the existing Vendor dashboard is reused as-is).
+  @IsOptional()
+  @IsString()
+  vendorProfileId?: string;
 }

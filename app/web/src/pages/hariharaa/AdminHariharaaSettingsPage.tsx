@@ -37,6 +37,7 @@ export function AdminHariharaaSettingsPage() {
     const payeeName = String(formData.get('payeeName') ?? '').trim();
     const primaryUpiId = String(formData.get('primaryUpiId') ?? '').trim();
     const secondaryUpiId = String(formData.get('secondaryUpiId') ?? '').trim();
+    const vendorProfileId = String(formData.get('vendorProfileId') ?? '').trim();
 
     setSaving(true);
     setError(null);
@@ -46,6 +47,7 @@ export function AdminHariharaaSettingsPage() {
         primaryUpiId,
         ...(payeeName ? { payeeName } : {}),
         ...(secondaryUpiId ? { secondaryUpiId } : {}),
+        ...(vendorProfileId ? { vendorProfileId } : {}),
       });
       setSettings(updated);
     } catch (err) {
@@ -99,6 +101,13 @@ export function AdminHariharaaSettingsPage() {
           <label>
             <Bi id="hariharaaSecondaryUpiField" />
             <input name="secondaryUpiId" defaultValue={settings?.secondaryUpiId ?? ''} />
+          </label>
+          <label>
+            <Bi id="hariharaaVendorIdField" />
+            <div className="hint">
+              <Bi id="hariharaaVendorIdHint" />
+            </div>
+            <input name="vendorProfileId" defaultValue={settings?.vendorProfileId ?? ''} />
           </label>
           <button type="submit" disabled={saving}>
             {saving ? <BiValue value={strings.saving} /> : <Bi id="hariharaaSaveSettingsButton" />}

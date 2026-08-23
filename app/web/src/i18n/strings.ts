@@ -746,6 +746,11 @@ export const strings = {
   hariharaaPayeeNameField: { en: 'Payee name (shown on QR)', te: 'చెల్లింపుదారు పేరు (QRలో చూపబడుతుంది)' },
   hariharaaPrimaryUpiField: { en: 'Primary UPI ID', te: 'ప్రధాన UPI ID' },
   hariharaaSecondaryUpiField: { en: 'Secondary UPI ID (optional)', te: 'ద్వితీయ UPI ID (ఐచ్ఛికం)' },
+  hariharaaVendorIdField: { en: 'HARIHARAA vendor profile ID', te: 'HARIHARAA విక్రేత ప్రొఫైల్ ID' },
+  hariharaaVendorIdHint: {
+    en: "The VendorProfile ID whose products make up HARIHARAA's catalog — copy it from that vendor's row in Manage products.",
+    te: 'HARIHARAA కేటలాగ్‌ను రూపొందించే ఉత్పత్తులు ఉన్న విక్రేత ప్రొఫైల్ ID — దాన్ని ఉత్పత్తులను నిర్వహించండి‌లోని ఆ విక్రేత వరుస నుండి కాపీ చేయండి.',
+  },
   hariharaaSaveSettingsButton: { en: 'Save settings', te: 'సెట్టింగ్‌లను సేవ్ చేయండి' },
   couldNotLoadHariharaaSettings: { en: 'Could not load settings.', te: 'సెట్టింగ్‌లను లోడ్ చేయలేకపోయాము.' },
   couldNotSaveHariharaaSettings: { en: 'Could not save settings.', te: 'సెట్టింగ్‌లను సేవ్ చేయలేకపోయాము.' },
