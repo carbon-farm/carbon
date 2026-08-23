@@ -20,6 +20,7 @@ export function CaseDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [resolutionAction, setResolutionAction] = useState<'confirm' | 'dispute' | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -76,27 +77,27 @@ export function CaseDetailPage() {
 
   async function handleConfirm() {
     if (!session || !theCase) return;
-    setBusy(true);
+    setResolutionAction('confirm');
     setError(null);
     try {
       setCase(await confirmCase(session.accessToken, theCase.id));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.couldNotConfirm.en} / ${strings.couldNotConfirm.te}`);
     } finally {
-      setBusy(false);
+      setResolutionAction(null);
     }
   }
 
   async function handleDispute() {
     if (!session || !theCase) return;
-    setBusy(true);
+    setResolutionAction('dispute');
     setError(null);
     try {
       setCase(await disputeCase(session.accessToken, theCase.id));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.couldNotDispute.en} / ${strings.couldNotDispute.te}`);
     } finally {
-      setBusy(false);
+      setResolutionAction(null);
     }
   }
 
@@ -230,11 +231,11 @@ export function CaseDetailPage() {
             <div className="card">
               <div className="field-label"><Bi id="resolutionLabel" /></div>
               <div>{theCase.resolutionNotes}</div>
-              <button type="button" onClick={handleConfirm} disabled={busy}>
-                {busy ? <BiValue value={strings.confirming} /> : <Bi id="confirmResolutionButton" />}
+              <button type="button" onClick={handleConfirm} disabled={resolutionAction !== null}>
+                {resolutionAction === 'confirm' ? <BiValue value={strings.confirming} /> : <Bi id="confirmResolutionButton" />}
               </button>
-              <button type="button" className="secondary" onClick={handleDispute} disabled={busy}>
-                {busy ? <BiValue value={strings.disputing} /> : <Bi id="disputeResolutionButton" />}
+              <button type="button" className="secondary" onClick={handleDispute} disabled={resolutionAction !== null}>
+                {resolutionAction === 'dispute' ? <BiValue value={strings.disputing} /> : <Bi id="disputeResolutionButton" />}
               </button>
             </div>
           )}
