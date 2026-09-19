@@ -15,6 +15,7 @@ import { ReportsModule } from './modules/reports/reports.module';
 import { LearningModule } from './modules/learning/learning.module';
 import { SoilLabModule } from './modules/soil-lab/soil-lab.module';
 import { MarketplaceModule } from './modules/marketplace/marketplace.module';
+import { MediaModule } from './modules/media/media.module';
 import { HariharaaModule } from './modules/hariharaa/hariharaa.module';
 import { HealthController } from './health/health.controller';
 
@@ -37,6 +38,7 @@ import { HealthController } from './health/health.controller';
     SoilLabModule,
     MarketplaceModule,
     HariharaaModule,
+    MediaModule,
   ],
   controllers: [HealthController],
 })

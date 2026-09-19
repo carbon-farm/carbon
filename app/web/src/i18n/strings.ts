@@ -674,6 +674,28 @@ export const strings = {
   vendorFilterLabel: { en: 'Seller', te: 'విక్రేత' },
   platformSoldOption: { en: 'Platform', te: 'ప్లాట్‌ఫారమ్' },
 
+  // Media library
+  mediaLibraryTitle: { en: 'Media library', te: 'మీడియా లైబ్రరీ' },
+  mediaNavTitle: { en: 'Media library', te: 'మీడియా లైబ్రరీ' },
+  mediaPreviewColumn: { en: 'Preview', te: 'ప్రివ్యూ' },
+  mediaKindColumn: { en: 'Type', te: 'రకం' },
+  mediaSourceColumn: { en: 'Source', te: 'మూలం' },
+  mediaOwnerColumn: { en: 'Belongs to', te: 'దీనికి చెందినది' },
+  mediaDateColumn: { en: 'Date', te: 'తేదీ' },
+  mediaOpenLink: { en: 'Open', te: 'తెరవండి' },
+  noMediaYet: { en: 'No uploads yet.', te: 'ఇంకా అప్‌లోడ్‌లు లేవు.' },
+  couldNotLoadMedia: { en: 'Could not load the media library.', te: 'మీడియా లైబ్రరీని లోడ్ చేయలేకపోయాము.' },
+  mediaKindImage: { en: 'Image', te: 'చిత్రం' },
+  mediaKindVideo: { en: 'Video', te: 'వీడియో' },
+  mediaKindAudio: { en: 'Audio', te: 'ఆడియో' },
+  mediaKindPdf: { en: 'PDF', te: 'PDF' },
+  mediaKindOther: { en: 'Other', te: 'ఇతర' },
+  mediaSourceCase: { en: 'Case evidence', te: 'కేసు ఆధారాలు' },
+  mediaSourceArticle: { en: 'Article evidence', te: 'వ్యాస ఆధారాలు' },
+  mediaSourceLesson: { en: 'Lesson', te: 'పాఠం' },
+  mediaSourceSoil: { en: 'Soil report', te: 'నేల నివేదిక' },
+  mediaSourceProduct: { en: 'Product image', te: 'ఉత్పత్తి చిత్రం' },
+
   // Account management
   deactivateAccountButton: { en: 'Deactivate', te: 'నిష్క్రియం చేయండి' },
   reactivateAccountButton: { en: 'Reactivate', te: 'మళ్ళీ క్రియాశీలం చేయండి' },
@@ -895,6 +917,32 @@ const ORDER_STATUS_KEYS: Record<string, StringKey> = {
 export function orderStatusLabel(status: string): Bilingual {
   const key = ORDER_STATUS_KEYS[status];
   return key ? strings[key] : { en: status, te: status };
+}
+
+const MEDIA_KIND_KEYS: Record<string, StringKey> = {
+  IMAGE: 'mediaKindImage',
+  VIDEO: 'mediaKindVideo',
+  AUDIO: 'mediaKindAudio',
+  PDF: 'mediaKindPdf',
+  OTHER: 'mediaKindOther',
+};
+
+export function mediaKindLabel(kind: string): Bilingual {
+  const key = MEDIA_KIND_KEYS[kind];
+  return key ? strings[key] : { en: kind, te: kind };
+}
+
+const MEDIA_SOURCE_KEYS: Record<string, StringKey> = {
+  CASE_EVIDENCE: 'mediaSourceCase',
+  ARTICLE_EVIDENCE: 'mediaSourceArticle',
+  LESSON: 'mediaSourceLesson',
+  SOIL_REPORT: 'mediaSourceSoil',
+  PRODUCT_IMAGE: 'mediaSourceProduct',
+};
+
+export function mediaSourceLabel(source: string): Bilingual {
+  const key = MEDIA_SOURCE_KEYS[source];
+  return key ? strings[key] : { en: source, te: source };
 }
 
 const DISPATCH_STATUS_KEYS: Record<string, StringKey> = {

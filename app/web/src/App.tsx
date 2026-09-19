@@ -50,6 +50,7 @@ import { HariharaaSubscriptionPage } from './pages/hariharaa/HariharaaSubscripti
 import { AdminHariharaaSubscriptionsPage } from './pages/hariharaa/AdminHariharaaSubscriptionsPage';
 import { AdminHariharaaSettingsPage } from './pages/hariharaa/AdminHariharaaSettingsPage';
 import { ChangePasswordPage } from './pages/ChangePasswordPage';
+import { MediaLibraryPage } from './pages/MediaLibraryPage';
 import { DispatchQueuePage } from './pages/hariharaa/DispatchQueuePage';
 
 export function App() {
@@ -412,6 +413,14 @@ export function App() {
             }
           />
 
+          <Route
+            path="/admin/media"
+            element={
+              <ProtectedRoute roles={['ADMINISTRATOR', 'MODERATOR']}>
+                <MediaLibraryPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/account/password"
             element={

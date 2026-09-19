@@ -29,6 +29,7 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
     { to: '/courses/manage', labelKey: 'coursesManageTitle' },
     { to: '/soil-samples/manage', labelKey: 'sampleQueueTitle' },
+    { to: '/admin/media', labelKey: 'mediaNavTitle' },
   ],
   EXPERT: [
     { to: '/expert/cases', labelKey: 'expertCasesTitle' },
@@ -55,6 +56,7 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { to: '/marketplace/manage/orders', labelKey: 'ordersQueueTitle' },
     { to: '/admin/hariharaa-subscriptions', labelKey: 'hariharaaSubscriptionsAdminNavTitle' },
     { to: '/admin/hariharaa-settings', labelKey: 'hariharaaSettingsAdminNavTitle' },
+    { to: '/admin/media', labelKey: 'mediaNavTitle' },
   ],
   CUSTOMER: [
     { to: '/hariharaa/shop', labelKey: 'hariharaaShopNavTitle' },
