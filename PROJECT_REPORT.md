@@ -7,10 +7,10 @@ An interactive version of this report (with a clickable test-plan checklist) is 
 
 ## Snapshot
 
-- **11 of 14** Charter modules fully built
-- **68** backend tests, all passing
+- **12 of 14** Charter modules fully built
+- **74** backend tests, all passing
 - **27** real products live in the OCF Marketplace catalog, plus a second, fully separate storefront (HARIHARAA Natural Food Stores) with its own subscription-gated catalog
-- **15** database migrations applied to production
+- **16** database migrations applied to production
 
 ## Module status
 
@@ -23,12 +23,12 @@ An interactive version of this report (with a clickable test-plan checklist) is 
 | 5 | Learning Management | Partial | Course → Lesson → Certificate loop built and verified. Shell only — no real course content yet. |
 | 6 | Product Marketplace | Done | Multi-vendor + platform-sold catalog, cart, Cash-on-Delivery checkout, order fulfillment. 27 real products live. |
 | 7 | Soil Laboratory | Done | Generic sample lifecycle (submitted → dispatched → received → tested → report). No lab partner integrated yet. |
-| 8 | Content Management | Partial | Per-module media upload works (evidence, lessons, reports, product images). No unified media library UI. |
+| 8 | Content Management | Done | Per-module uploads plus a unified, sortable/filterable Media Library (`/admin/media`) aggregating case/article evidence, lessons, soil reports and product images. |
 | 9 | Finance | Blocked | Depends entirely on the payment gateway decision (Module 1). |
 | 10 | Administration | Done | Staff, credentials, taxonomy, vendor approval, product & order oversight, audit log. |
 | 11 | Reporting | Done | Case volume, resolution time, article funnel, expert workload, accounts by role. |
 | 12 | Notification | Partial | In-app channel fully built and wired to every real trigger. SMS/WhatsApp/email/push blocked on a vendor decision. |
-| 13 | Security | Partial | JWT auth, RBAC, audit trail all live. Hygiene debt outstanding — see below. |
+| 13 | Security | Partial | JWT auth, RBAC, audit trail, admin account deactivate/reactivate (immediate lock-out), self-service change password. Key/password rotation still outstanding — see below. |
 | 14 | Configuration | Done | Crops, case categories, tags, regions, product categories — all admin-managed taxonomy. |
 
 ## What's been built
@@ -133,16 +133,10 @@ See the interactive report for a clickable checklist. Summary by role:
 
 - **Seeded Administrator password never rotated** (9999999999) — rotate via the Forgot Password self-service flow.
 - **Supabase `service_role` key never rotated** — rotate in the Supabase dashboard, then update Render's env var.
-- **13 test/QA accounts still in production**, cleanup deferred by mutual agreement:
-  Pavan (9000000000), Test Farmer (9123456780), Prod Mode Test (9123456799), Visual Check (9123456798), Visual Check 2 (9123456797), Live Verify (9123456700), Live Vercel Check (9123456701), Stuck Test User Fixed Name (9123450011), Live Resend Check (9123450022), Test Expert (9123456782), Pending Credential Expert (9123450088), Test Moderator (9123456781), Test Support Agent (9123450099).
-  Three more are ambiguous and were left alone: Paindla Vamshi Vardhan Reddy (9502829167 — may be a real site visitor), Vani (9382828484), "122" (9849957645).
-- **7 more test accounts added during the 2026-08-23 regression pass**, same deferred status — no admin deactivate/delete endpoint exists yet for any account, so none of these (old or new) can be cleaned up without direct database access:
-  Regression Test Farmer (9123456622), Regression API Test (9123456633), Regression Test Farmer — abandoned registration, never OTP-verified (9123456611), Regression Moderator (9123456711), Regression Expert (9123456712), Regression Vendor (9123456713).
-  Associated test records left in place (all in normal terminal states, not broken): case CASE-2026-665835DB (Closed), its auto-generated Published knowledge article "Chilli — Pest", order ORD-2026-CA4ED1C6 (Delivered), soil sample SOIL-2026-96EF7980, course "Regression Test Course: Organic Pest Management" (Published, 1 lesson), vendor profile "Regression Test Agro Supplies" (Approved), product "Regression Test Bio Booster" (Deactivated, so it's already hidden from the public catalog).
-- **2 more test accounts from HARIHARAA build verification (2026-08-23)**, same deferred status:
-  Regression Test Customer (9123456800, role CUSTOMER, active HARIHARAA subscriber), Regression Dispatch Agent (9123456900, role SUPPORT_AGENT).
-  Associated test records: order ORD-2026-25DD3C87 (Placed, item marked Sent). Note the HARIHARAA vendor account (9876500001, "HARIHARAA Natural Food Stores") and its 3 seeded products are **not** test data — they're the real infrastructure the storefront runs on; only their product listings (oil/flour/honey) are placeholders pending your actual catalog.
-
+- **Test accounts cleaned up (2026-09-19)**: Administrators can now deactivate/reactivate accounts (Staff page). All 21 known test/QA accounts were deactivated — login blocked immediately, sessions revoked, and re-registering the same number is refused. Deactivation is reversible; nothing was deleted, so their history (cases, orders, articles) is intact and everything downstream was re-checked after (2 published articles, 27 OCF products, 8 orders, HARIHARAA storefront all unaffected).
+  Deactivated: Pavan (9000000000), Test Farmer (9123456780), Prod Mode Test (9123456799), Visual Check (9123456798), Visual Check 2 (9123456797), Live Verify (9123456700), Live Vercel Check (9123456701), Stuck Test User Fixed Name (9123450011), Live Resend Check (9123450022), Test Expert (9123456782), Pending Credential Expert (9123450088), Test Moderator (9123456781), Test Support Agent (9123450099), Regression Test Farmer (9123456622), Regression API Test (9123456633), Regression Test Farmer — abandoned registration (9123456611), Regression Moderator (9123456711), Regression Expert (9123456712), Regression Vendor (9123456713), Regression Test Customer (9123456800), Regression Dispatch Agent (9123456900).
+  Still active, deliberately: the Administrator, the real HARIHARAA vendor account (9876500001), and three that may be real people and were left alone — Paindla Vamshi Vardhan Reddy (9502829167), Vani (9382828484), "122" (9849957645).
+  Test records left in place (all in normal terminal states, not broken): case CASE-2026-665835DB (Closed) and its Published article "Chilli — Pest", orders ORD-2026-CA4ED1C6 (Delivered) and ORD-2026-25DD3C87 (Placed), soil sample SOIL-2026-96EF7980, course "Regression Test Course: Organic Pest Management", vendor profile "Regression Test Agro Supplies" (Approved), product "Regression Test Bio Booster" (Deactivated). The HARIHARAA vendor and its 3 products are real infrastructure, not test data — only the product listings (oil/flour/honey) are placeholders pending your actual catalog.
 ## Deployment
 
 - **Frontend**: Vercel — https://carbon-xi-sepia.vercel.app
@@ -166,4 +160,5 @@ Migrations applied (14, all live):
 20260821121910_add_soil_laboratory
 20260822015831_add_marketplace
 20260823151259_add_hariharaa_customer_storefront
+20260919031842_add_user_deactivated_at
 ```

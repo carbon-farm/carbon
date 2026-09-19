@@ -78,6 +78,11 @@ A completely separate storefront on the same site — different branding, differ
 7. Vendor approvals: approve/reject pending vendor profiles.
 8. Manage products: oversight of every product (platform + all vendors), filter by seller/status.
 9. Order queue: move an order Placed → Confirmed → Shipped → Delivered, or cancel one and confirm the stock restocks.
+10. Staff accounts → Deactivate / Reactivate any account. A deactivated user is locked out immediately (even a session that's already open), and can't re-register the same number. You can't deactivate yourself or the last active Administrator.
+11. Media library (Administrator and Moderator): every upload across cases, articles, lessons, soil reports and product images in one sortable, filterable table.
+
+### Every role
+- **Account** (header link) → change your own password. You'll be logged out afterwards and sign in with the new one.
 10. HARIHARAA subscriptions (`/admin/hariharaa-subscriptions`): approve/reject pending payment claims.
 11. HARIHARAA settings (`/admin/hariharaa-settings`): edit the monthly price and both UPI IDs — takes effect immediately, no deploy needed.
 
