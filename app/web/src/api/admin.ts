@@ -65,3 +65,11 @@ export function listAuditLog(token: string, filters: { entityType?: string; from
 export function listAuditEntityTypes(token: string) {
   return apiRequest<string[]>('/audit/entity-types', { token });
 }
+
+export function setUserActive(token: string, id: string, isActive: boolean) {
+  return apiRequest<AdminUser>(`/users/${id}/active`, { method: 'PATCH', body: { isActive }, token });
+}
+
+export function changeMyPassword(token: string, currentPassword: string, newPassword: string) {
+  return apiRequest<{ message: string }>('/users/me/password', { method: 'POST', body: { currentPassword, newPassword }, token });
+}

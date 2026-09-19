@@ -119,6 +119,9 @@ model User {
   name              String
   preferredLanguage String   @default("te") // Telugu, per 01-Product/05-Target-Users.md
   isActive          Boolean  @default(true)
+  // Set when an Administrator deactivates the account, so it is never mistaken
+  // for a never-activated pending registration (which register() will resend).
+  deactivatedAt     DateTime?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 

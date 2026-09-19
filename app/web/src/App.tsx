@@ -49,6 +49,7 @@ import { HariharaaShopPage } from './pages/hariharaa/HariharaaShopPage';
 import { HariharaaSubscriptionPage } from './pages/hariharaa/HariharaaSubscriptionPage';
 import { AdminHariharaaSubscriptionsPage } from './pages/hariharaa/AdminHariharaaSubscriptionsPage';
 import { AdminHariharaaSettingsPage } from './pages/hariharaa/AdminHariharaaSettingsPage';
+import { ChangePasswordPage } from './pages/ChangePasswordPage';
 import { DispatchQueuePage } from './pages/hariharaa/DispatchQueuePage';
 
 export function App() {
@@ -407,6 +408,15 @@ export function App() {
             element={
               <ProtectedRoute roles={['SUPPORT_AGENT']}>
                 <DispatchQueuePage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/account/password"
+            element={
+              <ProtectedRoute>
+                <ChangePasswordPage />
               </ProtectedRoute>
             }
           />

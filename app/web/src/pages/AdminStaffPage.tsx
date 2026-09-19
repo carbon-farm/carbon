@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
-import { listUsers, createStaffUser, type AdminUser } from '../api/admin';
+import { listUsers, createStaffUser, setUserActive, type AdminUser } from '../api/admin';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, type StringKey } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
@@ -36,6 +36,7 @@ export function AdminStaffPage() {
   const [roleFilter, setRoleFilter] = useState('');
   const [activeFilter, setActiveFilter] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('newest');
+  const [busyUserId, setBusyUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!session) return;
@@ -77,6 +78,20 @@ export function AdminStaffPage() {
       setError(err instanceof ApiError ? err.message : `${strings.couldNotCreateStaff.en} / ${strings.couldNotCreateStaff.te}`);
     } finally {
       setCreating(false);
+    }
+  }
+
+  async function handleToggleActive(u: AdminUser) {
+    if (!session) return;
+    setBusyUserId(u.id);
+    setError(null);
+    try {
+      const updated = await setUserActive(session.accessToken, u.id, !u.isActive);
+      setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, isActive: updated.isActive } : x)));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : `${strings.couldNotUpdateAccount.en} / ${strings.couldNotUpdateAccount.te}`);
+    } finally {
+      setBusyUserId(null);
     }
   }
 
@@ -206,6 +221,11 @@ export function AdminStaffPage() {
               <div className="meta">
                 {u.mobileNumber} · {u.role}
               </div>
+              {/* The backend refuses self-deactivation and removing the last
+                  active Administrator, and its message is shown above. */}
+              <button type="button" className="secondary" onClick={() => handleToggleActive(u)} disabled={busyUserId === u.id}>
+                {u.isActive ? <Bi id="deactivateAccountButton" /> : <Bi id="reactivateAccountButton" />}
+              </button>
             </div>
           ))
         )}

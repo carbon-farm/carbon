@@ -119,6 +119,9 @@ export function AppShell({ children, wide = false }: { children: ReactNode; wide
                 <span className="notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
               )}
             </Link>
+            <Link to="/account/password" className="link-button">
+              <Bi id="accountNavTitle" />
+            </Link>
             <span className="header-role-badge">{session.role}</span>
             <button type="button" className="logout-icon-btn" onClick={logout}>
               <Bi id="logoutButton" />

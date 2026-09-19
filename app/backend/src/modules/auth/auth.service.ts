@@ -47,7 +47,7 @@ export class AuthService {
     // as a resend: update the details in case they're correcting a typo, and
     // issue a new OTP against the same user row rather than creating a
     // second one or rejecting them outright.
-    if (existing?.isActive) {
+    if (existing?.isActive || existing?.deactivatedAt) {
       throw new ConflictException(bi('Mobile number already registered', 'మొబైల్ నంబర్ ఇప్పటికే నమోదు అయింది'));
     }
 
@@ -95,7 +95,9 @@ export class AuthService {
     }
     if (!user.isActive) {
       throw new UnauthorizedException(
-        bi('Account not yet activated — verify your OTP first', 'ఖాతా ఇంకా యాక్టివేట్ కాలేదు — ముందుగా మీ OTPని ధృవీకరించండి'),
+        user.deactivatedAt
+          ? bi('This account is deactivated — contact an Administrator', 'ఈ ఖాతా నిష్క్రియం చేయబడింది — అడ్మినిస్ట్రేటర్‌ను సంప్రదించండి')
+          : bi('Account not yet activated — verify your OTP first', 'ఖాతా ఇంకా యాక్టివేట్ కాలేదు — ముందుగా మీ OTPని ధృవీకరించండి'),
       );
     }
 
@@ -235,7 +237,7 @@ export class AuthService {
       where: { tokenHash },
       include: { user: true },
     });
-    if (!record || record.revoked || record.expiresAt < new Date()) {
+    if (!record || record.revoked || record.expiresAt < new Date() || !record.user.isActive) {
       throw new UnauthorizedException(bi('Invalid or expired refresh token', 'చెల్లని లేదా గడువు ముగిసిన రిఫ్రెష్ టోకెన్'));
     }
 

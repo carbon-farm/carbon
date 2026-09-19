@@ -674,6 +674,18 @@ export const strings = {
   vendorFilterLabel: { en: 'Seller', te: 'విక్రేత' },
   platformSoldOption: { en: 'Platform', te: 'ప్లాట్‌ఫారమ్' },
 
+  // Account management
+  deactivateAccountButton: { en: 'Deactivate', te: 'నిష్క్రియం చేయండి' },
+  reactivateAccountButton: { en: 'Reactivate', te: 'మళ్ళీ క్రియాశీలం చేయండి' },
+  couldNotUpdateAccount: { en: 'Could not update this account.', te: 'ఈ ఖాతాను నవీకరించలేకపోయాము.' },
+  changePasswordTitle: { en: 'Change password', te: 'పాస్‌వర్డ్ మార్చండి' },
+  currentPasswordField: { en: 'Current password', te: 'ప్రస్తుత పాస్‌వర్డ్' },
+  newPasswordField: { en: 'New password (8+ characters)', te: 'కొత్త పాస్‌వర్డ్ (8+ అక్షరాలు)' },
+  changePasswordButton: { en: 'Change password', te: 'పాస్‌వర్డ్ మార్చండి' },
+  passwordChangedNotice: { en: 'Password changed. You will be asked to log in again.', te: 'పాస్‌వర్డ్ మార్చబడింది. మీరు మళ్ళీ లాగిన్ అవ్వాలి.' },
+  couldNotChangePassword: { en: 'Could not change your password.', te: 'మీ పాస్‌వర్డ్‌ను మార్చలేకపోయాము.' },
+  accountNavTitle: { en: 'Account', te: 'ఖాతా' },
+
   // HARIHARAA Natural Food Stores — nav labels
   hariharaaShopNavTitle: { en: 'Shop', te: 'షాప్' },
   hariharaaSubscriptionNavTitle: { en: 'My subscription', te: 'నా సభ్యత్వం' },
