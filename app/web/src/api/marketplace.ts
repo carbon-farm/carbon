@@ -232,9 +232,3 @@ export function setItemDispatchStatus(token: string, orderId: string, itemId: st
     token,
   });
 }
-
-// ---------- HARIHARAA storefront catalog (CUSTOMER only) ----------
-
-export function listHariharaaCatalog(token: string) {
-  return apiRequest<Product[]>('/marketplace/products/hariharaa', { token });
-}

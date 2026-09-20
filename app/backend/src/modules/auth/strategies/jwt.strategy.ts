@@ -6,6 +6,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { AuthenticatedUser } from '../../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { bi } from '../../../common/i18n';
+import { normalizeRole } from '../../../common/role-compat';
 
 interface JwtPayload {
   sub: string;
@@ -34,6 +35,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user?.isActive) {
       throw new UnauthorizedException(bi('This account is deactivated', 'ఈ ఖాతా నిష్క్రియం చేయబడింది'));
     }
-    return { userId: payload.sub, role: payload.role, mobileNumber: payload.mobileNumber };
+    // A token issued before the FARMER/CUSTOMER -> MEMBER merge still carries the old role.
+    return { userId: payload.sub, role: normalizeRole(payload.role), mobileNumber: payload.mobileNumber };
   }
 }

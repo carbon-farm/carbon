@@ -35,21 +35,13 @@ export class MarketplaceService {
     private readonly hariharaa: HariharaaService,
   ) {}
 
-  // Shared gate for cart-add and checkout: a HARIHARAA product requires an
-  // active-subscriber CUSTOMER; every other (OCF) product requires the
-  // requester to NOT be a CUSTOMER. Keeps the two storefronts' carts/orders
-  // fully partitioned even though they share the same CartItem/Order tables.
-  private async assertShopperCanTransact(userId: string, role: Role, product: Product): Promise<void> {
-    const hariharaaVendorId = await this.hariharaa.getHariharaaVendorId();
-    const isHariharaaProduct = hariharaaVendorId !== null && product.vendorId === hariharaaVendorId;
-    if (isHariharaaProduct) {
-      if (role !== Role.CUSTOMER || !(await this.hariharaa.isActiveSubscriber(userId))) {
-        throw new ForbiddenException(bi('An active HARIHARAA subscription is required', 'యాక్టివ్ HARIHARAA సభ్యత్వం అవసరం'));
-      }
-      return;
-    }
-    if (role === Role.CUSTOMER) {
-      throw new ForbiddenException(bi('This product is not part of the HARIHARAA catalog', 'ఈ ఉత్పత్తి HARIHARAA కేటలాగ్‌లో భాగం కాదు'));
+  // One catalog, one cart: anyone can browse and fill a cart. What membership unlocks in
+  // the shop is CHECKOUT — a member without an active membership (paid or granted free)
+  // is stopped here, on the server, not just hidden in the screens.
+  private async assertMembershipForCheckout(userId: string, role: Role): Promise<void> {
+    if (role !== Role.MEMBER) return; // staff accounts are not subject to membership
+    if (!(await this.hariharaa.isActiveSubscriber(userId))) {
+      throw new ForbiddenException(bi('An active membership is required to check out', 'చెక్అవుట్ చేయడానికి యాక్టివ్ సభ్యత్వం అవసరం'));
     }
   }
 
@@ -181,44 +173,13 @@ export class MarketplaceService {
   // products stay invisible to farmers even if the vendor already created
   // them, same trust gate as Knowledge's PUBLISHED-only farmer visibility.
   async listPublished(categoryId?: string, search?: string) {
-    const hariharaaVendorId = await this.hariharaa.getHariharaaVendorId();
     return this.prisma.product.findMany({
       where: {
         isActive: true,
-        // HARIHARAA is a completely separate, subscription-gated storefront —
-        // its products never appear in the general OCF catalog for any role.
-        // The exclusion is nested inside the vendor-sold branch specifically
-        // (not a top-level NOT) — a top-level `NOT: { vendorId: X }` would
-        // also silently exclude every platform-sold product (vendorId null),
-        // since SQL's `vendor_id != X` evaluates to NULL, not true, when
-        // vendor_id IS NULL.
-        OR: [
-          { vendorId: null },
-          { vendor: { isApproved: true, ...(hariharaaVendorId ? { id: { not: hariharaaVendorId } } : {}) } },
-        ],
+        OR: [{ vendorId: null }, { vendor: { isApproved: true } }],
         ...(categoryId ? { categoryId } : {}),
         ...(search ? { name: { contains: search, mode: 'insensitive' } } : {}),
       },
-      orderBy: { updatedAt: 'desc' },
-      include: PRODUCT_INCLUDE,
-    });
-  }
-
-  // CUSTOMER-only, gated on an active HARIHARAA subscription — the
-  // equivalent of listPublished() but for the HARIHARAA storefront's own
-  // vendor rather than the general OCF catalog.
-  async listHariharaaCatalog(requesterId: string) {
-    if (!(await this.hariharaa.isActiveSubscriber(requesterId))) {
-      throw new ForbiddenException(
-        bi('An active HARIHARAA subscription is required', 'యాక్టివ్ HARIHARAA సభ్యత్వం అవసరం'),
-      );
-    }
-    const vendorId = await this.hariharaa.getHariharaaVendorId();
-    if (!vendorId) {
-      throw new NotFoundException(bi('The HARIHARAA catalog is not set up yet', 'HARIHARAA కేటలాగ్ ఇంకా సెటప్ చేయలేదు'));
-    }
-    return this.prisma.product.findMany({
-      where: { vendorId, isActive: true },
       orderBy: { updatedAt: 'desc' },
       include: PRODUCT_INCLUDE,
     });
@@ -239,25 +200,6 @@ export class MarketplaceService {
     const isOwner = found.vendorId && (await this.prisma.vendorProfile.findUnique({ where: { id: found.vendorId } }))?.userId === requester.userId;
     const isAdmin = requester.role === Role.ADMINISTRATOR;
     if (isOwner || isAdmin) return found;
-
-    const hariharaaVendorId = await this.hariharaa.getHariharaaVendorId();
-    const isHariharaaProduct = hariharaaVendorId !== null && found.vendorId === hariharaaVendorId;
-    if (isHariharaaProduct) {
-      // HARIHARAA products are visible only to an active-subscriber CUSTOMER
-      // — never through the general OCF isVendorApproved rule below.
-      const isActiveCustomer =
-        requester.role === Role.CUSTOMER && found.isActive && (await this.hariharaa.isActiveSubscriber(requester.userId));
-      if (!isActiveCustomer) {
-        throw new ForbiddenException(bi('This product is not available', 'ఈ ఉత్పత్తి అందుబాటులో లేదు'));
-      }
-      return found;
-    }
-
-    // A CUSTOMER never sees the general OCF catalog — the two storefronts
-    // are fully partitioned by role, same as the checkout-side check.
-    if (requester.role === Role.CUSTOMER) {
-      throw new ForbiddenException(bi('This product is not available', 'ఈ ఉత్పత్తి అందుబాటులో లేదు'));
-    }
 
     const isPublic = found.isActive && (found.vendorId === null || (await this.isVendorApproved(found.vendorId)));
     if (!isPublic) {
@@ -288,12 +230,11 @@ export class MarketplaceService {
 
   // ---------- Cart ----------
 
-  async setCartItem(userId: string, role: Role, dto: AddToCartDto) {
+  async setCartItem(userId: string, dto: AddToCartDto) {
     const product = await this.getProductOrThrow(dto.productId);
     if (!product.isActive) {
       throw new BadRequestException(bi('This product is no longer available', 'ఈ ఉత్పత్తి ఇకపై అందుబాటులో లేదు'));
     }
-    await this.assertShopperCanTransact(userId, role, product);
     await this.prisma.cartItem.upsert({
       where: { userId_productId: { userId, productId: dto.productId } },
       create: { userId, productId: dto.productId, quantity: dto.quantity },
@@ -320,6 +261,7 @@ export class MarketplaceService {
   // ---------- Orders ----------
 
   async checkout(userId: string, role: Role, dto: CheckoutDto): Promise<Order> {
+    await this.assertMembershipForCheckout(userId, role);
     const cart = await this.prisma.cartItem.findMany({ where: { userId }, include: { product: true } });
     if (cart.length === 0) {
       throw new BadRequestException(bi('Your cart is empty', 'మీ కార్ట్ ఖాళీగా ఉంది'));
@@ -335,9 +277,6 @@ export class MarketplaceService {
           bi(`Not enough stock for "${item.product.name}"`, `"${item.product.name}"కు తగినంత స్టాక్ లేదు`),
         );
       }
-      // Defense in depth — setCartItem already enforces this at add-to-cart
-      // time, but a subscription can lapse between adding and checking out.
-      await this.assertShopperCanTransact(userId, role, item.product);
     }
 
     const totalAmount = cart.reduce((sum, item) => sum + item.quantity * item.product.price, 0);

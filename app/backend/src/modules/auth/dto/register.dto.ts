@@ -17,12 +17,11 @@ export class RegisterDto {
   @IsString()
   preferredLanguage?: string;
 
-  // Public self-registration may only ever request FARMER or CUSTOMER — the
-  // two roles this app lets someone sign themselves up for. Every other
-  // role is Administrator-created only (Staff accounts), so this is
-  // deliberately @IsIn(...) rather than the full @IsEnum(Role) used
-  // elsewhere for admin-facing staff creation.
+  // IGNORED. Everyone who signs up is a MEMBER now. The field is still accepted only so
+  // a cached copy of the old site (which sent role: FARMER/CUSTOMER) doesn't get a 400
+  // during the transition; it can never choose the account type, and staff roles are
+  // rejected here so registration can never be used to ask for a privileged one.
   @IsOptional()
-  @IsIn([Role.FARMER, Role.CUSTOMER])
+  @IsIn([Role.FARMER, Role.CUSTOMER, Role.MEMBER])
   role?: Role;
 }

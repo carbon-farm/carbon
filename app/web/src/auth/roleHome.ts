@@ -1,8 +1,8 @@
 // Where each role lands after login. Every role now has a real screen.
 export function roleHomePath(role: string): string {
   switch (role) {
-    case 'FARMER':
-      return '/dashboard';
+    case 'MEMBER':
+      return '/marketplace'; // open to everyone; advice features unlock with a membership
     case 'MODERATOR':
       return '/moderator/queue';
     case 'EXPERT':
@@ -11,8 +11,6 @@ export function roleHomePath(role: string): string {
       return '/admin';
     case 'VENDOR':
       return '/marketplace/vendor';
-    case 'CUSTOMER':
-      return '/hariharaa/shop';
     case 'SUPPORT_AGENT':
       return '/support/dispatch-queue';
     default:

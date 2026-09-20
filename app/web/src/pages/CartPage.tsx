@@ -147,7 +147,7 @@ export function CartPage() {
         </>
       )}
 
-      <Link to={session?.role === 'CUSTOMER' ? '/hariharaa/shop' : '/marketplace'} className="link-button">
+      <Link to="/marketplace" className="link-button">
         {strings.backButton.en} / {strings.backButton.te}
       </Link>
     </>

@@ -17,9 +17,9 @@ export class UsersService {
   ) {}
 
   async createStaffUser(dto: CreateStaffUserDto, actorId: string) {
-    if (dto.role === Role.FARMER) {
+    if (dto.role === Role.MEMBER || dto.role === Role.FARMER || dto.role === Role.CUSTOMER) {
       throw new BadRequestException(
-        bi('Farmers self-register; use /auth/register instead', 'రైతులు స్వయంగా నమోదు చేసుకుంటారు; /auth/register ఉపయోగించండి'),
+        bi('Members sign themselves up; use /auth/register instead', 'సభ్యులు స్వయంగా నమోదు చేసుకుంటారు; /auth/register ఉపయోగించండి'),
       );
     }
     const existing = await this.prisma.user.findUnique({ where: { mobileNumber: dto.mobileNumber } });

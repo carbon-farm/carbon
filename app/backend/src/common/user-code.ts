@@ -10,6 +10,7 @@ const ROLE_LETTER: Record<Role, string> = {
   VENDOR: 'V',
   SUPPORT_AGENT: 'S',
   CUSTOMER: 'C',
+  MEMBER: 'C', // everyone who signs up: HHC-0042 (legacy farmers keep their HHF- codes)
 };
 
 export function userCodePrefix(role: Role): string {

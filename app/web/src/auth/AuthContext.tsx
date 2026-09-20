@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { apiRequest } from '../api/client';
+import { normalizeRole } from './normalizeRole';
 
 interface Session {
   accessToken: string;
@@ -20,7 +21,7 @@ interface RequestOtpResult {
 
 interface AuthContextValue {
   session: Session | null;
-  register: (mobileNumber: string, password: string, name: string, role?: 'FARMER' | 'CUSTOMER') => Promise<RegisterResult>;
+  register: (mobileNumber: string, password: string, name: string) => Promise<RegisterResult>;
   verifyRegistrationOtp: (mobileNumber: string, code: string) => Promise<{ role: string }>;
   login: (mobileNumber: string, password: string) => Promise<{ role: string }>;
   logout: () => void;
@@ -36,7 +37,9 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Session) : null;
+    if (!raw) return null;
+    const saved = JSON.parse(raw) as Session;
+    return { ...saved, role: normalizeRole(saved.role) };
   });
 
   useEffect(() => {
@@ -47,10 +50,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [session]);
 
-  const register = useCallback((mobileNumber: string, password: string, name: string, role?: 'FARMER' | 'CUSTOMER') => {
+  const register = useCallback((mobileNumber: string, password: string, name: string) => {
     return apiRequest<RegisterResult>('/auth/register', {
       method: 'POST',
-      body: { mobileNumber, password, name, ...(role ? { role } : {}) },
+      body: { mobileNumber, password, name },
     });
   }, []);
 
@@ -59,8 +62,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       method: 'POST',
       body: { mobileNumber, code, purpose: 'REGISTRATION' },
     });
-    setSession({ accessToken: result.accessToken, refreshToken: result.refreshToken, role: result.role });
-    return { role: result.role };
+    const role = normalizeRole(result.role);
+    setSession({ accessToken: result.accessToken, refreshToken: result.refreshToken, role });
+    return { role };
   }, []);
 
   const login = useCallback(async (mobileNumber: string, password: string) => {
@@ -68,8 +72,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       method: 'POST',
       body: { mobileNumber, password },
     });
-    setSession({ accessToken: result.accessToken, refreshToken: result.refreshToken, role: result.role });
-    return { role: result.role };
+    const role = normalizeRole(result.role);
+    setSession({ accessToken: result.accessToken, refreshToken: result.refreshToken, role });
+    return { role };
   }, []);
 
   const requestPasswordResetOtp = useCallback((mobileNumber: string) => {

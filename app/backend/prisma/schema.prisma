@@ -19,6 +19,11 @@ datasource db {
   // DDL Prisma's migration engine needs
 }
 
+// Everyone who signs themselves up is a MEMBER — one account type for the whole app
+// (farm advice and the shop under one roof; what a member can do depends on their
+// membership, not on a type chosen at signup). FARMER and CUSTOMER are LEGACY values
+// from before that merge: no code creates them, existing rows are migrated to MEMBER,
+// and common/role-compat.ts treats them as MEMBER meanwhile. To be dropped once unused.
 enum Role {
   FARMER
   EXPERT
@@ -27,6 +32,7 @@ enum Role {
   VENDOR
   SUPPORT_AGENT
   CUSTOMER
+  MEMBER
 }
 
 enum MembershipStatus {
@@ -772,17 +778,24 @@ model HariharaaPayment {
   @@index([status])
 }
 
-// A customer's ACCESS to the HARIHARAA shop: just the paid-through date. Payments
+// A member's MEMBERSHIP: what unlocks checkout and the farm-advice features. Payments
 // themselves (who, how much, UTR, status) live in HariharaaPayment, one row per attempt.
-// Access is "activeUntil is in the future" — set only by a verified payment, extended
-// on renewal, and it simply lapses with no sweep job.
+// There are two independent ways to hold membership, kept in separate columns so one
+// never disturbs the other:
+//   activeUntil        paid-through date — set only by a verified payment, extended on renewal
+//   complimentaryUntil free access an Administrator granted (e.g. for testing), with a note
+// Access is "either date is in the future"; both simply lapse, with no sweep job.
 model HariharaaSubscription {
-  id          String    @id @default(uuid())
-  userId      String    @unique
-  user        User      @relation("HariharaaSubscriber", fields: [userId], references: [id], onDelete: Cascade)
-  activeUntil DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id                     String    @id @default(uuid())
+  userId                 String    @unique
+  user                   User      @relation("HariharaaSubscriber", fields: [userId], references: [id], onDelete: Cascade)
+  activeUntil            DateTime?
+  complimentaryUntil     DateTime?
+  complimentaryNote      String?
+  complimentaryGrantedBy String? // Administrator's user id (also in the audit log)
+  complimentaryGrantedAt DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
 }
 
 // Singleton (enforced at the service layer via a fixed well-known id, not a

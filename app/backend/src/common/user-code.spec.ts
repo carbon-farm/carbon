@@ -13,7 +13,8 @@ describe('user codes', () => {
   });
 
   it('gives every role a distinct prefix (so codes can never collide across roles)', () => {
-    const prefixes = Object.values(Role).map((r) => userCodePrefix(r));
+    // FARMER/CUSTOMER are legacy roles that share the Member letter (accounts are merged into MEMBER).
+    const prefixes = Object.values(Role).filter((r) => r !== 'CUSTOMER').map((r) => userCodePrefix(r));
     expect(new Set(prefixes).size).toBe(prefixes.length);
   });
 

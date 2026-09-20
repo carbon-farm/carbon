@@ -17,6 +17,8 @@ const ROLES = [
 
 const ROLE_KEYS: Record<string, StringKey> = {
   FARMER: 'roleFarmer',
+  MEMBER: 'roleMember',
+  CUSTOMER: 'roleMember',
   MODERATOR: 'roleModerator',
   EXPERT: 'roleExpert',
   VENDOR: 'roleVendor',

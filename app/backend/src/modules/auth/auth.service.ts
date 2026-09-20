@@ -12,6 +12,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { bi } from '../../common/i18n';
 import { nextUserCode } from '../../common/user-code';
+import { normalizeRole } from '../../common/role-compat';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RequestOtpDto } from './dto/request-otp.dto';
@@ -53,7 +54,8 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
-    const role = dto.role ?? Role.FARMER;
+    // One account type for everyone who signs up; what they can do depends on membership.
+    const role = Role.MEMBER;
     const user = existing
       ? await this.prisma.user.update({
           where: { id: existing.id },
@@ -113,7 +115,7 @@ export class AuthService {
     });
 
     const tokens = await this.issueTokenPair(user.id, user.role, user.mobileNumber);
-    return { ...tokens, role: user.role };
+    return { ...tokens, role: normalizeRole(user.role) as Role };
   }
 
   async requestOtp(dto: RequestOtpDto) {
@@ -176,7 +178,7 @@ export class AuthService {
         entityId: user.id,
       });
       const tokens = await this.issueTokenPair(user.id, user.role, user.mobileNumber);
-      return { verified: true, role: user.role, ...tokens };
+      return { verified: true, role: normalizeRole(user.role), ...tokens };
     }
 
     // PASSWORD_RESET: issue a short-lived, single-purpose reset token instead of

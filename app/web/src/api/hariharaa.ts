@@ -2,7 +2,7 @@ import { apiRequest } from './client';
 
 export type PaymentStatus = 'CREATED' | 'CLAIMED' | 'VERIFIED' | 'REJECTED';
 // Derived on the server (see HariharaaService.getMyStatus) — the UI never works it out itself.
-export type SubscriptionState = 'NOT_PAID' | 'AWAITING_VERIFICATION' | 'ACTIVE' | 'EXPIRED' | 'REJECTED';
+export type SubscriptionState = 'NOT_PAID' | 'AWAITING_VERIFICATION' | 'ACTIVE' | 'FREE' | 'EXPIRED' | 'REJECTED';
 
 // What the public (logged-out) landing page may know — no UPI ID, no payment link.
 export interface PublicSettings {
@@ -23,6 +23,8 @@ export interface AdminSettings {
 export interface MySubscription {
   userCode: string | null;
   hasAccess: boolean;
+  accessKind: 'PAID' | 'FREE' | 'NONE';
+  freeNote: string | null;
   activeUntil: string | null;
   state: SubscriptionState;
   latestPayment: {
@@ -95,4 +97,32 @@ export function listPendingPayments(token: string) {
 
 export function reviewPayment(token: string, id: string, approve: boolean, reason?: string) {
   return apiRequest(`/hariharaa/payments/${id}/review`, { method: 'POST', body: { approve, reason }, token });
+}
+
+export type MemberLabel = 'PAID' | 'FREE' | 'AWAITING' | 'EXPIRED' | 'UNPAID';
+
+export interface Member {
+  id: string;
+  userCode: string;
+  name: string;
+  mobileNumber: string;
+  isActive: boolean;
+  createdAt: string;
+  label: MemberLabel;
+  paidUntil: string | null;
+  freeUntil: string | null;
+  freeNote: string | null;
+}
+
+export function listMembers(token: string) {
+  return apiRequest<Member[]>('/hariharaa/members', { token });
+}
+
+// until: "YYYY-MM-DD" from a date picker (the server treats it as the end of that day in India).
+export function grantFreeAccess(token: string, userId: string, data: { until: string; note?: string }) {
+  return apiRequest(`/hariharaa/members/${userId}/free`, { method: 'POST', body: data, token });
+}
+
+export function revokeFreeAccess(token: string, userId: string) {
+  return apiRequest(`/hariharaa/members/${userId}/free`, { method: 'DELETE', token });
 }

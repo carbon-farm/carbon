@@ -2,17 +2,14 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
-import { roleHomePath } from '../auth/roleHome';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings, otpSentTo } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 
 // Two steps only, per 01-Product/05-Target-Users.md — Ravi's journey has no
 // patience for a long form: name/mobile/password, then a single OTP field.
-// forcedRole lets a second entry point (HARIHARAA's /hariharaa/register)
-// reuse this exact flow for a different role and different branding copy,
-// without exposing a role picker on the regular public /register page.
-export function RegisterPage({ forcedRole }: { forcedRole?: 'CUSTOMER' } = {}) {
+// There is one account type (Member) — no role picker, no second entry point.
+export function RegisterPage() {
   const { register, verifyRegistrationOtp } = useAuth();
   const navigate = useNavigate();
 
@@ -30,7 +27,7 @@ export function RegisterPage({ forcedRole }: { forcedRole?: 'CUSTOMER' } = {}) {
     setError(null);
     setSubmitting(true);
     try {
-      const result = await register(mobileNumber, password, name, forcedRole);
+      const result = await register(mobileNumber, password, name);
       setDevOtpHint(result.devOtp ?? null);
       setStep('otp');
     } catch (err) {
@@ -45,8 +42,10 @@ export function RegisterPage({ forcedRole }: { forcedRole?: 'CUSTOMER' } = {}) {
     setError(null);
     setSubmitting(true);
     try {
-      const { role } = await verifyRegistrationOtp(mobileNumber, otp);
-      navigate(roleHomePath(role));
+      await verifyRegistrationOtp(mobileNumber, otp);
+      // A brand-new member has not paid yet: go straight to the Pay page (they can still
+      // browse and fill a cart afterwards; checkout and farm advice unlock on payment).
+      navigate('/hariharaa/subscription');
     } catch (err) {
       setError(
         err instanceof ApiError ? err.message : `${strings.incorrectCodeError.en} / ${strings.incorrectCodeError.te}`,
@@ -101,8 +100,8 @@ export function RegisterPage({ forcedRole }: { forcedRole?: 'CUSTOMER' } = {}) {
   return (
     <div className="screen">
       <div>
-        <Bi id={forcedRole ? 'hariharaaRegisterEyebrow' : 'registerStep1'} as="span" className="eyebrow" />
-        <Bi id={forcedRole ? 'hariharaaCreateAccountTitle' : 'createAccountTitle'} as="h1" />
+        <Bi id="registerStep1" as="span" className="eyebrow" />
+        <Bi id="createAccountTitle" as="h1" />
       </div>
 
       {error && <div className="error-banner">{error}</div>}

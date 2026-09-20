@@ -11,21 +11,22 @@ import { AnswerCaseDto } from './dto/answer-case.dto';
 import { ConfirmPriorityDto } from './dto/confirm-priority.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { MembershipGuard } from '../../common/guards/membership.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, MembershipGuard)
 @Controller('cases')
 export class CasesController {
   constructor(private readonly casesService: CasesService) {}
 
-  @Roles(Role.FARMER)
+  @Roles(Role.MEMBER)
   @Post()
   createDraft(@Body() dto: CreateCaseDto, @CurrentUser() user: AuthenticatedUser) {
     return this.casesService.createDraft(user.userId, dto);
   }
 
-  @Roles(Role.FARMER)
+  @Roles(Role.MEMBER)
   @Get('mine')
   listMine(@CurrentUser() user: AuthenticatedUser) {
     return this.casesService.listMine(user.userId);
@@ -51,13 +52,13 @@ export class CasesController {
     return this.casesService.getById(id, { userId: user.userId, role: user.role as Role });
   }
 
-  @Roles(Role.FARMER)
+  @Roles(Role.MEMBER)
   @Patch(':id')
   updateDraft(@Param('id') id: string, @Body() dto: UpdateCaseDto, @CurrentUser() user: AuthenticatedUser) {
     return this.casesService.updateDraft(id, user.userId, dto);
   }
 
-  @Roles(Role.FARMER)
+  @Roles(Role.MEMBER)
   @Post(':id/evidence')
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_FILE_SIZE_BYTES } }))
   uploadEvidence(
@@ -68,7 +69,7 @@ export class CasesController {
     return this.casesService.addEvidenceMedia(id, user.userId, file);
   }
 
-  @Roles(Role.FARMER)
+  @Roles(Role.MEMBER)
   @Post(':id/submit')
   submit(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.casesService.submit(id, user.userId);
@@ -108,7 +109,7 @@ export class CasesController {
     return this.casesService.requestFollowUp(id, user.userId, dto);
   }
 
-  @Roles(Role.FARMER)
+  @Roles(Role.MEMBER)
   @Post(':id/respond-followup')
   respondFollowUp(
     @Param('id') id: string,
@@ -124,13 +125,13 @@ export class CasesController {
     return this.casesService.answer(id, user.userId, dto);
   }
 
-  @Roles(Role.FARMER)
+  @Roles(Role.MEMBER)
   @Post(':id/confirm')
   confirm(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.casesService.confirm(id, user.userId);
   }
 
-  @Roles(Role.FARMER)
+  @Roles(Role.MEMBER)
   @Post(':id/dispute')
   dispute(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.casesService.dispute(id, user.userId);

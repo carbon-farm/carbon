@@ -8,11 +8,18 @@ import { ClaimPaymentDto } from './dto/claim-payment.dto';
 import { ReviewClaimDto } from './dto/review-claim.dto';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
 import { buildUpiLink } from './upi-link';
+import { computeAccess, memberLabel, parseGrantUntil, renewalStart } from './membership-access';
+import { GrantFreeAccessDto } from './dto/grant-free-access.dto';
 
 const SETTINGS_ID = 'singleton';
 const PERIOD_DAYS = 30;
+const MAX_FREE_ACCESS_DAYS = 731; // ~2 years
 
-export type SubscriptionState = 'NOT_PAID' | 'AWAITING_VERIFICATION' | 'ACTIVE' | 'EXPIRED' | 'REJECTED';
+export type SubscriptionState = 'NOT_PAID' | 'AWAITING_VERIFICATION' | 'ACTIVE' | 'FREE' | 'EXPIRED' | 'REJECTED';
+
+// Accounts that can hold a membership: every self-signup. FARMER/CUSTOMER are the legacy
+// values from before the merge into MEMBER (see common/role-compat.ts).
+const MEMBER_ROLES: Role[] = [Role.MEMBER, Role.FARMER, Role.CUSTOMER];
 
 // HARIHARAA Natural Food Stores — a second storefront sharing this codebase's
 // Product/Order/VendorProfile tables, gated by a monthly subscription.
@@ -79,19 +86,20 @@ export class HariharaaService {
       this.prisma.hariharaaSubscription.findUnique({ where: { userId } }),
       this.prisma.hariharaaPayment.findFirst({ where: { userId }, orderBy: { createdAt: 'desc' } }),
     ]);
-    const activeUntil = subscription?.activeUntil ?? null;
-    const hasAccess = activeUntil !== null && activeUntil > new Date();
+    const access = computeAccess(subscription);
 
     let state: SubscriptionState = 'NOT_PAID';
     if (latest?.status === HariharaaPaymentStatus.CLAIMED) state = 'AWAITING_VERIFICATION';
-    else if (hasAccess) state = 'ACTIVE';
+    else if (access.hasAccess) state = access.kind === 'FREE' ? 'FREE' : 'ACTIVE';
     else if (latest?.status === HariharaaPaymentStatus.REJECTED) state = 'REJECTED';
-    else if (activeUntil !== null) state = 'EXPIRED';
+    else if (access.until !== null) state = 'EXPIRED';
 
     return {
       userCode: user?.userCode ?? null,
-      hasAccess,
-      activeUntil,
+      hasAccess: access.hasAccess,
+      accessKind: access.kind,
+      activeUntil: access.until, // when current access ends (or when the last one ended)
+      freeNote: access.kind === 'FREE' ? subscription?.complimentaryNote ?? null : null,
       state,
       latestPayment: latest
         ? {
@@ -107,14 +115,14 @@ export class HariharaaService {
     };
   }
 
-  // The one method every catalog/cart/checkout gate calls. Access is exactly "paid
-  // through a date that hasn't passed": activeUntil is only ever set by a verified
-  // payment, so it — not the state of the latest payment — is the source of truth. A
-  // customer renewing early, or whose renewal is rejected, keeps the days already paid
-  // for, and a lapsed month reads as not-subscribed with no sweep job.
+  // The one method every gate calls (checkout, and the farm-advice endpoints via
+  // MembershipGuard). Membership is exactly "paid through a future date, OR free access
+  // that hasn't ended" — see membership-access.ts. Both dates only ever move through a
+  // verified payment or an Administrator's grant, so a customer renewing early, or whose
+  // renewal is rejected, keeps what they already had, and nothing needs a sweep job.
   async isActiveSubscriber(userId: string): Promise<boolean> {
     const subscription = await this.prisma.hariharaaSubscription.findUnique({ where: { userId } });
-    return subscription?.activeUntil != null && subscription.activeUntil > new Date();
+    return computeAccess(subscription).hasAccess;
   }
 
   // ---------- Customer: pay ----------
@@ -287,7 +295,7 @@ export class HariharaaService {
 
     const verified = await this.prisma.$transaction(async (tx) => {
       const current = await tx.hariharaaSubscription.findUnique({ where: { userId: payment.userId } });
-      const activeUntil = new Date(Math.max(Date.now(), current?.activeUntil?.getTime() ?? 0));
+      const activeUntil = renewalStart(current);
       activeUntil.setDate(activeUntil.getDate() + payment.periodDays);
 
       await tx.hariharaaSubscription.upsert({
@@ -316,5 +324,93 @@ export class HariharaaService {
       '/hariharaa/shop',
     );
     return verified;
+  }
+  // ---------- Administrator: members & free access ----------
+
+  // Everyone who can hold a membership, each with one plain label (Paid / Free / Awaiting
+  // verification / Expired / Unpaid) so the Members screen reads at a glance.
+  async listMembers() {
+    const [users, claimed] = await Promise.all([
+      this.prisma.user.findMany({
+        where: { role: { in: MEMBER_ROLES } },
+        select: { id: true, userCode: true, name: true, mobileNumber: true, isActive: true, createdAt: true, hariharaaSubscription: true },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.hariharaaPayment.findMany({ where: { status: HariharaaPaymentStatus.CLAIMED }, select: { userId: true } }),
+    ]);
+    const waiting = new Set(claimed.map((p) => p.userId));
+    return users.map(({ hariharaaSubscription, ...u }) => {
+      const access = computeAccess(hariharaaSubscription);
+      return {
+        ...u,
+        label: memberLabel(access, waiting.has(u.id)),
+        paidUntil: access.paidUntil,
+        freeUntil: access.freeUntil,
+        freeNote: hariharaaSubscription?.complimentaryNote ?? null,
+      };
+    });
+  }
+
+  // The manual exception to paying: an Administrator gives a member free access until a
+  // date (e.g. for testing, or the existing farmers). Kept apart from paid days, capped
+  // so it can't be set by accident to something like the year 2099, and always audited.
+  async grantFreeAccess(userId: string, dto: GrantFreeAccessDto, adminId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+    if (!user || !MEMBER_ROLES.includes(user.role)) {
+      throw new NotFoundException(bi('Member not found', 'సభ్యుడు కనుగొనబడలేదు'));
+    }
+    const until = parseGrantUntil(dto.until);
+    if (!until) throw new BadRequestException(bi('Enter a valid date', 'చెల్లుబాటు అయ్యే తేదీని నమోదు చేయండి'));
+    if (until <= new Date()) throw new BadRequestException(bi('The date must be in the future', 'తేదీ భవిష్యత్తులో ఉండాలి'));
+    if (until.getTime() - Date.now() > MAX_FREE_ACCESS_DAYS * 864e5) {
+      throw new BadRequestException(bi('Free access can be granted for at most 2 years at a time', 'ఉచిత ప్రాప్యతను ఒకసారి గరిష్టంగా 2 సంవత్సరాలకు మాత్రమే ఇవ్వవచ్చు'));
+    }
+    const note = dto.note?.trim() || null;
+    const data = { complimentaryUntil: until, complimentaryNote: note, complimentaryGrantedBy: adminId, complimentaryGrantedAt: new Date() };
+    const updated = await this.prisma.hariharaaSubscription.upsert({ where: { userId }, create: { userId, ...data }, update: data });
+
+    await this.audit.log({
+      actorId: adminId,
+      action: 'membership.free.grant',
+      entityType: 'HariharaaSubscription',
+      entityId: updated.id,
+      metadata: { userId, until: until.toISOString(), note },
+    });
+    const shown = until.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' });
+    await this.notifications.create(
+      userId,
+      'membership.free.granted',
+      bi('You have free access', 'మీకు ఉచిత ప్రాప్యత ఉంది'),
+      bi(`Free access until ${shown}`, `${shown} వరకు ఉచిత ప్రాప్యత`),
+      '/hariharaa/subscription',
+    );
+    return updated;
+  }
+
+  // Removes only the free grant — paid days are untouched.
+  async revokeFreeAccess(userId: string, adminId: string) {
+    const current = await this.prisma.hariharaaSubscription.findUnique({ where: { userId } });
+    if (!current?.complimentaryUntil) {
+      throw new NotFoundException(bi('This member has no free access to remove', 'ఈ సభ్యునికి తొలగించడానికి ఉచిత ప్రాప్యత లేదు'));
+    }
+    const updated = await this.prisma.hariharaaSubscription.update({
+      where: { userId },
+      data: { complimentaryUntil: null, complimentaryNote: null, complimentaryGrantedBy: null, complimentaryGrantedAt: null },
+    });
+    await this.audit.log({
+      actorId: adminId,
+      action: 'membership.free.revoke',
+      entityType: 'HariharaaSubscription',
+      entityId: updated.id,
+      metadata: { userId, previousUntil: current.complimentaryUntil.toISOString() },
+    });
+    await this.notifications.create(
+      userId,
+      'membership.free.revoked',
+      bi('Your free access has ended', 'మీ ఉచిత ప్రాప్యత ముగిసింది'),
+      bi('Pay to continue using everything', 'అన్నింటినీ ఉపయోగించడం కొనసాగించడానికి చెల్లించండి'),
+      '/hariharaa/subscription',
+    );
+    return updated;
   }
 }

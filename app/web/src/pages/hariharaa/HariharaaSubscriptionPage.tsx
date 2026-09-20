@@ -73,12 +73,12 @@ export function HariharaaSubscriptionPage() {
 
   const state = status?.state ?? 'NOT_PAID';
   const awaiting = state === 'AWAITING_VERIFICATION';
-  const isRenewal = state === 'ACTIVE' || state === 'EXPIRED';
+  const isRenewal = state === 'ACTIVE' || state === 'EXPIRED' || state === 'FREE';
 
   return (
     <>
       <div>
-        <Bi id="hariharaaShopNavTitle" as="span" className="eyebrow" />
+        <Bi id="hariharaaSubscriptionNavTitle" as="span" className="eyebrow" />
         <Bi id="hariharaaSubscriptionTitle" as="h1" />
       </div>
 
@@ -117,9 +117,14 @@ export function HariharaaSubscriptionPage() {
             {status?.activeUntil && (
               <div>
                 <div className="field-label">
-                  <Bi id={status.hasAccess ? 'hariharaaActiveUntilLabel' : 'hariharaaExpiredOnLabel'} />
+                  <Bi id={status.hasAccess ? (status.accessKind === 'FREE' ? 'hariharaaFreeUntilLabel' : 'hariharaaActiveUntilLabel') : 'hariharaaExpiredOnLabel'} />
                 </div>
                 <div>{new Date(status.activeUntil).toLocaleDateString()}</div>
+                {status.freeNote && (
+                  <div className="hint">
+                    {strings.memberFreeReasonPrefix.en} {status.freeNote}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -165,7 +170,7 @@ export function HariharaaSubscriptionPage() {
       )}
 
       {status?.hasAccess && (
-        <Link to="/hariharaa/shop" className="link-button">
+        <Link to="/marketplace" className="link-button">
           {strings.backButton.en} / {strings.backButton.te}
         </Link>
       )}

@@ -6,21 +6,22 @@ import { SoilLabService } from './soil-lab.service';
 import { CreateSampleDto } from './dto/create-sample.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { MembershipGuard } from '../../common/guards/membership.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, MembershipGuard)
 @Controller('soil-samples')
 export class SoilLabController {
   constructor(private readonly soilLabService: SoilLabService) {}
 
-  @Roles(Role.FARMER)
+  @Roles(Role.MEMBER)
   @Post()
   createSample(@Body() dto: CreateSampleDto, @CurrentUser() user: AuthenticatedUser) {
     return this.soilLabService.createSample(user.userId, dto);
   }
 
-  @Roles(Role.FARMER)
+  @Roles(Role.MEMBER)
   @Get('mine')
   listMine(@CurrentUser() user: AuthenticatedUser) {
     return this.soilLabService.listMine(user.userId);

@@ -13,13 +13,13 @@ import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-
 export class OrdersController {
   constructor(private readonly marketplaceService: MarketplaceService) {}
 
-  @Roles(Role.FARMER, Role.CUSTOMER)
+  @Roles(Role.MEMBER)
   @Post('checkout')
   checkout(@Body() dto: CheckoutDto, @CurrentUser() user: AuthenticatedUser) {
     return this.marketplaceService.checkout(user.userId, user.role as Role, dto);
   }
 
-  @Roles(Role.FARMER, Role.CUSTOMER)
+  @Roles(Role.MEMBER)
   @Get('mine')
   listMine(@CurrentUser() user: AuthenticatedUser) {
     return this.marketplaceService.listMyOrders(user.userId);

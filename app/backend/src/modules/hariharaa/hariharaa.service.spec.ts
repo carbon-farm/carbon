@@ -21,14 +21,15 @@ describe('HariharaaService', () => {
 
   beforeEach(() => {
     prisma = {
-      user: { findUnique: jest.fn().mockResolvedValue({ userCode: 'HHC-0042', name: 'Ravi' }) },
+      user: { findUnique: jest.fn().mockResolvedValue({ userCode: 'HHC-0042', name: 'Ravi', role: 'MEMBER' }), findMany: jest.fn().mockResolvedValue([]) },
       hariharaaSettings: { findUnique: jest.fn().mockResolvedValue(settings) },
-      hariharaaSubscription: { findUnique: jest.fn().mockResolvedValue(null), upsert: jest.fn().mockResolvedValue({}) },
+      hariharaaSubscription: { findUnique: jest.fn().mockResolvedValue(null), upsert: jest.fn().mockResolvedValue({ id: 's1' }), update: jest.fn().mockResolvedValue({ id: 's1' }) },
       hariharaaPayment: {
         findFirst: jest.fn().mockResolvedValue(null),
         findUnique: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
+        findMany: jest.fn().mockResolvedValue([]),
       },
       $transaction: jest.fn((cb: (tx: unknown) => unknown) => cb(prisma)),
     };
@@ -190,6 +191,55 @@ describe('HariharaaService', () => {
     it('only a submitted payment can be reviewed', async () => {
       prisma.hariharaaPayment.findUnique.mockResolvedValue(payment({ status: S.VERIFIED }));
       await expect(service.review('p1', { approve: true }, 'admin')).rejects.toBeInstanceOf(BadRequestException);
+    });
+  });
+
+  describe('free access', () => {
+    const future = () => new Date(Date.now() + 60 * DAY).toISOString();
+    it('grants free access to a member, audits it and tells them', async () => {
+      await service.grantFreeAccess('u1', { until: future(), note: 'tester' }, 'admin');
+      expect(prisma.hariharaaSubscription.upsert).toHaveBeenCalledTimes(1);
+      const arg = prisma.hariharaaSubscription.upsert.mock.calls[0][0];
+      expect(arg.update).toMatchObject({ complimentaryNote: 'tester', complimentaryGrantedBy: 'admin' });
+      expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ action: 'membership.free.grant' }));
+      expect(notifications.create).toHaveBeenCalledWith('u1', 'membership.free.granted', expect.any(String), expect.any(String), expect.any(String));
+    });
+    it('rejects a past date, junk, an over-long grant, and staff accounts', async () => {
+      await expect(service.grantFreeAccess('u1', { until: new Date(Date.now() - DAY).toISOString() }, 'a')).rejects.toBeInstanceOf(BadRequestException);
+      await expect(service.grantFreeAccess('u1', { until: 'nonsense' }, 'a')).rejects.toBeInstanceOf(BadRequestException);
+      await expect(service.grantFreeAccess('u1', { until: new Date(Date.now() + 900 * DAY).toISOString() }, 'a')).rejects.toBeInstanceOf(BadRequestException);
+      prisma.user.findUnique.mockResolvedValue({ role: 'ADMINISTRATOR' });
+      await expect(service.grantFreeAccess('u1', { until: future() }, 'a')).rejects.toBeInstanceOf(NotFoundException);
+      expect(prisma.hariharaaSubscription.upsert).not.toHaveBeenCalled();
+    });
+    it('revoke clears only the free grant, and errors when there is none', async () => {
+      prisma.hariharaaSubscription.findUnique.mockResolvedValue({ complimentaryUntil: days(20), activeUntil: days(5) });
+      await service.revokeFreeAccess('u1', 'admin');
+      expect(prisma.hariharaaSubscription.update.mock.calls[0][0].data).not.toHaveProperty('activeUntil');
+      expect(prisma.hariharaaSubscription.update.mock.calls[0][0].data.complimentaryUntil).toBeNull();
+      prisma.hariharaaSubscription.findUnique.mockResolvedValue({ complimentaryUntil: null, activeUntil: days(5) });
+      await expect(service.revokeFreeAccess('u1', 'admin')).rejects.toBeInstanceOf(NotFoundException);
+    });
+    it('a free member counts as an active subscriber and shows state FREE', async () => {
+      prisma.hariharaaSubscription.findUnique.mockResolvedValue({ activeUntil: null, complimentaryUntil: days(30), complimentaryNote: 'till Dec' });
+      await expect(service.isActiveSubscriber('u1')).resolves.toBe(true);
+      await expect(service.getMyStatus('u1')).resolves.toMatchObject({ state: 'FREE', hasAccess: true, accessKind: 'FREE', freeNote: 'till Dec' });
+    });
+  });
+
+  describe('listMembers', () => {
+    it('labels each member Paid / Free / Awaiting / Expired / Unpaid', async () => {
+      const u = (id: string, sub: unknown) => ({ id, userCode: id, name: id, mobileNumber: '1', isActive: true, createdAt: new Date(), hariharaaSubscription: sub });
+      prisma.user.findMany.mockResolvedValue([
+        u('a', { activeUntil: days(5), complimentaryUntil: null }),
+        u('b', { activeUntil: null, complimentaryUntil: days(5) }),
+        u('c', null),
+        u('d', { activeUntil: days(-3), complimentaryUntil: null }),
+        u('e', null),
+      ]);
+      prisma.hariharaaPayment.findMany.mockResolvedValue([{ userId: 'e' }]);
+      const labels = (await service.listMembers()).map((m: any) => m.label);
+      expect(labels).toEqual(['PAID', 'FREE', 'UNPAID', 'EXPIRED', 'AWAITING']);
     });
   });
 });

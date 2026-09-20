@@ -40,15 +40,7 @@ export class ProductsController {
     return this.marketplaceService.listAllForAdmin();
   }
 
-  // CUSTOMER-only HARIHARAA catalog — a separate storefront's products,
-  // never mixed into the general listPublished() catalog above.
-  @Roles(Role.CUSTOMER)
-  @Get('hariharaa')
-  listHariharaaCatalog(@CurrentUser() user: AuthenticatedUser) {
-    return this.marketplaceService.listHariharaaCatalog(user.userId);
-  }
-
-  // Kept below the fixed /mine, /admin, /hariharaa routes deliberately — NestJS
+  // Kept below the fixed /mine, /admin routes deliberately — NestJS
   // matches in declaration order, and :id would otherwise swallow those
   // static paths as product IDs.
   @Get(':id')

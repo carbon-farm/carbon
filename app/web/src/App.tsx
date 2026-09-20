@@ -1,5 +1,6 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
+import { MembershipProvider } from './auth/MembershipContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
@@ -45,9 +46,9 @@ import { VendorApprovalsPage } from './pages/VendorApprovalsPage';
 import { ProductsManagePage } from './pages/ProductsManagePage';
 import { OrdersManagePage } from './pages/OrdersManagePage';
 import { HariharaaLandingPage } from './pages/hariharaa/HariharaaLandingPage';
-import { HariharaaShopPage } from './pages/hariharaa/HariharaaShopPage';
 import { HariharaaSubscriptionPage } from './pages/hariharaa/HariharaaSubscriptionPage';
 import { AdminHariharaaSubscriptionsPage } from './pages/hariharaa/AdminHariharaaSubscriptionsPage';
+import { AdminMembersPage } from './pages/hariharaa/AdminMembersPage';
 import { AdminHariharaaSettingsPage } from './pages/hariharaa/AdminHariharaaSettingsPage';
 import { ChangePasswordPage } from './pages/ChangePasswordPage';
 import { MediaLibraryPage } from './pages/MediaLibraryPage';
@@ -57,6 +58,7 @@ export function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <MembershipProvider>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -64,12 +66,14 @@ export function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
           <Route path="/hariharaa" element={<HariharaaLandingPage />} />
-          <Route path="/hariharaa/register" element={<RegisterPage forcedRole="CUSTOMER" />} />
+          {/* One account type: the old HARIHARAA sign-up and shop addresses lead to the shared ones. */}
+          <Route path="/hariharaa/register" element={<Navigate to="/register" replace />} />
+          <Route path="/hariharaa/shop" element={<Navigate to="/marketplace" replace />} />
 
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute roles={['FARMER']}>
+              <ProtectedRoute roles={['MEMBER']} membership>
                 <DashboardPage />
               </ProtectedRoute>
             }
@@ -77,7 +81,7 @@ export function App() {
           <Route
             path="/cases"
             element={
-              <ProtectedRoute roles={['FARMER']}>
+              <ProtectedRoute roles={['MEMBER']} membership>
                 <CasesPage />
               </ProtectedRoute>
             }
@@ -85,7 +89,7 @@ export function App() {
           <Route
             path="/cases/new"
             element={
-              <ProtectedRoute roles={['FARMER']}>
+              <ProtectedRoute roles={['MEMBER']} membership>
                 <NewCasePage />
               </ProtectedRoute>
             }
@@ -93,7 +97,7 @@ export function App() {
           <Route
             path="/cases/:id"
             element={
-              <ProtectedRoute roles={['FARMER']}>
+              <ProtectedRoute roles={['MEMBER']} membership>
                 <CaseDetailPage />
               </ProtectedRoute>
             }
@@ -162,7 +166,7 @@ export function App() {
           <Route
             path="/knowledge"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute membership>
                 <KnowledgeBrowsePage />
               </ProtectedRoute>
             }
@@ -170,7 +174,7 @@ export function App() {
           <Route
             path="/knowledge/:id"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute membership>
                 <ArticleViewPage />
               </ProtectedRoute>
             }
@@ -228,7 +232,7 @@ export function App() {
           <Route
             path="/courses"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute membership>
                 <CoursesBrowsePage />
               </ProtectedRoute>
             }
@@ -252,7 +256,7 @@ export function App() {
           <Route
             path="/courses/:id"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute membership>
                 <CourseDetailPage />
               </ProtectedRoute>
             }
@@ -260,7 +264,7 @@ export function App() {
           <Route
             path="/courses/:id/lessons/:lessonId"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute membership>
                 <LessonViewPage />
               </ProtectedRoute>
             }
@@ -269,7 +273,7 @@ export function App() {
           <Route
             path="/soil-samples"
             element={
-              <ProtectedRoute roles={['FARMER']}>
+              <ProtectedRoute roles={['MEMBER']} membership>
                 <SoilSamplesPage />
               </ProtectedRoute>
             }
@@ -285,7 +289,7 @@ export function App() {
           <Route
             path="/soil-samples/:id"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute membership>
                 <SoilSampleDetailPage />
               </ProtectedRoute>
             }
@@ -310,7 +314,7 @@ export function App() {
           <Route
             path="/marketplace/cart"
             element={
-              <ProtectedRoute roles={['FARMER', 'CUSTOMER']}>
+              <ProtectedRoute roles={['MEMBER']}>
                 <CartPage />
               </ProtectedRoute>
             }
@@ -318,7 +322,7 @@ export function App() {
           <Route
             path="/marketplace/orders"
             element={
-              <ProtectedRoute roles={['FARMER', 'CUSTOMER']}>
+              <ProtectedRoute roles={['MEMBER']}>
                 <OrdersPage />
               </ProtectedRoute>
             }
@@ -373,18 +377,18 @@ export function App() {
           />
 
           <Route
-            path="/hariharaa/shop"
+            path="/hariharaa/subscription"
             element={
-              <ProtectedRoute roles={['CUSTOMER']}>
-                <HariharaaShopPage />
+              <ProtectedRoute roles={['MEMBER']}>
+                <HariharaaSubscriptionPage />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/hariharaa/subscription"
+            path="/admin/members"
             element={
-              <ProtectedRoute roles={['CUSTOMER']}>
-                <HariharaaSubscriptionPage />
+              <ProtectedRoute roles={['ADMINISTRATOR']} wide>
+                <AdminMembersPage />
               </ProtectedRoute>
             }
           />
@@ -448,6 +452,7 @@ export function App() {
             }
           />
         </Routes>
+        </MembershipProvider>
       </BrowserRouter>
     </AuthProvider>
   );
