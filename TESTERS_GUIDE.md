@@ -11,8 +11,7 @@ Practical guide for clicking through the live app. Not a formal SDLC document (s
 |---|---|---|---|
 | Administrator | `9999999999` | `ChangeMe123!` | Seeded account. **Change this password** — it's been sitting at the default since seeding; flagged repeatedly, not yet rotated. |
 | Moderator / Expert / Vendor / Support Agent | — | — | Create via Admin → Staff accounts, with any temporary password you choose. |
-| Farmer | — | — | Self-register via the public "Create an account" link (`/register`). |
-| Customer (HARIHARAA) | — | — | Self-register via the separate HARIHARAA landing page's "Register to subscribe" link (`/hariharaa/register`) — a completely different signup entry point from the Farmer one above. |
+| Member | — | — | Self-register via the public "Create an account" link (`/register`). There is one account type for everyone (farmers and shoppers alike) — no role to choose. |
 
 **OTP is on-screen, not SMS'd.** Registration and password-reset OTP appear directly on screen behind a red "Temporary" banner — deliberate, until a real SMS/WhatsApp vendor is chosen. Don't treat a missing SMS as a bug.
 
@@ -51,26 +50,20 @@ Practical guide for clicking through the live app. Not a formal SDLC document (s
 2. Once approved: create a product (name, description, price, unit, stock, category), upload an image, edit price/stock later, deactivate/reactivate it.
 3. Confirm a deactivated product disappears from the public catalog immediately, and that other vendors' products don't show up under "My products."
 
-### Customer (HARIHARAA Natural Food Stores)
-A completely separate storefront on the same site — different branding, different catalog, subscription-gated. Not the same thing as the Farmer's Marketplace.
-1. Visit `/hariharaa` while logged out — confirm you see only branding, 6 testimonial videos, and a subscribe/QR section. Nothing else about the business should be visible.
-2. Click "Register to subscribe" → register/OTP-verify → you should land on the HARIHARAA shop, not the Farmer dashboard.
-3. Before subscribing, confirm the shop shows "An active HARIHARAA subscription is required."
-4. Go to My subscription, submit a payment reference (any text works pre-gateway) — status moves to "Submitted."
-5. Once an Administrator approves it (see below), refresh the shop — the catalog should now be browsable.
-6. Add a product to cart, checkout (Cash on Delivery only, same as the Farmer Marketplace), confirm the order appears under My orders.
-7. Confirm you can **not** view an OCF Marketplace product by its direct URL — HARIHARAA and OCF catalogs are fully separated.
-
-### Support Agent (dispatch)
-1. Log in — you should land on the Dispatch queue, not a "not built" page.
-2. Open any order from the queue (works for both OCF and HARIHARAA orders — dispatch is shared across both storefronts).
-3. Toggle an order item between Pending and Sent.
-4. Confirm you do **not** see the whole-order Confirm/Ship/Deliver/Cancel buttons — those stay Administrator-only.
-5. Confirm an Administrator can still move the whole order to Shipped/Delivered even while some items are still Pending — that's the intended "send what's in stock" behavior, not a bug.
+### Member (farm advice + HARIHARAA Natural Food Stores, one account)
+One sign-up, one catalog, one membership (₹499/month). Anyone can browse and fill a cart; **checkout and the farm-advice features need an active membership.**
+1. Register at `/register` → verify the on-screen code → you land on the Pay page. Check the header shows your name and ID (e.g. HHC-0042).
+2. Go to Marketplace: you can browse the whole catalog (farm products and HARIHARAA food products together) and add to cart, while unpaid.
+3. While unpaid, confirm a slim "Membership payment pending" strip sits under the title bar on every screen, and that My cases / Knowledge / Courses / Soil Testing show a "Members only" card. Checkout is refused with a clear message.
+4. On the Pay page tap Pay now: a UPI QR appears with your ID in the payment note. Pay in any UPI app (or skip actually paying and type any 6+ character reference while testing), submit the reference — status becomes "waiting for verification".
+5. An Administrator verifies it (Administrator section below). Within about a minute — or on your next page change — the strip disappears and everything unlocks. Checkout with a delivery address should now work.
+6. Try submitting the same reference from a second account: it must be refused as already used.
+7. If an Administrator gives you free access, the Pay page shows "Free access until …" and everything is unlocked; when it is removed you are locked again (paid days, if any, are untouched).
 
 ### Administrator
 1. Log in with the seeded account above.
-2. Staff accounts: create Moderator/Expert/Vendor/Support Agent/Customer accounts.
+2. Staff accounts: create Moderator/Expert/Vendor/Support Agent/Administrator accounts (Members sign up themselves).
+2a. **Members & free access** (`/admin/members`): search, sort by any column, filter by Paid / Free / Waiting / Unpaid / Expired. Use "Give free access" to unlock a member until a date (for testing — e.g. 31 Dec), "Remove free access" to end it. Payments waiting for verification are under "HARIHARAA subscriptions".
 3. Expert credentials: approve/reject pending qualifications.
 4. Taxonomy: manage crops, case categories, tags, regions, and product categories.
 5. Audit log: every material action platform-wide, filterable by entity type and date.
@@ -88,7 +81,7 @@ A completely separate storefront on the same site — different branding, differ
 
 ## What's new this round — worth specifically checking
 
-- **HARIHARAA Natural Food Stores** (`/hariharaa`) — a second, subscription-gated storefront bolted onto the same app: public testimonials + UPI QR page, Customer self-registration, manual payment-claim approval, its own product catalog fully separated from the OCF Marketplace.
+- **One account, one membership** — farmers and shoppers are the same Member type; the combined catalog is open to browse, while checkout and farm advice unlock with a paid month or Administrator-granted free access. New: the Members screen, payment strip under the title bar, readable user IDs (HHC-0042) in the header, and manual UPI verification built to be swapped for a gateway later.
 - **Per-order dispatch tracking** (Support Agent's Dispatch queue) — each order line can be marked Sent/Pending independently of the whole order's status.
 - **Learning Management** (Courses tab / Manage Courses) — full course → lesson → completion → certificate loop.
 - **Soil Laboratory** (Soil Testing tab / staff queue) — sample request through report delivery.

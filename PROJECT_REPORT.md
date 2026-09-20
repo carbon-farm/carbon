@@ -8,9 +8,9 @@ An interactive version of this report (with a clickable test-plan checklist) is 
 ## Snapshot
 
 - **12 of 14** Charter modules fully built
-- **90** backend tests, all passing
-- **27** real products live in the OCF Marketplace catalog, plus a second, fully separate storefront (HARIHARAA Natural Food Stores) with its own subscription-gated catalog
-- **17** database migrations applied to production
+- **136** backend tests, all passing
+- **30** products in one combined catalog (the farm/OCF products plus HARIHARAA Natural Food Stores products), one account type, one membership
+- **22** database migrations applied to production
 
 ## Module status
 
@@ -80,15 +80,17 @@ An interactive version of this report (with a clickable test-plan checklist) is 
 - Rebuilt the frontend as a real portal after direct feedback that the previous build read as disconnected pages — persistent branded header, role-aware nav, a real landing page.
 - Bilingual (English + Telugu, stacked) on every farmer-facing string without exception.
 
-### HARIHARAA Natural Food Stores (new, 2026-08-23) — a second, unrelated storefront on the same platform
-- Public landing page (`/hariharaa`, no login) shows only 6 customer-testimonial videos and a dynamic UPI QR code until a visitor subscribes — nothing else about the business is visible, per the explicit "nothing else till they pay and subscribe" instruction.
-- New `CUSTOMER` role, kept fully separate from `FARMER` — its own registration entry point (`/hariharaa/register`), its own dashboard/shop, its own order history (reusing the same Order/Cart tables, partitioned by role so neither storefront's customers can see or buy from the other's catalog).
-- Subscription is monthly and manual for now: customer pays via UPI, submits a payment reference, an Administrator reviews and approves it (same submit → pending → approve/reject shape as Expert-credential and Vendor approval) — 30 days of access per approval. Built so a later swap to an automated payment gateway only changes how a claim gets created, not the approval/notification/audit plumbing.
-- HARIHARAA's product catalog is its own `VendorProfile` (created and approved through the exact same Staff-account + vendor-approval flow as any OCF vendor) — reuses the existing Vendor dashboard for product management, no new admin UI needed there.
-- Price and both UPI IDs are Administrator-editable (`/admin/hariharaa-settings`) — no code deploy needed to change them.
-- Per-line **dispatch tracking** (Pending/Sent) added to every Marketplace order, independent of the whole-order status — an order can ship while some lines are still pending (stock shortage on the seller's side: send what's available, the rest waits). Handled by the `SUPPORT_AGENT` role, which existed in the schema but had zero real screens until now — it now has its own dispatch queue (`/support/dispatch-queue`).
-- Verified live end to end: public landing → CUSTOMER register/OTP → blocked pre-subscription → claim submitted → Administrator notified/approved → catalog unlocked → COD checkout → order placed with the item defaulting to Pending → SUPPORT_AGENT login → dispatch queue → marked Sent → whole-order status untouched by the item-level change. Cross-tenant isolation confirmed both directions: a CUSTOMER hitting an OCF product's URL directly is rejected, and a FARMER's `/marketplace` still shows exactly the 27 OCF products with no HARIHARAA products mixed in.
-- **Real bug caught and fixed during this verification**: the filter meant to exclude HARIHARAA's products from the general OCF catalog used a top-level `NOT: { vendorId: X }`, which — due to SQL's NULL-comparison rules — silently excluded every platform-sold product too (`vendor_id != X` evaluates to NULL, not true, when `vendor_id IS NULL`). This briefly emptied the entire 27-product OCF catalog for every role in production before being caught by the live regression check and fixed (exclusion moved inside the vendor-sold branch specifically, where it can't touch the null-vendor branch).
+### One roof: Members, membership and HARIHARAA (2026-09)
+Everything now lives under one app and one account type.
+- **One account type — Member.** Farmers and HARIHARAA customers were merged; sign-up has no role picker. Every Member gets a readable, permanent ID (`HHC-0042`; staff get `HHE-`, `HHM-`, `HHA-` … and existing farmers keep `HHF-`), shown with their name in the header on every screen. `/hariharaa/register` and `/hariharaa/shop` simply redirect to the shared sign-up and catalog.
+- **Anyone signed in can browse the combined catalog and fill a cart** (farm products and HARIHARAA food products together). **Checkout and the farm-advice features (cases, farms, knowledge, courses, soil testing) need an active membership** — enforced by the API (`MembershipGuard`, plus a check in checkout), not just hidden in the UI. Staff roles need no membership.
+- **Membership is ₹499/month, verified manually for now.** The member taps Pay (a UPI QR is generated for that member and amount, with their ID in the note), pays in any UPI app, and types the UTR. An Administrator verifies it against the bank and 30 days start. One `markVerified` step is the seam a payment gateway will later call. Duplicate UTRs are rejected; renewals stack on top of remaining days.
+- **Free access switch (Administrator → Members & free access).** Every member shows one label — Paid / Free / Waiting / Unpaid / Expired — in a sortable, filterable list. An Administrator can give a member free access until a date (max 2 years at a time, audited, member notified) and remove it again; paid days are never touched, and paying during a free period adds time after it. The three existing real users were granted free access until 31 Dec 2026.
+- **Unpaid members see a payment strip** directly under the title bar on every screen (hidden on the Pay page); it clears by itself once payment is verified or free access is granted. Locked screens show a friendly "Members only" card instead of errors.
+- Per-line **dispatch tracking** (Pending/Sent) on every order, handled by the `SUPPORT_AGENT` dispatch queue, is unchanged.
+- Legacy `FARMER`/`CUSTOMER` roles are mapped to `MEMBER` at the API edge (so old sessions keep working) and the stored data was migrated. Removing the two unused enum values is a later, optional cleanup.
+- **Verified live end to end (2026-09-20):** register → MEMBER + ID → unpaid: browse and add to cart work, cases/knowledge/courses/farms/soil are 403 and checkout is refused → free grant unlocks everything → revoke locks it again → past date and 2099 rejected, member cannot grant themselves → pay + claim + Administrator verify → unlocked, checkout allowed → staff unaffected. Also checked in a real browser: header name + ID, strip and locked card, strip clearing after the grant, and the Members screen (sort + Free filter).
+- Still to come: guest browsing and guest cart, a Department → Category → Sub-category tree, saved delivery addresses, and COD/UPI order payment with verification before dispatch.
 
 ## Deferred & blocked
 
@@ -125,8 +127,8 @@ See the interactive report for a clickable checklist. Summary by role:
 - **Vendor**: profile submission + approval gate, product create/edit/image/deactivate, deactivated products disappearing from the public catalog.
 - **Administrator**: staff/credential management, taxonomy CRUD, audit log + reports sanity check, vendor approval, full order fulfillment + cancel/restock, spot-check the 27 seeded products.
 - **Cross-cutting**: sort/filter on every list screen, mobile-width nav for every role, dark mode, bilingual coverage, a hard-refresh mid-session to catch stale PWA cache.
-- **HARIHARAA CUSTOMER**: land on `/hariharaa` unauthenticated (testimonials + QR only), register via `/hariharaa/register`, confirm blocked pre-subscription, submit a claim, confirm access unlocks after Administrator approval, browse/buy the HARIHARAA catalog, confirm OCF products stay inaccessible.
-- **HARIHARAA Administrator**: review/approve/reject subscription claims, edit price/UPI IDs in settings.
+- **Member**: register (no role choice), see the ID in the header, see the payment strip and "Members only" cards while unpaid, pay/claim, get unlocked after verification; browse the combined catalog and cart while unpaid, checkout only when paid or free.
+- **Administrator — Members**: search/sort/filter the list, give and remove free access, verify or reject payment claims, edit price and UPI settings.
 - **SUPPORT_AGENT**: confirm login lands on `/support/dispatch-queue`, can toggle an order item Pending/Sent, cannot see the whole-order confirm/ship/deliver/cancel buttons.
 
 ## Security & hygiene pending
