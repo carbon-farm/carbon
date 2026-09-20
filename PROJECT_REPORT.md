@@ -8,9 +8,9 @@ An interactive version of this report (with a clickable test-plan checklist) is 
 ## Snapshot
 
 - **12 of 14** Charter modules fully built
-- **74** backend tests, all passing
+- **90** backend tests, all passing
 - **27** real products live in the OCF Marketplace catalog, plus a second, fully separate storefront (HARIHARAA Natural Food Stores) with its own subscription-gated catalog
-- **16** database migrations applied to production
+- **17** database migrations applied to production
 
 ## Module status
 
@@ -133,6 +133,7 @@ See the interactive report for a clickable checklist. Summary by role:
 
 - **Seeded Administrator password never rotated** (9999999999) — rotate via the Forgot Password self-service flow.
 - **Supabase `service_role` key never rotated** — rotate in the Supabase dashboard, then update Render's env var.
+- **HARIHARAA payment-flow audit (2026-09-20)**: a live check decoded the deployed QR and walked a customer through pay → claim → approve → lapse → renew. Fixed and re-verified live: the QR now matches the merchant's own Google Pay QR (adds `aid`, plain `@`, `499.00`); lapsed customers see Expired and can renew (previously told "Active" with no form); early renewal keeps access and adds to remaining days; a payment reference can no longer unlock several accounts; each claim records the price expected. Four more throwaway accounts were created and deactivated (9123457001, 9123457002, 9123458001, 9123458002). Migration `20260920001834_add_upi_aid_and_expected_amount`.
 - **Test accounts cleaned up (2026-09-19)**: Administrators can now deactivate/reactivate accounts (Staff page). All 21 known test/QA accounts were deactivated — login blocked immediately, sessions revoked, and re-registering the same number is refused. Deactivation is reversible; nothing was deleted, so their history (cases, orders, articles) is intact and everything downstream was re-checked after (2 published articles, 27 OCF products, 8 orders, HARIHARAA storefront all unaffected).
   Deactivated: Pavan (9000000000), Test Farmer (9123456780), Prod Mode Test (9123456799), Visual Check (9123456798), Visual Check 2 (9123456797), Live Verify (9123456700), Live Vercel Check (9123456701), Stuck Test User Fixed Name (9123450011), Live Resend Check (9123450022), Test Expert (9123456782), Pending Credential Expert (9123450088), Test Moderator (9123456781), Test Support Agent (9123450099), Regression Test Farmer (9123456622), Regression API Test (9123456633), Regression Test Farmer — abandoned registration (9123456611), Regression Moderator (9123456711), Regression Expert (9123456712), Regression Vendor (9123456713), Regression Test Customer (9123456800), Regression Dispatch Agent (9123456900).
   Still active, deliberately: the Administrator, the real HARIHARAA vendor account (9876500001), and three that may be real people and were left alone — Paindla Vamshi Vardhan Reddy (9502829167), Vani (9382828484), "122" (9849957645).
@@ -161,4 +162,5 @@ Migrations applied (14, all live):
 20260822015831_add_marketplace
 20260823151259_add_hariharaa_customer_storefront
 20260919031842_add_user_deactivated_at
+20260920001834_add_upi_aid_and_expected_amount
 ```
