@@ -4,6 +4,7 @@ import { useAuth } from '../auth/AuthContext';
 import { roleHomePath } from '../auth/roleHome';
 import { getUnreadCount } from '../api/notifications';
 import { getMe, type AdminUser } from '../api/admin';
+import { PaymentStrip } from './PaymentStrip';
 import { Bi } from '../i18n/Bi';
 import { strings, type StringKey } from '../i18n/strings';
 
@@ -154,6 +155,8 @@ export function AppShell({ children, wide = false }: { children: ReactNode; wide
           </div>
         )}
       </header>
+
+      <PaymentStrip />
 
       {navItems.length > 0 && (
         <nav className="app-nav">
