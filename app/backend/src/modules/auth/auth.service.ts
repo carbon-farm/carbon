@@ -54,8 +54,6 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
     const role = dto.role ?? Role.FARMER;
-    // Only a brand-new account takes a number; a resent registration keeps its own.
-    const userCode = existing ? undefined : await nextUserCode(this.prisma, role);
     const user = existing
       ? await this.prisma.user.update({
           where: { id: existing.id },
@@ -67,7 +65,8 @@ export class AuthService {
             passwordHash,
             name: dto.name,
             role,
-            userCode,
+            // Only a brand-new account takes a number; a resent registration keeps its own.
+            userCode: await nextUserCode(this.prisma, role),
             preferredLanguage: dto.preferredLanguage ?? 'te',
             isActive: false, // activated once REGISTRATION OTP is verified
           },

@@ -125,7 +125,7 @@ model User {
   // Short, human-usable ID (HHC-0042 = customer #42) for people to say, write and
   // search by — the UUID above stays the internal key. Assigned once at creation,
   // never reused or changed; see common/user-code.ts.
-  userCode          String?   @unique
+  userCode          String    @unique
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -134,34 +134,33 @@ model User {
   membershipStatus MembershipStatus?
   membershipExpiry DateTime?
 
-  farmLands                    FarmLand[]
-  expertProfile                ExpertProfile?
-  refreshTokens                RefreshToken[]
-  auditLogs                    AuditLog[]              @relation("AuditActor")
-  verifiedExperts              ExpertProfile[]         @relation("CredentialVerifier")
-  casesAsFarmer                Case[]                  @relation("CaseFarmer")
-  casesAsExpert                Case[]                  @relation("CaseExpert")
-  articlesAuthored             KnowledgeArticle[]      @relation("KnowledgeAuthor")
-  articlesReviewed             KnowledgeArticle[]      @relation("KnowledgeReviewer")
-  notifications                Notification[]
-  articleFeedback              ArticleFeedback[]
-  articleBookmarks             ArticleBookmark[]
-  articleViews                 ArticleView[]
-  coursesAuthored              Course[]                @relation("CourseAuthor")
-  lessonCompletions            LessonCompletion[]
-  certificates                 Certificate[]
-  soilSamples                  SoilSample[]            @relation("SoilSampleFarmer")
-  vendorProfile                VendorProfile?          @relation("VendorUser")
-  vendorApprovals              VendorProfile[]         @relation("VendorApprover")
-  cartItems                    CartItem[]
-  orders                       Order[]
-  productReviews               ProductReview[]
-  productWishlists             ProductWishlist[]
-  hariharaaSubscription        HariharaaSubscription?  @relation("HariharaaSubscriber")
-  hariharaaSubscriptionReviews HariharaaSubscription[] @relation("HariharaaSubscriptionReviewer")
-  hariharaaSettingsUpdates     HariharaaSettings[]     @relation("HariharaaSettingsUpdater")
-  hariharaaPayments            HariharaaPayment[]      @relation("HariharaaPayer")
-  hariharaaPaymentsVerified    HariharaaPayment[]      @relation("HariharaaPaymentVerifier")
+  farmLands                 FarmLand[]
+  expertProfile             ExpertProfile?
+  refreshTokens             RefreshToken[]
+  auditLogs                 AuditLog[]             @relation("AuditActor")
+  verifiedExperts           ExpertProfile[]        @relation("CredentialVerifier")
+  casesAsFarmer             Case[]                 @relation("CaseFarmer")
+  casesAsExpert             Case[]                 @relation("CaseExpert")
+  articlesAuthored          KnowledgeArticle[]     @relation("KnowledgeAuthor")
+  articlesReviewed          KnowledgeArticle[]     @relation("KnowledgeReviewer")
+  notifications             Notification[]
+  articleFeedback           ArticleFeedback[]
+  articleBookmarks          ArticleBookmark[]
+  articleViews              ArticleView[]
+  coursesAuthored           Course[]               @relation("CourseAuthor")
+  lessonCompletions         LessonCompletion[]
+  certificates              Certificate[]
+  soilSamples               SoilSample[]           @relation("SoilSampleFarmer")
+  vendorProfile             VendorProfile?         @relation("VendorUser")
+  vendorApprovals           VendorProfile[]        @relation("VendorApprover")
+  cartItems                 CartItem[]
+  orders                    Order[]
+  productReviews            ProductReview[]
+  productWishlists          ProductWishlist[]
+  hariharaaSubscription     HariharaaSubscription? @relation("HariharaaSubscriber")
+  hariharaaSettingsUpdates  HariharaaSettings[]    @relation("HariharaaSettingsUpdater")
+  hariharaaPayments         HariharaaPayment[]     @relation("HariharaaPayer")
+  hariharaaPaymentsVerified HariharaaPayment[]     @relation("HariharaaPaymentVerifier")
 
   @@index([role])
 }
@@ -773,39 +772,17 @@ model HariharaaPayment {
   @@index([status])
 }
 
-// LEGACY: subscription claims now live in HariharaaPayment. Only activeUntil
-// (paid-through date) is still used from this model; the other columns are removed in
-// a follow-up migration once the new code is live.
-enum HariharaaSubscriptionStatus {
-  PENDING_REVIEW
-  ACTIVE
-  REJECTED
-  EXPIRED
-}
-
+// A customer's ACCESS to the HARIHARAA shop: just the paid-through date. Payments
+// themselves (who, how much, UTR, status) live in HariharaaPayment, one row per attempt.
+// Access is "activeUntil is in the future" — set only by a verified payment, extended
+// on renewal, and it simply lapses with no sweep job.
 model HariharaaSubscription {
-  id                String                      @id @default(uuid())
-  userId            String                      @unique
-  user              User                        @relation("HariharaaSubscriber", fields: [userId], references: [id], onDelete: Cascade)
-  status            HariharaaSubscriptionStatus @default(PENDING_REVIEW)
-  paymentReference  String?
-  // Price the customer was asked to pay when they submitted — the settings
-  // price can change later, and the reviewing Administrator needs to compare
-  // the bank credit against what was expected *then*.
-  expectedAmountInr Float?
-  note              String?
-  submittedAt       DateTime                    @default(now())
-  reviewedByUserId  String?
-  reviewedBy        User?                       @relation("HariharaaSubscriptionReviewer", fields: [reviewedByUserId], references: [id])
-  reviewedAt        DateTime?
-  activeUntil       DateTime? // set to submission/approval time + 30 days on approve; the load-bearing
-  // "is this customer currently subscribed" check compares this against
-  // now(), not just status === ACTIVE, so a lapsed month reads correctly
-  // even before any explicit expiry job runs.
-  createdAt         DateTime                    @default(now())
-  updatedAt         DateTime                    @updatedAt
-
-  @@index([status])
+  id          String    @id @default(uuid())
+  userId      String    @unique
+  user        User      @relation("HariharaaSubscriber", fields: [userId], references: [id], onDelete: Cascade)
+  activeUntil DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 // Singleton (enforced at the service layer via a fixed well-known id, not a
