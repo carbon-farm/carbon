@@ -2,12 +2,22 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
-import { listPublishedProducts, listCategories, listWishlist, type Product, type ProductCategory } from '../api/marketplace';
+import {
+  listCatalogProducts,
+  listCatalogCategories,
+  listWishlist,
+  type Product,
+  type ProductCategory,
+} from '../api/marketplace';
+import { buildCategoryTree, categoryName } from '../catalog/categoryTree';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 
 type SortMode = 'newest' | 'priceAsc' | 'priceDesc' | 'title';
 
+// The shop window. Open to everyone (no login): browse the combined catalog by
+// Department -> Category -> Sub-category, search, sort, and fill a cart. Signing in is only
+// needed to check out; a paid or free membership unlocks checkout itself.
 export function MarketplacePage() {
   const { session, logout } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
@@ -15,36 +25,62 @@ export function MarketplacePage() {
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [categoryFilter, setCategoryFilter] = useState('');
+  const [departmentId, setDepartmentId] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [subCategoryId, setSubCategoryId] = useState('');
   const [search, setSearch] = useState('');
   const [wishlistOnly, setWishlistOnly] = useState(false);
   const [sortMode, setSortMode] = useState<SortMode>('newest');
 
   useEffect(() => {
-    if (!session) return;
-    listPublishedProducts(session.accessToken)
+    listCatalogProducts()
       .then(setProducts)
-      .catch((err) => {
-        if (err instanceof ApiError && err.status === 401) {
-          logout();
-          return;
-        }
-        setError(err instanceof ApiError ? err.message : `${strings.couldNotLoadProducts.en} / ${strings.couldNotLoadProducts.te}`);
-      })
+      .catch((err) => setError(err instanceof ApiError ? err.message : `${strings.couldNotLoadProducts.en} / ${strings.couldNotLoadProducts.te}`))
       .finally(() => setLoading(false));
-    listCategories(session.accessToken).then(setCategories).catch(() => {});
+    listCatalogCategories()
+      .then(setCategories)
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!session || session.role !== 'MEMBER') return;
     listWishlist(session.accessToken)
       .then((items) => setWishlistIds(new Set(items.map((p) => p.id))))
-      .catch(() => {});
+      .catch((err) => {
+        if (err instanceof ApiError && err.status === 401) logout();
+      });
   }, [session, logout]);
+
+  const tree = useMemo(() => buildCategoryTree(categories), [categories]);
+  const department = tree.find((d) => d.id === departmentId);
+  const category = department?.children.find((c) => c.id === categoryId);
+
+  // The deepest choice made; browsing it includes everything filed beneath it.
+  const selectedIds = useMemo(() => {
+    const chosen = subCategoryId || categoryId || departmentId;
+    if (!chosen) return null;
+    const out = new Set<string>();
+    const walk = (nodes: typeof tree) => {
+      for (const n of nodes) {
+        if (n.id === chosen) collect(n);
+        else walk(n.children);
+      }
+    };
+    const collect = (n: (typeof tree)[number]) => {
+      out.add(n.id);
+      n.children.forEach(collect);
+    };
+    walk(tree);
+    return out;
+  }, [tree, departmentId, categoryId, subCategoryId]);
 
   const visible = useMemo(() => {
     let rows = products;
-    if (categoryFilter) rows = rows.filter((p) => p.categoryId === categoryFilter);
+    if (selectedIds) rows = rows.filter((p) => p.categoryId !== null && selectedIds.has(p.categoryId));
     if (wishlistOnly) rows = rows.filter((p) => wishlistIds.has(p.id));
     if (search.trim()) {
       const q = search.trim().toLowerCase();
-      rows = rows.filter((p) => p.name.toLowerCase().includes(q));
+      rows = rows.filter((p) => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q));
     }
     rows = [...rows];
     switch (sortMode) {
@@ -61,7 +97,7 @@ export function MarketplacePage() {
         rows.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
     }
     return rows;
-  }, [products, categoryFilter, wishlistOnly, wishlistIds, search, sortMode]);
+  }, [products, selectedIds, wishlistOnly, wishlistIds, search, sortMode]);
 
   return (
     <>
@@ -77,6 +113,7 @@ export function MarketplacePage() {
         </Link>
       </div>
 
+      {!session && <BiValue value={strings.guestBrowseHint} as="p" className="hint" />}
       {error && <div className="error-banner">{error}</div>}
 
       {!loading && products.length > 0 && (
@@ -85,14 +122,53 @@ export function MarketplacePage() {
             <Bi id="searchPlaceholder" />
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={biInline('searchPlaceholder')} />
           </label>
-          {categories.length > 0 && (
+          {tree.length > 0 && (
+            <label>
+              <Bi id="departmentLabel" />
+              <select
+                value={departmentId}
+                onChange={(e) => {
+                  setDepartmentId(e.target.value);
+                  setCategoryId('');
+                  setSubCategoryId('');
+                }}
+              >
+                <option value="">{biInline('allOption')}</option>
+                {tree.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {categoryName(d)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {department && department.children.length > 0 && (
             <label>
               <Bi id="categoryLabel" />
-              <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+              <select
+                value={categoryId}
+                onChange={(e) => {
+                  setCategoryId(e.target.value);
+                  setSubCategoryId('');
+                }}
+              >
                 <option value="">{biInline('allOption')}</option>
-                {categories.map((c) => (
+                {department.children.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.name}
+                    {categoryName(c)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {category && category.children.length > 0 && (
+            <label>
+              <Bi id="subCategoryLabel" />
+              <select value={subCategoryId} onChange={(e) => setSubCategoryId(e.target.value)}>
+                <option value="">{biInline('allOption')}</option>
+                {category.children.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {categoryName(c)}
                   </option>
                 ))}
               </select>
@@ -123,15 +199,20 @@ export function MarketplacePage() {
       ) : visible.length === 0 ? (
         <BiValue value={strings.reportNoData} as="p" className="hint" />
       ) : (
-        <div className="card">
+        <div className="product-grid">
           {visible.map((p) => (
-            <Link to={`/marketplace/products/${p.id}`} key={p.id} className="case-item">
+            <Link to={`/marketplace/products/${p.id}`} key={p.id} className="case-item product-tile">
+              {p.imageUrls[0] && <img src={p.imageUrls[0]} alt="" className="product-tile-img" loading="lazy" />}
               <div className="top-bar">
                 <div className="label">{p.name}</div>
                 {wishlistIds.has(p.id) && <span className="priority-badge">♥</span>}
               </div>
               <div className="meta">
-                ₹{p.price.toFixed(2)} {p.unit} · {p.vendor?.businessName ?? biInline('platformSoldOption')}
+                ₹{p.price.toFixed(2)} {p.unit}
+              </div>
+              <div className="meta">
+                {p.category ? `${p.category.name} · ` : ''}
+                {p.vendor?.businessName ?? biInline('platformSoldOption')}
               </div>
               {p.stockQuantity === 0 && <BiValue value={strings.outOfStockNotice} as="div" className="status-line" />}
             </Link>

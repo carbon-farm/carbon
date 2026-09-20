@@ -4,7 +4,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { ApiError } from '../../api/client';
 import { listOrdersQueue, type Order } from '../../api/marketplace';
 import { Bi, BiValue, biInline } from '../../i18n/Bi';
-import { strings, orderStatusLabel } from '../../i18n/strings';
+import { strings, orderStatusLabel, orderPaymentStatusLabel } from '../../i18n/strings';
 
 type SortMode = 'oldest' | 'newest';
 
@@ -20,6 +20,7 @@ export function DispatchQueuePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pendingOnly, setPendingOnly] = useState(false);
+  const [readyOnly, setReadyOnly] = useState(true);
   const [sortMode, setSortMode] = useState<SortMode>('oldest');
 
   useEffect(() => {
@@ -36,13 +37,17 @@ export function DispatchQueuePage() {
       .finally(() => setLoading(false));
   }, [session, logout]);
 
+  // Ready to pack = not cancelled, and either Cash on Delivery or a UPI payment that has been verified.
+  const isReady = (o: Order) => o.status !== 'CANCELLED' && (o.paymentMethod === 'COD' || o.paymentStatus === 'PAID');
+
   const visible = useMemo(() => {
-    let rows = orders;
+    let rows = readyOnly ? orders.filter(isReady) : orders;
     if (pendingOnly) rows = rows.filter((o) => o.items.some((i) => i.dispatchStatus === 'PENDING'));
     rows = [...rows];
     rows.sort((a, b) => (sortMode === 'newest' ? b.createdAt.localeCompare(a.createdAt) : a.createdAt.localeCompare(b.createdAt)));
     return rows;
-  }, [orders, pendingOnly, sortMode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orders, pendingOnly, readyOnly, sortMode]);
 
   return (
     <>
@@ -55,6 +60,10 @@ export function DispatchQueuePage() {
 
       {!loading && orders.length > 0 && (
         <div className="list-toolbar">
+          <label className="checkbox-label">
+            <input type="checkbox" checked={readyOnly} onChange={(e) => setReadyOnly(e.target.checked)} />
+            <Bi id="dispatchReadyOnly" />
+          </label>
           <label className="checkbox-label">
             <input type="checkbox" checked={pendingOnly} onChange={(e) => setPendingOnly(e.target.checked)} />
             <Bi id="dispatchStatusPending" />
@@ -85,6 +94,12 @@ export function DispatchQueuePage() {
                 <div className="label">{o.orderNumber}</div>
                 <div className="meta">
                   {o.farmer?.name} · ₹{o.totalAmount.toFixed(2)} · {o.items.length} items
+                </div>
+                <div className="meta">
+                  {o.shippingAddress ? `${o.shippingAddress.city} ${o.shippingAddress.pincode} · ${o.shippingAddress.phone}` : o.deliveryAddress}
+                </div>
+                <div className="meta">
+                  {o.paymentMethod === 'UPI' ? strings.paymentUpiShort.en : strings.paymentCod.en} · {orderPaymentStatusLabel(o.paymentStatus).en}
                 </div>
                 <div className="status-line">
                   {status.en} / {status.te}

@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { MarketplaceService } from './marketplace.service';
 import { SubmitVendorProfileDto, VerifyVendorDto } from './dto/vendor-profile.dto';
-import { CreateCategoryDto } from './dto/create-category.dto';
+import { CreateCategoryDto, UpdateCategoryDto } from './dto/create-category.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -45,6 +45,19 @@ export class MarketplaceController {
   @Get('categories')
   listCategories() {
     return this.marketplaceService.listCategories();
+  }
+
+  // Includes switched-off categories and product counts, for the taxonomy editor.
+  @Roles(Role.ADMINISTRATOR)
+  @Get('categories/manage')
+  listCategoriesForAdmin() {
+    return this.marketplaceService.listCategories(true);
+  }
+
+  @Roles(Role.ADMINISTRATOR)
+  @Patch('categories/:id')
+  updateCategory(@Param('id') id: string, @Body() dto: UpdateCategoryDto) {
+    return this.marketplaceService.updateCategory(id, dto);
   }
 
   @Roles(Role.ADMINISTRATOR)

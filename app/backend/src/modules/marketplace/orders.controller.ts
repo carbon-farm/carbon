@@ -1,6 +1,9 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { MarketplaceService } from './marketplace.service';
+import { OrderPaymentsService } from './order-payments.service';
+import { ClaimPaymentDto } from '../hariharaa/dto/claim-payment.dto';
+import { ReviewClaimDto } from '../hariharaa/dto/review-claim.dto';
 import { CheckoutDto } from './dto/checkout.dto';
 import { SetDispatchStatusDto } from './dto/dispatch-status.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -11,7 +14,10 @@ import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('marketplace/orders')
 export class OrdersController {
-  constructor(private readonly marketplaceService: MarketplaceService) {}
+  constructor(
+    private readonly marketplaceService: MarketplaceService,
+    private readonly orderPayments: OrderPaymentsService,
+  ) {}
 
   @Roles(Role.MEMBER)
   @Post('checkout')
@@ -29,6 +35,14 @@ export class OrdersController {
   @Get('manage')
   listQueueForAdmin() {
     return this.marketplaceService.listQueueForAdmin();
+  }
+
+  // UPI payments waiting for an Administrator to check the bank credit. Static path, so it
+  // stays above the :id routes.
+  @Roles(Role.ADMINISTRATOR)
+  @Get('payments/pending')
+  listPendingPayments() {
+    return this.orderPayments.listPending();
   }
 
   // Kept below the fixed /checkout, /mine, /manage routes deliberately —
@@ -76,5 +90,24 @@ export class OrdersController {
     @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.marketplaceService.markItemDispatchStatus(id, itemId, dto.status, user.userId);
+  }
+
+  // Paying an order by UPI: get the QR, then type the UTR; an Administrator verifies it.
+  @Roles(Role.MEMBER)
+  @Post(':id/payment/start')
+  startPayment(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.orderPayments.start(user.userId, id);
+  }
+
+  @Roles(Role.MEMBER)
+  @Post(':id/payment/claim')
+  claimPayment(@Param('id') id: string, @Body() dto: ClaimPaymentDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.orderPayments.claim(user.userId, id, dto);
+  }
+
+  @Roles(Role.ADMINISTRATOR)
+  @Post(':id/payment/review')
+  reviewPayment(@Param('id') id: string, @Body() dto: ReviewClaimDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.orderPayments.review(id, dto, user.userId);
   }
 }

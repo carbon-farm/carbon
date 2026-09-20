@@ -16,7 +16,7 @@ import {
   type Tag,
   type Region,
 } from '../api/configuration';
-import { listCategories as listProductCategories, createCategory as createProductCategory, type ProductCategory } from '../api/marketplace';
+import { ProductCategoryEditor } from '../components/ProductCategoryEditor';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, type StringKey } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
@@ -86,7 +86,6 @@ export function AdminTaxonomyPage() {
   const [crops, setCrops] = useState<Crop[]>([]);
   const [categories, setCategories] = useState<CaseCategory[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
-  const [productCategories, setProductCategories] = useState<ProductCategory[]>([]);
   const [regions, setRegions] = useState<Region[]>([]);
   const [regionName, setRegionName] = useState('');
   const [regionState, setRegionState] = useState('');
@@ -109,14 +108,12 @@ export function AdminTaxonomyPage() {
       listCaseCategories(session.accessToken),
       listTags(session.accessToken),
       listRegions(session.accessToken),
-      listProductCategories(session.accessToken),
     ])
-      .then(([cropsResult, categoriesResult, tagsResult, regionsResult, productCategoriesResult]) => {
+      .then(([cropsResult, categoriesResult, tagsResult, regionsResult]) => {
         setCrops(cropsResult);
         setCategories(categoriesResult);
         setTags(tagsResult);
         setRegions(regionsResult);
-        setProductCategories(productCategoriesResult);
       })
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) {
@@ -196,17 +193,7 @@ export function AdminTaxonomyPage() {
             }
           />
 
-          <SimpleListSection
-            headingKey="productCategoriesHeading"
-            items={productCategories}
-            onAdd={(name) =>
-              guarded(async () => {
-                if (!session) return;
-                const created = await createProductCategory(session.accessToken, name);
-                setProductCategories((prev) => [...prev, created]);
-              })
-            }
-          />
+          <ProductCategoryEditor />
 
           <div className="card">
             <div className="top-bar">

@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { apiRequest } from '../api/client';
 import { normalizeRole } from './normalizeRole';
+import { mergeGuestCart } from '../api/marketplace';
+import { clearGuestCart, readGuestCart } from '../cart/guestCart';
 
 interface Session {
   accessToken: string;
@@ -34,6 +36,21 @@ const STORAGE_KEY = 'agriai.session';
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+// Whatever the visitor put in their cart before signing in joins their saved cart. Failures
+// are swallowed on purpose — a cart hiccup must never block someone from signing in — and the
+// browser copy is only cleared once the server has it.
+async function foldGuestCartIntoAccount(accessToken: string, role: string) {
+  if (role !== 'MEMBER') return;
+  const lines = readGuestCart();
+  if (lines.length === 0) return;
+  try {
+    await mergeGuestCart(accessToken, lines);
+    clearGuestCart();
+  } catch {
+    // keep the browser cart; it will be offered again next sign-in
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -63,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: { mobileNumber, code, purpose: 'REGISTRATION' },
     });
     const role = normalizeRole(result.role);
+    await foldGuestCartIntoAccount(result.accessToken, role);
     setSession({ accessToken: result.accessToken, refreshToken: result.refreshToken, role });
     return { role };
   }, []);
@@ -73,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: { mobileNumber, password },
     });
     const role = normalizeRole(result.role);
+    await foldGuestCartIntoAccount(result.accessToken, role);
     setSession({ accessToken: result.accessToken, refreshToken: result.refreshToken, role });
     return { role };
   }, []);

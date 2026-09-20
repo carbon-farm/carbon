@@ -31,6 +31,7 @@ describe('HariharaaService', () => {
         update: jest.fn(),
         findMany: jest.fn().mockResolvedValue([]),
       },
+      order: { findFirst: jest.fn().mockResolvedValue(null) },
       $transaction: jest.fn((cb: (tx: unknown) => unknown) => cb(prisma)),
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
@@ -224,6 +225,16 @@ describe('HariharaaService', () => {
       prisma.hariharaaSubscription.findUnique.mockResolvedValue({ activeUntil: null, complimentaryUntil: days(30), complimentaryNote: 'till Dec' });
       await expect(service.isActiveSubscriber('u1')).resolves.toBe(true);
       await expect(service.getMyStatus('u1')).resolves.toMatchObject({ state: 'FREE', hasAccess: true, accessKind: 'FREE', freeNote: 'till Dec' });
+    });
+  });
+
+  describe('claim vs shop orders', () => {
+    it('refuses a UTR that already backs a shop order', async () => {
+      prisma.hariharaaPayment.findUnique.mockResolvedValue(payment());
+      prisma.hariharaaPayment.findFirst.mockResolvedValue(null);
+      prisma.order.findFirst.mockResolvedValue({ id: 'o1' });
+      await expect(service.claimPayment('u1', 'p1', { utr: 'ABC123456' })).rejects.toBeInstanceOf(ConflictException);
+      expect(prisma.hariharaaPayment.update).not.toHaveBeenCalled();
     });
   });
 

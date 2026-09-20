@@ -4,6 +4,8 @@ import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import {
   getProduct,
+  getCatalogProduct,
+  getCatalogReviews,
   setCartItem,
   toggleWishlist,
   getReviews,
@@ -11,6 +13,7 @@ import {
   type Product,
   type ReviewsSummary,
 } from '../api/marketplace';
+import { setGuestCartItem } from '../cart/guestCart';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 
@@ -30,9 +33,12 @@ export function ProductDetailPage() {
   const [comment, setComment] = useState('');
   const [reviewBusy, setReviewBusy] = useState(false);
 
+  // Anyone (signed in or not) can shop; staff only look.
+  const canShop = !session || session.role === 'MEMBER';
+
   useEffect(() => {
-    if (!session || !id) return;
-    getProduct(session.accessToken, id)
+    if (!id) return;
+    (session ? getProduct(session.accessToken, id) : getCatalogProduct(id))
       .then(setProduct)
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) {
@@ -42,7 +48,7 @@ export function ProductDetailPage() {
         setError(err instanceof ApiError ? err.message : `${strings.couldNotLoadProduct.en} / ${strings.couldNotLoadProduct.te}`);
       })
       .finally(() => setLoading(false));
-    getReviews(session.accessToken, id)
+    (session ? getReviews(session.accessToken, id) : getCatalogReviews(id))
       .then((summary) => {
         setReviews(summary);
         if (summary.myReview) {
@@ -54,11 +60,12 @@ export function ProductDetailPage() {
   }, [id, session, logout]);
 
   async function handleAddToCart() {
-    if (!session || !id) return;
+    if (!id) return;
     setAddingToCart(true);
     setError(null);
     try {
-      await setCartItem(session.accessToken, id, quantity);
+      if (session) await setCartItem(session.accessToken, id, quantity);
+      else setGuestCartItem(id, quantity); // signed out: the cart lives in this browser until they sign in
       navigate('/marketplace/cart');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.couldNotAddToCart.en} / ${strings.couldNotAddToCart.te}`);
@@ -131,7 +138,7 @@ export function ProductDetailPage() {
             </div>
             <div className="meta">{product.vendor?.businessName ?? strings.platformSoldOption.en}</div>
 
-            {product.stockQuantity === 0 ? (
+            {!canShop ? null : product.stockQuantity === 0 ? (
               <BiValue value={strings.outOfStockNotice} as="p" className="hint" />
             ) : (
               <>
@@ -150,9 +157,11 @@ export function ProductDetailPage() {
                 </button>
               </>
             )}
-            <button type="button" className="secondary" onClick={handleToggleWishlist} disabled={wishlistBusy}>
-              {wishlisted ? <Bi id="wishlistedButton" /> : <Bi id="wishlistButton" />}
-            </button>
+            {session && canShop && (
+              <button type="button" className="secondary" onClick={handleToggleWishlist} disabled={wishlistBusy}>
+                {wishlisted ? <Bi id="wishlistedButton" /> : <Bi id="wishlistButton" />}
+              </button>
+            )}
           </div>
 
           <div className="card">
@@ -183,6 +192,15 @@ export function ProductDetailPage() {
               <BiValue value={strings.noReviewsYet} as="p" className="hint" />
             )}
 
+            {!session && (
+              <p className="hint">
+                <BiValue value={strings.loginToReviewHint} />{' '}
+                <Link to={`/login?next=/marketplace/products/${id}`} className="link-button">
+                  <Bi id="loginLink" />
+                </Link>
+              </p>
+            )}
+            {session && canShop && (
             <form onSubmit={handleSubmitReview}>
               <Bi id="writeReviewHeading" as="h2" />
               <label>
@@ -209,6 +227,7 @@ export function ProductDetailPage() {
                 )}
               </button>
             </form>
+            )}
           </div>
         </>
       )}

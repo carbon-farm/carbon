@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
@@ -9,10 +9,17 @@ import {
   deliverOrder,
   cancelOrder,
   setItemDispatchStatus,
+  startOrderPayment,
+  claimOrderPayment,
+  reviewOrderPayment,
   type Order,
+  type OrderPaymentLink,
 } from '../api/marketplace';
+import { AddressBlock } from '../components/AddressBlock';
+import { UpiPaymentCard } from './hariharaa/UpiPaymentCard';
+import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 import { Bi, BiValue } from '../i18n/Bi';
-import { strings, orderStatusLabel, dispatchStatusLabel } from '../i18n/strings';
+import { strings, orderStatusLabel, dispatchStatusLabel, orderPaymentStatusLabel } from '../i18n/strings';
 
 export function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -22,8 +29,12 @@ export function OrderDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [busyItemId, setBusyItemId] = useState<string | null>(null);
+  const [payLink, setPayLink] = useState<OrderPaymentLink | null>(null);
+  const [paying, setPaying] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   const isStaff = session?.role === 'ADMINISTRATOR';
+  const isOwner = session?.role === 'MEMBER';
   // Separate from isStaff deliberately: SUPPORT_AGENT gets the per-item
   // dispatch controls below but not the whole-order confirm/ship/deliver/
   // cancel buttons, which stay Administrator-only.
@@ -69,6 +80,51 @@ export function OrderDetailPage() {
     }
   }
 
+  // The customer's side of a UPI order: get the QR, pay, then type the UTR.
+  async function handleStartPayment() {
+    if (!session || !order) return;
+    setPaying(true);
+    setError(null);
+    try {
+      setPayLink(await startOrderPayment(session.accessToken, order.id));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : `${strings.couldNotStartPayment.en} / ${strings.couldNotStartPayment.te}`);
+    } finally {
+      setPaying(false);
+    }
+  }
+
+  async function handleClaim(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!session || !order) return;
+    const utr = String(new FormData(event.currentTarget).get('utr') ?? '').trim();
+    setPaying(true);
+    setError(null);
+    try {
+      setOrder(await claimOrderPayment(session.accessToken, order.id, { utr }));
+      setPayLink(null);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : `${strings.couldNotSubmitHariharaaClaim.en} / ${strings.couldNotSubmitHariharaaClaim.te}`);
+    } finally {
+      setPaying(false);
+    }
+  }
+
+  async function handleReview(approve: boolean) {
+    if (!session || !order) return;
+    if (!approve && !rejectReason.trim()) return;
+    setBusy(true);
+    setError(null);
+    try {
+      setOrder(await reviewOrderPayment(session.accessToken, order.id, approve, approve ? undefined : rejectReason.trim()));
+      setRejectReason('');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : `${strings.couldNotReviewHariharaaSubscription.en} / ${strings.couldNotReviewHariharaaSubscription.te}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleToggleDispatchStatus(itemId: string, current: 'PENDING' | 'SENT') {
     if (!session || !order) return;
     setBusyItemId(itemId);
@@ -109,12 +165,64 @@ export function OrderDetailPage() {
           )}
           <div>
             <div className="field-label"><Bi id="deliveryAddressField" /></div>
-            <div>{order.deliveryAddress}</div>
+            {order.shippingAddress ? <AddressBlock address={order.shippingAddress} /> : <div>{order.deliveryAddress}</div>}
           </div>
           <div>
             <div className="field-label"><Bi id="paymentMethodLabel" /></div>
-            <div>{order.paymentMethod}</div>
+            <div>
+              {order.paymentMethod === 'UPI' ? strings.paymentUpiShort.en + ' / ' + strings.paymentUpiShort.te : strings.paymentCod.en + ' / ' + strings.paymentCod.te}
+            </div>
+            <div className="status-line">
+              {orderPaymentStatusLabel(order.paymentStatus).en} / {orderPaymentStatusLabel(order.paymentStatus).te}
+            </div>
+            {order.paymentUtr && <div className="meta">UTR: {order.paymentUtr}</div>}
+            {order.paymentStatus === 'REJECTED' && order.paymentRejectionReason && <div className="hint">{order.paymentRejectionReason}</div>}
           </div>
+
+          {isOwner && order.paymentMethod === 'UPI' && order.status !== 'CANCELLED' && (order.paymentStatus === 'PENDING' || order.paymentStatus === 'REJECTED') && (
+            <div className="card">
+              <Bi id="orderPayHeading" as="h2" />
+              {!payLink ? (
+                <button type="button" onClick={handleStartPayment} disabled={paying}>
+                  {paying ? <BiValue value={strings.hariharaaStartingPayment} /> : <Bi id="hariharaaPayNowButton" />}
+                </button>
+              ) : (
+                <>
+                  <UpiPaymentCard payment={payLink} />
+                  <BiValue value={strings.hariharaaPayThenSubmitHint} as="p" className="hint" />
+                  <form onSubmit={handleClaim}>
+                    <label>
+                      <Bi id="hariharaaPaymentReferenceField" />
+                      <input name="utr" required minLength={6} maxLength={40} onInvalid={bilingualInvalidHandler} onChange={clearCustomValidity} />
+                    </label>
+                    <button type="submit" disabled={paying}>
+                      {paying ? <BiValue value={strings.hariharaaSubmittingClaim} /> : <Bi id="hariharaaSubmitClaimButton" />}
+                    </button>
+                  </form>
+                </>
+              )}
+            </div>
+          )}
+          {isOwner && order.paymentMethod === 'UPI' && order.paymentStatus === 'CLAIMED' && (
+            <BiValue value={strings.orderPayVerifyingNotice} as="p" className="hint" />
+          )}
+
+          {isStaff && order.paymentMethod === 'UPI' && order.paymentStatus === 'CLAIMED' && (
+            <div className="card">
+              <Bi id="orderVerifyHeading" as="h2" />
+              <BiValue value={strings.orderVerifyHint} as="p" className="hint" />
+              <button type="button" onClick={() => handleReview(true)} disabled={busy}>
+                <Bi id="approveButton" />
+              </button>
+              <label>
+                <Bi id="rejectReasonField" />
+                <input value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} />
+              </label>
+              <button type="button" className="secondary" onClick={() => handleReview(false)} disabled={busy || !rejectReason.trim()}>
+                <Bi id="rejectButton" />
+              </button>
+            </div>
+          )}
 
           {order.items.map((item) => {
             const itemBusy = busyItemId === item.id;
@@ -154,8 +262,15 @@ export function OrderDetailPage() {
             </div>
           </div>
 
+          {isStaff && order.status === 'PLACED' && order.paymentMethod === 'UPI' && order.paymentStatus !== 'PAID' && (
+            <BiValue value={strings.orderConfirmNeedsPayment} as="p" className="hint" />
+          )}
           {isStaff && order.status === 'PLACED' && (
-            <button type="button" onClick={() => handleAction(confirmOrder)} disabled={busy}>
+            <button
+              type="button"
+              onClick={() => handleAction(confirmOrder)}
+              disabled={busy || (order.paymentMethod === 'UPI' && order.paymentStatus !== 'PAID')}
+            >
               {busy ? <BiValue value={strings.updatingOrder} /> : <Bi id="confirmOrderButton" />}
             </button>
           )}

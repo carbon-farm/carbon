@@ -1,5 +1,5 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { DispatchStatus, Order, OrderStatus, Product, Role, VendorProfile } from '@prisma/client';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { DispatchStatus, Order, OrderPaymentStatus, OrderStatus, Prisma, Product, Role, VendorProfile } from '@prisma/client';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
@@ -8,9 +8,12 @@ import { UploadsService } from '../uploads/uploads.service';
 import { HariharaaService } from '../hariharaa/hariharaa.service';
 import { bi } from '../../common/i18n';
 import { SubmitVendorProfileDto, VerifyVendorDto } from './dto/vendor-profile.dto';
-import { CreateCategoryDto } from './dto/create-category.dto';
+import { CreateCategoryDto, UpdateCategoryDto } from './dto/create-category.dto';
+import { AddressesService } from '../addresses/addresses.service';
+import { addressSnapshot, formatAddress } from '../addresses/address-format';
+import { MAX_CATEGORY_LEVEL, levelOf, resolveCategoryIds } from './category-tree';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
-import { AddToCartDto } from './dto/cart.dto';
+import { AddToCartDto, GuestCartDto } from './dto/cart.dto';
 import { CheckoutDto } from './dto/checkout.dto';
 import { SubmitReviewDto } from './dto/review.dto';
 import { SetDispatchStatusDto } from './dto/dispatch-status.dto';
@@ -33,6 +36,7 @@ export class MarketplaceService {
     private readonly notifications: NotificationsService,
     private readonly uploads: UploadsService,
     private readonly hariharaa: HariharaaService,
+    private readonly addresses: AddressesService,
   ) {}
 
   // One catalog, one cart: anyone can browse and fill a cart. What membership unlocks in
@@ -111,12 +115,69 @@ export class MarketplaceService {
 
   // ---------- Categories ----------
 
-  async listCategories() {
-    return this.prisma.productCategoryMaster.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } });
+  // Flat list of the category tree (Department -> Category -> Sub-category); the screens
+  // build the tree from parentId. `level` is 0/1/2 so a picker can indent without recursing.
+  async listCategories(includeInactive = false) {
+    const rows = await this.prisma.productCategoryMaster.findMany({
+      where: includeInactive ? {} : { isActive: true },
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+      include: { _count: { select: { products: true } } },
+    });
+    const nodes = rows.map((r) => ({ id: r.id, parentId: r.parentId }));
+    return rows.map(({ _count, ...r }) => ({ ...r, level: levelOf(nodes, r.id), productCount: _count.products }));
   }
 
   async createCategory(dto: CreateCategoryDto) {
-    return this.prisma.productCategoryMaster.create({ data: { name: dto.name } });
+    if (dto.parentId) {
+      const all = await this.prisma.productCategoryMaster.findMany({ select: { id: true, parentId: true } });
+      if (!all.some((n) => n.id === dto.parentId)) {
+        throw new NotFoundException(bi('Parent category not found', 'పేరెంట్ వర్గం కనుగొనబడలేదు'));
+      }
+      if (levelOf(all, dto.parentId) >= MAX_CATEGORY_LEVEL) {
+        throw new BadRequestException(
+          bi('Sub-categories are the deepest level — nothing can go under one', 'ఉప-వర్గాలే లోతైన స్థాయి — వాటి కింద ఏదీ చేర్చలేరు'),
+        );
+      }
+    }
+    try {
+      return await this.prisma.productCategoryMaster.create({
+        data: { name: dto.name.trim(), nameTe: dto.nameTe?.trim() || null, parentId: dto.parentId ?? null },
+      });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+        throw new ConflictException(bi('A category with this name already exists', 'ఈ పేరుతో వర్గం ఇప్పటికే ఉంది'));
+      }
+      throw err;
+    }
+  }
+
+  async updateCategory(id: string, dto: UpdateCategoryDto) {
+    const existing = await this.prisma.productCategoryMaster.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException(bi('Category not found', 'వర్గం కనుగొనబడలేదు'));
+    if (dto.isActive === false) {
+      const activeChildren = await this.prisma.productCategoryMaster.count({ where: { parentId: id, isActive: true } });
+      if (activeChildren > 0) {
+        throw new BadRequestException(
+          bi('Switch off the categories inside it first', 'ముందుగా దానిలోని వర్గాలను ఆఫ్ చేయండి'),
+        );
+      }
+    }
+    try {
+      return await this.prisma.productCategoryMaster.update({
+        where: { id },
+        data: {
+          ...(dto.name !== undefined ? { name: dto.name.trim() } : {}),
+          ...(dto.nameTe !== undefined ? { nameTe: dto.nameTe.trim() || null } : {}),
+          ...(dto.sortOrder !== undefined ? { sortOrder: dto.sortOrder } : {}),
+          ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
+        },
+      });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+        throw new ConflictException(bi('A category with this name already exists', 'ఈ పేరుతో వర్గం ఇప్పటికే ఉంది'));
+      }
+      throw err;
+    }
   }
 
   // ---------- Products ----------
@@ -173,11 +234,13 @@ export class MarketplaceService {
   // products stay invisible to farmers even if the vendor already created
   // them, same trust gate as Knowledge's PUBLISHED-only farmer visibility.
   async listPublished(categoryId?: string, search?: string) {
+    // Browsing a Department or Category includes everything filed beneath it.
+    const categoryIds = categoryId ? await resolveCategoryIds(this.prisma, categoryId) : null;
     return this.prisma.product.findMany({
       where: {
         isActive: true,
         OR: [{ vendorId: null }, { vendor: { isApproved: true } }],
-        ...(categoryId ? { categoryId } : {}),
+        ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
         ...(search ? { name: { contains: search, mode: 'insensitive' } } : {}),
       },
       orderBy: { updatedAt: 'desc' },
@@ -258,6 +321,65 @@ export class MarketplaceService {
     return { items, total };
   }
 
+  // ---------- Public catalog (no login) ----------
+
+  // A product a visitor may see: active, and either platform-sold or from an approved vendor.
+  async getPublicProduct(productId: string): Promise<Product> {
+    const found = await this.getProductOrThrow(productId);
+    const isPublic = found.isActive && (found.vendorId === null || (await this.isVendorApproved(found.vendorId)));
+    if (!isPublic) throw new NotFoundException(bi('This product is not available', 'ఈ ఉత్పత్తి అందుబాటులో లేదు'));
+    return found;
+  }
+
+  async getPublicReviews(productId: string) {
+    await this.getPublicProduct(productId);
+    const [reviews, aggregate] = await Promise.all([
+      this.prisma.productReview.findMany({
+        where: { productId },
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+        include: { user: { select: { id: true, name: true } } },
+      }),
+      this.prisma.productReview.aggregate({ where: { productId }, _avg: { rating: true }, _count: { _all: true } }),
+    ]);
+    return { averageRating: aggregate._avg.rating, totalCount: aggregate._count._all, myReview: null, reviews };
+  }
+
+  // Prices a cart kept in the visitor's browser, in the same shape as a saved cart so one
+  // cart screen serves both. Unavailable products are dropped rather than failing the page.
+  async previewGuestCart(dto: GuestCartDto) {
+    const merged = new Map<string, number>();
+    for (const item of dto.items) merged.set(item.productId, Math.min((merged.get(item.productId) ?? 0) + item.quantity, 999));
+    const products = await this.prisma.product.findMany({
+      where: { id: { in: [...merged.keys()] }, isActive: true, OR: [{ vendorId: null }, { vendor: { isApproved: true } }] },
+      include: PRODUCT_INCLUDE,
+    });
+    const items = products.map((product) => ({ id: product.id, productId: product.id, quantity: merged.get(product.id)!, product }));
+    const total = items.reduce((sum, item) => sum + item.quantity * item.product.price, 0);
+    return { items, total };
+  }
+
+  // Folds the browser cart into the member's saved cart right after sign-in. Quantities add
+  // up, capped at what is in stock; anything no longer sold is skipped.
+  async mergeGuestCart(userId: string, dto: GuestCartDto) {
+    const incoming = new Map<string, number>();
+    for (const item of dto.items) incoming.set(item.productId, (incoming.get(item.productId) ?? 0) + item.quantity);
+    const products = await this.prisma.product.findMany({
+      where: { id: { in: [...incoming.keys()] }, isActive: true, OR: [{ vendorId: null }, { vendor: { isApproved: true } }] },
+    });
+    for (const product of products) {
+      const existing = await this.prisma.cartItem.findUnique({ where: { userId_productId: { userId, productId: product.id } } });
+      const wanted = (existing?.quantity ?? 0) + incoming.get(product.id)!;
+      const quantity = Math.min(wanted, Math.max(product.stockQuantity, existing?.quantity ?? 0, 1));
+      await this.prisma.cartItem.upsert({
+        where: { userId_productId: { userId, productId: product.id } },
+        create: { userId, productId: product.id, quantity },
+        update: { quantity },
+      });
+    }
+    return this.listCart(userId);
+  }
+
   // ---------- Orders ----------
 
   async checkout(userId: string, role: Role, dto: CheckoutDto): Promise<Order> {
@@ -279,6 +401,21 @@ export class MarketplaceService {
       }
     }
 
+    // Where it goes: a saved address (copied onto the order, so later edits can't move an
+    // existing order) — or, for a screen cached from before the address book, plain text.
+    let deliveryAddress: string;
+    let shippingAddress: Prisma.InputJsonValue | undefined;
+    if (dto.addressId) {
+      const address = await this.addresses.getOwned(userId, dto.addressId);
+      deliveryAddress = formatAddress(address);
+      shippingAddress = addressSnapshot(address);
+    } else if (dto.deliveryAddress) {
+      deliveryAddress = dto.deliveryAddress;
+    } else {
+      throw new BadRequestException(bi('Choose a delivery address', 'డెలివరీ చిరునామాను ఎంచుకోండి'));
+    }
+    const paymentMethod = dto.paymentMethod ?? 'COD';
+
     const totalAmount = cart.reduce((sum, item) => sum + item.quantity * item.product.price, 0);
     const order = await this.prisma.$transaction(async (tx) => {
       const created = await tx.order.create({
@@ -286,7 +423,9 @@ export class MarketplaceService {
           orderNumber: this.generateOrderNumber(),
           farmerId: userId,
           totalAmount,
-          deliveryAddress: dto.deliveryAddress,
+          deliveryAddress,
+          paymentMethod,
+          ...(shippingAddress ? { shippingAddress } : {}),
           items: {
             create: cart.map((item) => ({
               productId: item.productId,
@@ -312,13 +451,13 @@ export class MarketplaceService {
       action: 'order.place',
       entityType: 'Order',
       entityId: order.id,
-      metadata: { orderNumber: order.orderNumber, totalAmount },
+      metadata: { orderNumber: order.orderNumber, totalAmount, paymentMethod },
     });
     await this.notifications.notifyRole(
       Role.ADMINISTRATOR,
       'order.placed',
       bi('New order placed', 'కొత్త ఆర్డర్ చేయబడింది'),
-      bi(`${order.orderNumber} — ₹${totalAmount.toFixed(2)}`, `${order.orderNumber} — ₹${totalAmount.toFixed(2)}`),
+      bi(`${order.orderNumber} — ₹${totalAmount.toFixed(2)} (${paymentMethod})`, `${order.orderNumber} — ₹${totalAmount.toFixed(2)} (${paymentMethod})`),
       '/marketplace/manage/orders',
     );
     return order;
@@ -370,6 +509,13 @@ export class MarketplaceService {
   }
 
   async confirmOrder(orderId: string, adminId: string): Promise<Order> {
+    // A UPI order is only worth packing once the money is verified in the bank.
+    const existing = await this.getOrderOrThrow(orderId);
+    if (existing.paymentMethod === 'UPI' && existing.paymentStatus !== OrderPaymentStatus.PAID) {
+      throw new BadRequestException(
+        bi('Verify the UPI payment before confirming this order', 'ఈ ఆర్డర్‌ను ధృవీకరించే ముందు UPI చెల్లింపును ధృవీకరించండి'),
+      );
+    }
     return this.transitionOrder(orderId, adminId, [OrderStatus.PLACED], OrderStatus.CONFIRMED, 'order.confirm');
   }
 
@@ -378,7 +524,15 @@ export class MarketplaceService {
   }
 
   async deliverOrder(orderId: string, adminId: string): Promise<Order> {
-    const updated = await this.transitionOrder(orderId, adminId, [OrderStatus.SHIPPED], OrderStatus.DELIVERED, 'order.deliver');
+    let updated = await this.transitionOrder(orderId, adminId, [OrderStatus.SHIPPED], OrderStatus.DELIVERED, 'order.deliver');
+    // Cash on Delivery: the cash is collected at the door, so a delivered COD order is paid.
+    if (updated.paymentMethod === 'COD' && updated.paymentStatus !== OrderPaymentStatus.PAID) {
+      updated = await this.prisma.order.update({
+        where: { id: orderId },
+        data: { paymentStatus: OrderPaymentStatus.PAID, paymentVerifiedAt: new Date(), paymentVerifiedBy: adminId },
+        include: { items: true },
+      });
+    }
     await this.notifications.create(
       updated.farmerId,
       'order.delivered',

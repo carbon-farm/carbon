@@ -179,6 +179,16 @@ export class HariharaaService {
     };
   }
 
+  // A UPI link/QR for any amount (used by shop orders too) — built here so the payee, UPI ID
+  // and merchant id live in one place, and so the gateway swap touches one service.
+  async buildPaymentLink(amountInr: number, note: string) {
+    const settings = await this.getSettingsOrThrow();
+    return {
+      payeeName: settings.payeeName,
+      upiLink: buildUpiLink({ vpa: settings.primaryUpiId, payeeName: settings.payeeName, amountInr, merchantAid: settings.upiAid, note }),
+    };
+  }
+
   // Step 2 — "I've paid": the customer types the UTR from their UPI app.
   async claimPayment(userId: string, paymentId: string, dto: ClaimPaymentDto) {
     const payment = await this.prisma.hariharaaPayment.findUnique({ where: { id: paymentId } });
@@ -194,6 +204,8 @@ export class HariharaaService {
     // A rejected reference can be retried by the same customer, but not claimed by anyone else.
     const rejectedElsewhere = await this.prisma.hariharaaPayment.findFirst({ where: { rejectedUtr: utr, NOT: { userId } } });
     if (rejectedElsewhere) throw this.utrTaken();
+    // ...and the same bank reference cannot also be backing a shop order.
+    if (await this.prisma.order.findFirst({ where: { paymentUtr: utr } })) throw this.utrTaken();
 
     let updated;
     try {

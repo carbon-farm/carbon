@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { MarketplaceService } from './marketplace.service';
-import { AddToCartDto } from './dto/cart.dto';
+import { AddToCartDto, GuestCartDto } from './dto/cart.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -21,6 +21,12 @@ export class CartController {
   @Post()
   setCartItem(@Body() dto: AddToCartDto, @CurrentUser() user: AuthenticatedUser) {
     return this.marketplaceService.setCartItem(user.userId, dto);
+  }
+
+  // Folds the cart built while signed out into the saved cart, right after sign-in.
+  @Post('merge')
+  mergeGuestCart(@Body() dto: GuestCartDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.marketplaceService.mergeGuestCart(user.userId, dto);
   }
 
   @Post(':productId/remove')

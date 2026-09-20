@@ -20,6 +20,7 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { to: '/marketplace', labelKey: 'marketplaceEyebrow' },
     { to: '/marketplace/cart', labelKey: 'cartTitle' },
     { to: '/marketplace/orders', labelKey: 'myOrdersTitle' },
+    { to: '/account/addresses', labelKey: 'addressesNavTitle' },
     { to: '/dashboard', labelKey: 'dashboardEyebrow' },
     { to: '/cases', labelKey: 'myCasesTitle' },
     { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
@@ -64,6 +65,11 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { to: '/admin/media', labelKey: 'mediaNavTitle' },
   ],
   SUPPORT_AGENT: [{ to: '/support/dispatch-queue', labelKey: 'dispatchQueueNavTitle' }],
+  // Visitors who are not signed in: the shop window and their cart.
+  GUEST: [
+    { to: '/marketplace', labelKey: 'marketplaceEyebrow' },
+    { to: '/marketplace/cart', labelKey: 'cartTitle' },
+  ],
 };
 
 // Persistent header + role-aware nav — every authenticated page renders
@@ -72,7 +78,7 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
 // forms (direct user feedback: it didn't).
 export function AppShell({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
   const { session, logout } = useAuth();
-  const navItems = session ? (NAV_BY_ROLE[session.role] ?? []) : [];
+  const navItems = NAV_BY_ROLE[session ? session.role : 'GUEST'] ?? [];
   const [unreadCount, setUnreadCount] = useState(0);
   const [me, setMe] = useState<AdminUser | null>(null);
 
@@ -117,6 +123,16 @@ export function AppShell({ children, wide = false }: { children: ReactNode; wide
           <span className="bi-en">Organic Carbon Farming</span>
           <span className="bi-te">ఆర్గానిక్ కార్బన్ ఫార్మింగ్</span>
         </Link>
+        {!session && (
+          <div className="header-actions">
+            <Link to="/login" className="link-button">
+              <Bi id="loginLink" />
+            </Link>
+            <Link to="/register" className="link-button">
+              <Bi id="registerLink" />
+            </Link>
+          </div>
+        )}
         {session && (
           <div className="header-actions">
             <Link to="/notifications" className="notif-bell-btn" title={strings.notificationBellLabel.en}>

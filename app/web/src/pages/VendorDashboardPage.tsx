@@ -12,6 +12,7 @@ import {
   type Product,
   type ProductCategory,
 } from '../api/marketplace';
+import { flattenWithPaths } from '../catalog/categoryTree';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
@@ -172,12 +173,12 @@ export function VendorDashboardPage() {
                   <input name="stockQuantity" type="number" step="1" min="0" onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler} required />
                 </label>
                 <label>
-                  <Bi id="articleCropField" />
+                  <Bi id="categoryLabel" />
                   <select name="categoryId" defaultValue="">
                     <option value="">{biInline('selectPlaceholder')}</option>
-                    {categories.map((c) => (
+                    {flattenWithPaths(categories).map(({ node: c, path }) => (
                       <option key={c.id} value={c.id}>
-                        {c.name}
+                        {path}
                       </option>
                     ))}
                   </select>

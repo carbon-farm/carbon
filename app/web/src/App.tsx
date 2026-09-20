@@ -1,7 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import { MembershipProvider } from './auth/MembershipContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
+import { OpenRoute, ProtectedRoute } from './components/ProtectedRoute';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -38,6 +38,8 @@ import { SoilLabQueuePage } from './pages/SoilLabQueuePage';
 import { MarketplacePage } from './pages/MarketplacePage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { CartPage } from './pages/CartPage';
+import { CheckoutPage } from './pages/CheckoutPage';
+import { AddressesPage } from './pages/AddressesPage';
 import { OrdersPage } from './pages/OrdersPage';
 import { OrderDetailPage } from './pages/OrderDetailPage';
 import { VendorDashboardPage } from './pages/VendorDashboardPage';
@@ -298,24 +300,40 @@ export function App() {
           <Route
             path="/marketplace"
             element={
-              <ProtectedRoute>
+              <OpenRoute>
                 <MarketplacePage />
-              </ProtectedRoute>
+              </OpenRoute>
             }
           />
           <Route
             path="/marketplace/products/:id"
             element={
-              <ProtectedRoute>
+              <OpenRoute>
                 <ProductDetailPage />
-              </ProtectedRoute>
+              </OpenRoute>
             }
           />
           <Route
             path="/marketplace/cart"
             element={
-              <ProtectedRoute roles={['MEMBER']}>
+              <OpenRoute>
                 <CartPage />
+              </OpenRoute>
+            }
+          />
+          <Route
+            path="/marketplace/checkout"
+            element={
+              <ProtectedRoute roles={['MEMBER']}>
+                <CheckoutPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/account/addresses"
+            element={
+              <ProtectedRoute roles={['MEMBER']}>
+                <AddressesPage />
               </ProtectedRoute>
             }
           />

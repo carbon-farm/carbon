@@ -53,16 +53,20 @@ Practical guide for clicking through the live app. Not a formal SDLC document (s
 ### Member (farm advice + HARIHARAA Natural Food Stores, one account)
 One sign-up, one catalog, one membership (₹499/month). Anyone can browse and fill a cart; **checkout and the farm-advice features need an active membership.**
 1. Register at `/register` → verify the on-screen code → you land on the Pay page. Check the header shows your name and ID (e.g. HHC-0042).
-2. Go to Marketplace: you can browse the whole catalog (farm products and HARIHARAA food products together) and add to cart, while unpaid.
+2. Go to Marketplace: you can browse the whole catalog (farm products and HARIHARAA food products together) and add to cart, while unpaid. Use the Department → Category → Sub-category filters, search and sort. **Try it signed out too** (open the site in a private window): browse, add to cart, then log in or register — the cart should come with you.
 3. While unpaid, confirm a slim "Membership payment pending" strip sits under the title bar on every screen, and that My cases / Knowledge / Courses / Soil Testing show a "Members only" card. Checkout is refused with a clear message.
 4. On the Pay page tap Pay now: a UPI QR appears with your ID in the payment note. Pay in any UPI app (or skip actually paying and type any 6+ character reference while testing), submit the reference — status becomes "waiting for verification".
-5. An Administrator verifies it (Administrator section below). Within about a minute — or on your next page change — the strip disappears and everything unlocks. Checkout with a delivery address should now work.
+5. An Administrator verifies it (Administrator section below). Within about a minute — or on your next page change — the strip disappears and everything unlocks.
+5a. **Checkout:** Cart → Proceed to checkout. Add a delivery address (receiver, phone, house/street, town, state, 6-digit PIN — landmark, second phone and email are optional; bad PINs and phone numbers are refused). Choose Cash on Delivery or UPI and place the order. Addresses you save appear next time and under Addresses in the menu (edit, delete, make default). Editing a saved address must not change an order you already placed.
+5b. **Paying an order by UPI:** on the order page tap Pay now — the QR is for that order's total. Submit the UTR; the order shows "Payment submitted — being verified". The Administrator cannot confirm the order until they verify it. If they reject it, you see the reason and can pay/submit again. A UTR you already used on another order or for membership is refused.
 6. Try submitting the same reference from a second account: it must be refused as already used.
 7. If an Administrator gives you free access, the Pay page shows "Free access until …" and everything is unlocked; when it is removed you are locked again (paid days, if any, are untouched).
 
 ### Administrator
 1. Log in with the seeded account above.
 2. Staff accounts: create Moderator/Expert/Vendor/Support Agent/Administrator accounts (Members sign up themselves).
+2b. **Product categories** (Admin → Taxonomy → Product categories): add a department, add categories inside it and sub-categories inside those (nothing goes deeper), give each an optional Telugu name, rename, switch off/on. Switched-off items disappear from the shop but nothing is deleted. Vendors pick a product's category from the full "Department › Category › Sub-category" list.
+2c. **Orders** (Administrator → Order queue): sort by any column; filter by status, payment method and payment status; the yellow shortcut lists UPI payments waiting for verification. Open an order to verify/reject the payment, then confirm, ship and deliver (delivering a COD order marks it paid). The dispatch team's queue defaults to orders ready to pack.
 2a. **Members & free access** (`/admin/members`): search, sort by any column, filter by Paid / Free / Waiting / Unpaid / Expired. Use "Give free access" to unlock a member until a date (for testing — e.g. 31 Dec), "Remove free access" to end it. Payments waiting for verification are under "HARIHARAA subscriptions".
 3. Expert credentials: approve/reject pending qualifications.
 4. Taxonomy: manage crops, case categories, tags, regions, and product categories.
@@ -82,6 +86,8 @@ One sign-up, one catalog, one membership (₹499/month). Anyone can browse and f
 ## What's new this round — worth specifically checking
 
 - **One account, one membership** — farmers and shoppers are the same Member type; the combined catalog is open to browse, while checkout and farm advice unlock with a paid month or Administrator-granted free access. New: the Members screen, payment strip under the title bar, readable user IDs (HHC-0042) in the header, and manual UPI verification built to be swapped for a gateway later.
+- **Open shop, saved addresses, order payments and the category tree** — the shop window works without logging in (guest cart follows you into your account), checkout collects and saves full delivery details, UPI orders are verified before dispatch, and the catalog is organised Department → Category → Sub-category.
+- **Every screen now stretches to the width of your window** — try a phone, a laptop and a very wide monitor; nothing should need sideways scrolling.
 - **Per-order dispatch tracking** (Support Agent's Dispatch queue) — each order line can be marked Sent/Pending independently of the whole order's status.
 - **Learning Management** (Courses tab / Manage Courses) — full course → lesson → completion → certificate loop.
 - **Soil Laboratory** (Soil Testing tab / staff queue) — sample request through report delivery.

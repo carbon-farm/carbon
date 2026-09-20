@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { roleHomePath } from '../auth/roleHome';
 import { ApiError } from '../api/client';
@@ -10,6 +10,7 @@ import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation
 export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +22,9 @@ export function LoginPage() {
     setSubmitting(true);
     try {
       const { role } = await login(mobileNumber, password);
-      navigate(roleHomePath(role));
+      // ?next=/marketplace/cart brings a visitor back to where they were (same-site paths only).
+      const next = searchParams.get('next');
+      navigate(next && /^\/(?!\/)/.test(next) ? next : roleHomePath(role));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.genericError.en} / ${strings.genericError.te}`);
     } finally {

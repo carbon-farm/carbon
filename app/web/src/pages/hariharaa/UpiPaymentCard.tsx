@@ -5,7 +5,7 @@ import { strings } from '../../i18n/strings';
 
 // The payment QR — shown only to a logged-in customer, after they tap Pay, so every
 // payment is tied to an account. The link is built by the backend (see upi-link.ts).
-export function UpiPaymentCard({ payment }: { payment: StartedPayment }) {
+export function UpiPaymentCard({ payment }: { payment: Pick<StartedPayment, 'amountInr' | 'upiLink'> }) {
   return (
     <div>
       <div className="field-label">

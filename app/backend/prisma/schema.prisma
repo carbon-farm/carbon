@@ -160,6 +160,7 @@ model User {
   vendorProfile             VendorProfile?         @relation("VendorUser")
   vendorApprovals           VendorProfile[]        @relation("VendorApprover")
   cartItems                 CartItem[]
+  addresses                 Address[]
   orders                    Order[]
   productReviews            ProductReview[]
   productWishlists          ProductWishlist[]
@@ -589,13 +590,23 @@ enum DispatchStatus {
   SENT
 }
 
+// A three-level tree: Department -> Category -> Sub-category. Depth is implied by how many
+// parents a row has (none = Department). A product can sit on any level, usually the
+// deepest one that applies; browsing a node includes everything beneath it.
 model ProductCategoryMaster {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id        String                  @id @default(uuid())
+  name      String                  @unique
+  nameTe    String? // Telugu name, shown after the English one
+  parentId  String?
+  parent    ProductCategoryMaster?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children  ProductCategoryMaster[] @relation("CategoryTree")
+  sortOrder Int                     @default(0)
+  isActive  Boolean                 @default(true)
+  createdAt DateTime                @default(now())
 
   products Product[]
+
+  @@index([parentId])
 }
 
 // Mirrors ExpertProfile's shape deliberately — a vendor's products aren't
@@ -646,6 +657,40 @@ model Product {
   @@index([isActive])
 }
 
+// PENDING = nothing paid yet (a Cash on Delivery order stays here until it is delivered and
+// the cash is collected); CLAIMED = the customer says they paid by UPI and gave the UTR;
+// PAID = an Administrator verified the UPI credit, or the COD cash was collected;
+// REJECTED = the UPI claim could not be verified (the customer can submit again).
+enum OrderPaymentStatus {
+  PENDING
+  CLAIMED
+  PAID
+  REJECTED
+}
+
+// A member's saved delivery addresses (the address book).
+model Address {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label          String? // e.g. "Home", "Farm", "Shop"
+  recipientName  String
+  phone          String
+  alternatePhone String?
+  email          String?
+  line1          String
+  line2          String?
+  landmark       String?
+  city           String
+  state          String
+  pincode        String
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+}
+
 model CartItem {
   id        String   @id @default(uuid())
   userId    String
@@ -660,16 +705,25 @@ model CartItem {
 }
 
 model Order {
-  id              String      @id @default(uuid())
-  orderNumber     String      @unique
-  farmerId        String
-  farmer          User        @relation(fields: [farmerId], references: [id], onDelete: Cascade)
-  status          OrderStatus @default(PLACED)
-  totalAmount     Float
-  deliveryAddress String
-  paymentMethod   String      @default("COD")
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id                     String             @id @default(uuid())
+  orderNumber            String             @unique
+  farmerId               String
+  farmer                 User               @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  status                 OrderStatus        @default(PLACED)
+  totalAmount            Float
+  deliveryAddress        String
+  paymentMethod          String             @default("COD") // "COD" | "UPI"
+  // Structured copy of the address chosen at checkout, frozen at order time (a later edit
+  // to the saved address must never change where an existing order is sent).
+  shippingAddress        Json?
+  paymentStatus          OrderPaymentStatus @default(PENDING)
+  paymentUtr             String?            @unique
+  paymentClaimedAt       DateTime?
+  paymentVerifiedAt      DateTime?
+  paymentVerifiedBy      String?
+  paymentRejectionReason String?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
 
   items OrderItem[]
 

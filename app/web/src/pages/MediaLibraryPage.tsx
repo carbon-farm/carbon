@@ -99,7 +99,7 @@ export function MediaLibraryPage() {
         <BiValue value={strings.reportNoData} as="p" className="hint" />
       ) : (
         <div className="card" style={{ overflowX: 'auto' }}>
-          <table>
+          <table className="data-table">
             <thead>
               <tr>
                 <th>

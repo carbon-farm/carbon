@@ -8,9 +8,9 @@ An interactive version of this report (with a clickable test-plan checklist) is 
 ## Snapshot
 
 - **12 of 14** Charter modules fully built
-- **136** backend tests, all passing
+- **156** backend tests, all passing
 - **30** products in one combined catalog (the farm/OCF products plus HARIHARAA Natural Food Stores products), one account type, one membership
-- **22** database migrations applied to production
+- **23** database migrations applied to production
 
 ## Module status
 
@@ -90,7 +90,12 @@ Everything now lives under one app and one account type.
 - Per-line **dispatch tracking** (Pending/Sent) on every order, handled by the `SUPPORT_AGENT` dispatch queue, is unchanged.
 - Legacy `FARMER`/`CUSTOMER` roles are mapped to `MEMBER` at the API edge (so old sessions keep working) and the stored data was migrated. Removing the two unused enum values is a later, optional cleanup.
 - **Verified live end to end (2026-09-20):** register → MEMBER + ID → unpaid: browse and add to cart work, cases/knowledge/courses/farms/soil are 403 and checkout is refused → free grant unlocks everything → revoke locks it again → past date and 2099 rejected, member cannot grant themselves → pay + claim + Administrator verify → unlocked, checkout allowed → staff unaffected. Also checked in a real browser: header name + ID, strip and locked card, strip clearing after the grant, and the Members screen (sort + Free filter).
-- Still to come: guest browsing and guest cart, a Department → Category → Sub-category tree, saved delivery addresses, and COD/UPI order payment with verification before dispatch.
+- **Open shop window (no login).** `/marketplace`, product pages and the cart work for visitors. A signed-out cart lives in the browser and is priced by the server (`POST /marketplace/catalog/cart-preview`); it is folded into the member's saved cart the moment they sign in or register (`POST /marketplace/cart/merge`, quantities add up, capped by stock, unavailable items skipped). Checkout is where an account and a membership are needed.
+- **Department → Category → Sub-category tree** (three levels, one self-referencing table). Existing categories were arranged into two departments — *Farm Inputs* (the 3 existing categories) and *Natural Foods* (Oils, Honey & Sweeteners, Flours & Millets, with the 3 HARIHARAA products filed) — and each node can carry a Telugu name. Browsing a department or category includes everything beneath it. Administrators manage the tree in Admin → Taxonomy (add inside any node, rename, switch off/on; switching off hides without deleting, and a node with active children cannot be switched off). Names stay unique across the tree; sub-categories are the deepest level.
+- **Address book + checkout.** Members save delivery addresses (receiver, phone, optional second phone/email, house/street, area, landmark, town, state, 6-digit PIN, label, default) at `/account/addresses` or inline at checkout; phone numbers are stored as plain 10 digits. Checkout is a real page (address → Cash on Delivery or UPI → order summary). The chosen address is **copied onto the order** (`shippingAddress` JSON plus the readable text), so later edits or deletes never move an existing order. Checkout is still refused for a member without an active membership.
+- **Order payments.** COD orders are marked paid when delivered (cash collected). UPI orders follow the same pay → UTR → verify shape as membership: "Pay now" on the order gives a QR for exactly that order's total with the order number in the note; the customer types the UTR; an Administrator verifies it (or rejects it with a reason and the customer can submit a corrected reference). **A UPI order cannot be confirmed for packing until its payment is verified.** One bank reference can back only one thing — a UTR already used for another order or for a membership payment is refused in both directions.
+- **Order queue** (Administrator) is now a sortable, filterable table (order, customer, total, payment, status, date; filters for status, payment method, payment status, search by order/customer/UTR) with a one-click "N UPI payments waiting for verification" shortcut. The dispatch queue shows city, PIN, receiver phone and payment state per order and defaults to *ready to pack* (COD or paid).
+- **Fluid layout everywhere.** No page is capped to a fixed width any more: screens use the whole window and reflow (grids for products and addresses, two-column checkout that stacks on phones, header and tables that adapt). Audited at phone width across ~40 screens with no sideways scrolling.
 
 ## Deferred & blocked
 

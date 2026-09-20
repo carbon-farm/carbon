@@ -21,6 +21,11 @@ export function LandingPage() {
                 <Bi id="createAccountLink" />
               </button>
             </Link>
+            <Link to="/marketplace">
+              <button type="button" className="secondary">
+                <Bi id="browseShopLink" />
+              </button>
+            </Link>
           </div>
         </div>
       </section>

@@ -887,6 +887,103 @@ export const strings = {
   couldNotLoadMembers: { en: 'Could not load members. Try again.', te: 'సభ్యులను లోడ్ చేయలేకపోయాము. మళ్ళీ ప్రయత్నించండి.' },
   couldNotSaveFreeAccess: { en: 'Could not save free access. Try again.', te: 'ఉచిత ప్రాప్యతను సేవ్ చేయలేకపోయాము. మళ్ళీ ప్రయత్నించండి.' },
   memberFreeReasonPrefix: { en: 'Reason:', te: 'కారణం:' },
+  // Shop window, guest cart, checkout, address book, order payments, category tree
+  browseShopLink: { en: 'Browse the shop', te: 'షాప్‌ను చూడండి' },
+  departmentLabel: { en: 'Department', te: 'విభాగం' },
+  subCategoryLabel: { en: 'Sub-category', te: 'ఉప-వర్గం' },
+  registerLink: { en: 'Register', te: 'నమోదు చేసుకోండి' },
+  guestBrowseHint: {
+    en: 'Browse and fill your cart freely — you only need to sign in when you check out.',
+    te: 'స్వేచ్ఛగా బ్రౌజ్ చేసి మీ కార్ట్ నింపండి — చెక్అవుట్ సమయంలో మాత్రమే సైన్ ఇన్ కావాలి.',
+  },
+  loginToReviewHint: { en: 'Log in to save or review products.', te: 'ఉత్పత్తులను సేవ్ చేయడానికి లేదా సమీక్షించడానికి లాగిన్ అవ్వండి.' },
+  staffNoCartNotice: { en: 'Staff accounts do not have a shopping cart.', te: 'సిబ్బంది ఖాతాలకు షాపింగ్ కార్ట్ ఉండదు.' },
+  guestCheckoutNotice: {
+    en: 'Your cart is saved on this device. Log in or create an account to check out — your items will come with you.',
+    te: 'మీ కార్ట్ ఈ పరికరంలో సేవ్ అయింది. చెక్అవుట్ చేయడానికి లాగిన్ అవ్వండి లేదా ఖాతా సృష్టించండి — మీ వస్తువులు మీతో వస్తాయి.',
+  },
+  loginToCheckoutButton: { en: 'Log in to check out', te: 'చెక్అవుట్ కోసం లాగిన్ అవ్వండి' },
+  checkoutNeedsMembershipNotice: {
+    en: 'Checkout needs an active membership. Your cart is safe — activate your membership, then place this order.',
+    te: 'చెక్అవుట్‌కు యాక్టివ్ సభ్యత్వం అవసరం. మీ కార్ట్ భద్రంగా ఉంది — సభ్యత్వాన్ని యాక్టివేట్ చేసి, ఈ ఆర్డర్ చేయండి.',
+  },
+  addressesNavTitle: { en: 'Addresses', te: 'చిరునామాలు' },
+  addressesPageTitle: { en: 'My addresses', te: 'నా చిరునామాలు' },
+  addressesHint: {
+    en: 'Save your delivery addresses once and pick one at checkout. Changing an address here never changes an order you already placed.',
+    te: 'మీ డెలివరీ చిరునామాలను ఒకసారి సేవ్ చేసి, చెక్అవుట్‌లో ఒకదాన్ని ఎంచుకోండి. ఇక్కడ చిరునామా మార్చినా, ఇప్పటికే చేసిన ఆర్డర్ మారదు.',
+  },
+  noAddressesYet: { en: 'No saved addresses yet.', te: 'ఇంకా సేవ్ చేసిన చిరునామాలు లేవు.' },
+  addAddressButton: { en: 'Add a new address', te: 'కొత్త చిరునామా చేర్చండి' },
+  addrEditHeading: { en: 'Edit address', te: 'చిరునామాను మార్చండి' },
+  addrRecipientField: { en: 'Receiver name', te: 'స్వీకర్త పేరు' },
+  addrPhoneField: { en: 'Mobile number', te: 'మొబైల్ నంబర్' },
+  addrAltPhoneField: { en: 'Second phone (optional)', te: 'రెండవ ఫోన్ (ఐచ్ఛికం)' },
+  addrEmailField: { en: 'Email (optional)', te: 'ఇమెయిల్ (ఐచ్ఛికం)' },
+  addrLine1Field: { en: 'House no. / street / village', te: 'ఇంటి నంబర్ / వీధి / గ్రామం' },
+  addrLine2Field: { en: 'Area / mandal (optional)', te: 'ప్రాంతం / మండలం (ఐచ్ఛికం)' },
+  addrLandmarkField: { en: 'Landmark (optional)', te: 'ల్యాండ్‌మార్క్ (ఐచ్ఛికం)' },
+  addrCityField: { en: 'Town / city', te: 'పట్టణం / నగరం' },
+  addrStateField: { en: 'State', te: 'రాష్ట్రం' },
+  addrPincodeField: { en: 'PIN code (6 digits)', te: 'పిన్ కోడ్ (6 అంకెలు)' },
+  addrLabelField: { en: 'Name this address (Home, Farm, Shop…)', te: 'ఈ చిరునామాకు పేరు (ఇల్లు, పొలం, దుకాణం…)' },
+  addrDefaultField: { en: 'Make this my default address', te: 'దీన్ని నా డిఫాల్ట్ చిరునామాగా చేయండి' },
+  addrSaveButton: { en: 'Save', te: 'సేవ్ చేయండి' },
+  addrSaving: { en: 'Saving…', te: 'సేవ్ అవుతోంది…' },
+  addrEditButton: { en: 'Edit', te: 'మార్చండి' },
+  addrMakeDefaultButton: { en: 'Make default', te: 'డిఫాల్ట్ చేయండి' },
+  addrDeleteButton: { en: 'Delete', te: 'తొలగించండి' },
+  addrDefaultBadge: { en: 'Default', te: 'డిఫాల్ట్' },
+  addrUntitled: { en: 'Address', te: 'చిరునామా' },
+  couldNotLoadAddresses: { en: 'Could not load your addresses. Try again.', te: 'మీ చిరునామాలను లోడ్ చేయలేకపోయాము. మళ్ళీ ప్రయత్నించండి.' },
+  couldNotSaveAddress: { en: 'Could not save the address. Check the details and try again.', te: 'చిరునామాను సేవ్ చేయలేకపోయాము. వివరాలను తనిఖీ చేసి మళ్ళీ ప్రయత్నించండి.' },
+  deliveryAddressHeading: { en: 'Delivery address', te: 'డెలివరీ చిరునామా' },
+  chooseAddressHint: { en: 'Choose or add a delivery address to place the order.', te: 'ఆర్డర్ చేయడానికి డెలివరీ చిరునామాను ఎంచుకోండి లేదా చేర్చండి.' },
+  paymentMethodHeading: { en: 'How will you pay?', te: 'మీరు ఎలా చెల్లిస్తారు?' },
+  paymentCod: { en: 'Cash on Delivery', te: 'క్యాష్ ఆన్ డెలివరీ' },
+  paymentUpi: { en: 'Pay by UPI', te: 'UPI ద్వారా చెల్లించండి' },
+  paymentUpiShort: { en: 'UPI', te: 'UPI' },
+  paymentCodHint: { en: 'Pay in cash when the order reaches you.', te: 'ఆర్డర్ మీకు చేరినప్పుడు నగదు చెల్లించండి.' },
+  paymentUpiHint: {
+    en: 'Pay with any UPI app after placing the order. We verify the payment, then pack and send it.',
+    te: 'ఆర్డర్ చేసిన తర్వాత ఏదైనా UPI యాప్‌తో చెల్లించండి. మేము చెల్లింపును ధృవీకరించి, ప్యాక్ చేసి పంపుతాము.',
+  },
+  orderSummaryHeading: { en: 'Order summary', te: 'ఆర్డర్ సారాంశం' },
+  orderPayHeading: { en: 'Pay for this order', te: 'ఈ ఆర్డర్‌కు చెల్లించండి' },
+  orderPayVerifyingNotice: {
+    en: 'We will verify your payment against our bank account, then pack and send your order. You will get a notification.',
+    te: 'మేము మీ చెల్లింపును మా బ్యాంక్ ఖాతాలో ధృవీకరించి, మీ ఆర్డర్‌ను ప్యాక్ చేసి పంపుతాము. మీకు నోటిఫికేషన్ వస్తుంది.',
+  },
+  orderVerifyHeading: { en: 'Verify the UPI payment', te: 'UPI చెల్లింపును ధృవీకరించండి' },
+  orderVerifyHint: {
+    en: 'Check that the UTR below shows as credited in the bank for this exact amount, then approve. The order cannot be confirmed until then.',
+    te: 'దిగువ UTR ఈ ఖచ్చితమైన మొత్తానికి బ్యాంకులో జమ అయినట్లు ఉందో తనిఖీ చేసి, ఆమోదించండి. అప్పటి వరకు ఆర్డర్‌ను నిర్ధారించలేరు.',
+  },
+  orderConfirmNeedsPayment: { en: 'Verify the UPI payment before confirming this order.', te: 'ఈ ఆర్డర్‌ను నిర్ధారించే ముందు UPI చెల్లింపును ధృవీకరించండి.' },
+  orderPayStatusPending: { en: 'Payment pending', te: 'చెల్లింపు పెండింగ్' },
+  orderPayStatusClaimed: { en: 'Payment submitted — being verified', te: 'చెల్లింపు సమర్పించబడింది — ధృవీకరణలో ఉంది' },
+  orderPayStatusPaid: { en: 'Paid', te: 'చెల్లించబడింది' },
+  orderPayStatusRejected: { en: 'Payment not verified — pay again', te: 'చెల్లింపు ధృవీకరించబడలేదు — మళ్ళీ చెల్లించండి' },
+  orderPaymentStatusFilterLabel: { en: 'Payment status', te: 'చెల్లింపు స్థితి' },
+  ordersNeedVerifying: { en: '{n} UPI payment(s) waiting for verification — show them', te: '{n} UPI చెల్లింపు(లు) ధృవీకరణ కోసం వేచి ఉన్నాయి — చూపించండి' },
+  orderNumberColumn: { en: 'Order', te: 'ఆర్డర్' },
+  customerColumnLabel: { en: 'Customer', te: 'కస్టమర్' },
+  dispatchReadyOnly: { en: 'Ready to pack only (COD or paid)', te: 'ప్యాక్ చేయడానికి సిద్ధమైనవి మాత్రమే (COD లేదా చెల్లించినవి)' },
+  categoryTreeHint: {
+    en: 'Departments hold categories, and categories hold sub-categories. A product can be filed at any level. Switching one off hides it from the shop without deleting anything.',
+    te: 'విభాగాలలో వర్గాలు, వర్గాలలో ఉప-వర్గాలు ఉంటాయి. ఉత్పత్తిని ఏ స్థాయిలోనైనా ఉంచవచ్చు. ఒకదాన్ని ఆఫ్ చేస్తే ఏదీ తొలగించకుండా షాప్ నుండి దాచబడుతుంది.',
+  },
+  nameTeField: { en: 'Telugu name (optional)', te: 'తెలుగు పేరు (ఐచ్ఛికం)' },
+  categoryOffBadge: { en: '(off)', te: '(ఆఫ్)' },
+  productsCountLabel: { en: 'products', te: 'ఉత్పత్తులు' },
+  renameButton: { en: 'Rename', te: 'పేరు మార్చండి' },
+  addDepartmentButton: { en: 'Add a department', te: 'విభాగాన్ని చేర్చండి' },
+  addCategoryInsideButton: { en: 'Add a category inside', te: 'లోపల వర్గాన్ని చేర్చండి' },
+  addSubCategoryInsideButton: { en: 'Add a sub-category inside', te: 'లోపల ఉప-వర్గాన్ని చేర్చండి' },
+  switchOffButton: { en: 'Switch off', te: 'ఆఫ్ చేయండి' },
+  switchOnButton: { en: 'Switch on', te: 'ఆన్ చేయండి' },
+  showSwitchedOffLabel: { en: 'Show switched-off ones', te: 'ఆఫ్ చేసినవి చూపించండి' },
+  couldNotSaveCategory: { en: 'Could not save the category. Try again.', te: 'వర్గాన్ని సేవ్ చేయలేకపోయాము. మళ్ళీ ప్రయత్నించండి.' },
 } as const satisfies Record<string, Bilingual>;
 
 export type StringKey = keyof typeof strings;
@@ -1051,5 +1148,17 @@ const HARIHARAA_SUBSCRIPTION_STATUS_KEYS: Record<string, StringKey> = {
 
 export function hariharaaSubscriptionStatusLabel(status: string): Bilingual {
   const key = HARIHARAA_SUBSCRIPTION_STATUS_KEYS[status];
+  return key ? strings[key] : { en: status, te: status };
+}
+
+const ORDER_PAYMENT_STATUS_KEYS: Record<string, StringKey> = {
+  PENDING: 'orderPayStatusPending',
+  CLAIMED: 'orderPayStatusClaimed',
+  PAID: 'orderPayStatusPaid',
+  REJECTED: 'orderPayStatusRejected',
+};
+
+export function orderPaymentStatusLabel(status: string): Bilingual {
+  const key = ORDER_PAYMENT_STATUS_KEYS[status];
   return key ? strings[key] : { en: status, te: status };
 }
