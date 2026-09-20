@@ -24,4 +24,9 @@ export class UpdateSettingsDto {
   @IsOptional()
   @IsString()
   vendorProfileId?: string;
+
+  // The `aid=` value from the merchant's own Google Pay QR — see upi-link.ts.
+  @IsOptional()
+  @IsString()
+  upiAid?: string;
 }

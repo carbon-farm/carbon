@@ -2,14 +2,15 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { ApiError } from '../../api/client';
-import { getMySubscription, submitClaim, type Subscription } from '../../api/hariharaa';
+import { getMySubscription, submitClaim, type MySubscription } from '../../api/hariharaa';
 import { Bi, BiValue } from '../../i18n/Bi';
 import { strings, hariharaaSubscriptionStatusLabel } from '../../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../../i18n/validation';
+import { UpiPaymentCard } from './UpiPaymentCard';
 
 export function HariharaaSubscriptionPage() {
   const { session, logout } = useAuth();
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [subscription, setSubscription] = useState<MySubscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,8 +40,10 @@ export function HariharaaSubscriptionPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const updated = await submitClaim(session.accessToken, { paymentReference, ...(note ? { note } : {}) });
-      setSubscription(updated);
+      await submitClaim(session.accessToken, { paymentReference, ...(note ? { note } : {}) });
+      // Re-read so hasAccess / effectiveStatus come from the server, not guesses here.
+      setSubscription(await getMySubscription(session.accessToken));
+      formEl.reset();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.couldNotSubmitHariharaaClaim.en} / ${strings.couldNotSubmitHariharaaClaim.te}`);
     } finally {
@@ -48,8 +51,12 @@ export function HariharaaSubscriptionPage() {
     }
   }
 
-  const status = subscription?.status ?? 'NOT_SUBMITTED';
-  const canSubmit = status !== 'ACTIVE' && status !== 'PENDING_REVIEW';
+  // effectiveStatus, not status: the stored status stays ACTIVE after the paid
+  // month passes, and showing it raw told lapsed customers they were still active
+  // and hid the renewal form.
+  const status = subscription?.effectiveStatus ?? 'NOT_SUBMITTED';
+  const pending = status === 'PENDING_REVIEW';
+  const isRenewal = status !== 'NOT_SUBMITTED';
   const statusLabel = hariharaaSubscriptionStatusLabel(status);
 
   return (
@@ -64,43 +71,44 @@ export function HariharaaSubscriptionPage() {
       {loading ? (
         <BiValue value={strings.loading} as="p" className="hint" />
       ) : (
-        <div className="card">
-          <div className="field-label">
-            <Bi id="hariharaaStatusLabel" />
-          </div>
-          <BiValue value={statusLabel} as="p" />
+        <>
+          <div className="card">
+            <div className="field-label">
+              <Bi id="hariharaaStatusLabel" />
+            </div>
+            <BiValue value={statusLabel} as="p" />
 
-          {subscription?.activeUntil && (
-            <div>
-              <div className="field-label">
-                <Bi id="hariharaaActiveUntilLabel" />
+            {subscription?.activeUntil && (
+              <div>
+                <div className="field-label">
+                  <Bi id={subscription.hasAccess ? 'hariharaaActiveUntilLabel' : 'hariharaaExpiredOnLabel'} />
+                </div>
+                <div>{new Date(subscription.activeUntil).toLocaleDateString()}</div>
               </div>
-              <div>{new Date(subscription.activeUntil).toLocaleDateString()}</div>
+            )}
+          </div>
+
+          {!pending && (
+            <div className="card">
+              <Bi id={isRenewal ? 'hariharaaRenewHeading' : 'hariharaaPayHeading'} as="h2" />
+              <UpiPaymentCard />
+
+              <form onSubmit={handleSubmit}>
+                <label>
+                  <Bi id="hariharaaPaymentReferenceField" />
+                  <input name="paymentReference" required minLength={6} onInvalid={bilingualInvalidHandler} onChange={clearCustomValidity} />
+                </label>
+                <label>
+                  <Bi id="hariharaaNoteField" />
+                  <textarea name="note" rows={2} />
+                </label>
+                <button type="submit" disabled={submitting}>
+                  {submitting ? <BiValue value={strings.hariharaaSubmittingClaim} /> : isRenewal ? <Bi id="hariharaaResubmitClaimButton" /> : <Bi id="hariharaaSubmitClaimButton" />}
+                </button>
+              </form>
             </div>
           )}
-
-          {canSubmit && (
-            <form onSubmit={handleSubmit}>
-              <label>
-                <Bi id="hariharaaPaymentReferenceField" />
-                <input name="paymentReference" required minLength={2} onInvalid={bilingualInvalidHandler} onChange={clearCustomValidity} />
-              </label>
-              <label>
-                <Bi id="hariharaaNoteField" />
-                <textarea name="note" rows={2} />
-              </label>
-              <button type="submit" disabled={submitting}>
-                {submitting ? (
-                  <BiValue value={strings.hariharaaSubmittingClaim} />
-                ) : status === 'REJECTED' || status === 'EXPIRED' ? (
-                  <Bi id="hariharaaResubmitClaimButton" />
-                ) : (
-                  <Bi id="hariharaaSubmitClaimButton" />
-                )}
-              </button>
-            </form>
-          )}
-        </div>
+        </>
       )}
 
       <Link to="/hariharaa/shop" className="link-button">

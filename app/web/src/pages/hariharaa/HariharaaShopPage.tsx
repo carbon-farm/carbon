@@ -19,6 +19,7 @@ export function HariharaaShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [needsSubscription, setNeedsSubscription] = useState(false);
   const [search, setSearch] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('newest');
 
@@ -29,6 +30,11 @@ export function HariharaaShopPage() {
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) {
           logout();
+          return;
+        }
+        // 403 here always means "no active subscription" — point them at where to pay.
+        if (err instanceof ApiError && err.status === 403) {
+          setNeedsSubscription(true);
           return;
         }
         setError(err instanceof ApiError ? err.message : `${strings.couldNotLoadProducts.en} / ${strings.couldNotLoadProducts.te}`);
@@ -75,6 +81,17 @@ export function HariharaaShopPage() {
 
       {error && <div className="error-banner">{error}</div>}
 
+      {needsSubscription && (
+        <div className="card">
+          <BiValue value={strings.hariharaaSubscriptionNeeded} as="p" />
+          <Link to="/hariharaa/subscription">
+            <button type="button">
+              <Bi id="hariharaaGoToSubscription" />
+            </button>
+          </Link>
+        </div>
+      )}
+
       {!loading && products.length > 0 && (
         <div className="list-toolbar">
           <label>
@@ -95,7 +112,7 @@ export function HariharaaShopPage() {
 
       {loading ? (
         <BiValue value={strings.loading} as="p" className="hint" />
-      ) : products.length === 0 ? (
+      ) : needsSubscription ? null : products.length === 0 ? (
         <BiValue value={strings.noHariharaaProductsYet} as="p" className="hint" />
       ) : visible.length === 0 ? (
         <BiValue value={strings.reportNoData} as="p" className="hint" />

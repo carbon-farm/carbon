@@ -7,11 +7,13 @@ export interface PublicSettings {
   payeeName: string;
   primaryUpiId: string;
   secondaryUpiId: string | null;
+  upiLink: string;
 }
 
-export interface AdminSettings extends PublicSettings {
+export interface AdminSettings extends Omit<PublicSettings, 'upiLink'> {
   id: string;
   vendorProfileId: string | null;
+  upiAid: string | null;
 }
 
 export interface Subscription {
@@ -19,10 +21,16 @@ export interface Subscription {
   userId: string;
   status: HariharaaSubscriptionStatus;
   paymentReference: string | null;
+  expectedAmountInr: number | null;
   note: string | null;
   submittedAt: string;
   reviewedAt: string | null;
   activeUntil: string | null;
+}
+
+export interface MySubscription extends Subscription {
+  hasAccess: boolean;
+  effectiveStatus: HariharaaSubscriptionStatus;
 }
 
 export interface PendingSubscriptionClaim extends Subscription {
@@ -45,6 +53,7 @@ export function updateSettings(
     primaryUpiId: string;
     secondaryUpiId?: string;
     vendorProfileId?: string;
+    upiAid?: string;
   },
 ) {
   return apiRequest<AdminSettings>('/hariharaa/settings', { method: 'PATCH', body: data, token });
@@ -55,7 +64,7 @@ export function submitClaim(token: string, data: { paymentReference: string; not
 }
 
 export function getMySubscription(token: string) {
-  return apiRequest<Subscription | null>('/hariharaa/subscription/me', { token });
+  return apiRequest<MySubscription | null>('/hariharaa/subscription/me', { token });
 }
 
 export function listPendingClaims(token: string) {

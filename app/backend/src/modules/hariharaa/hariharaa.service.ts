@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { HariharaaSubscriptionStatus, Role } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
@@ -7,6 +7,7 @@ import { bi } from '../../common/i18n';
 import { SubmitClaimDto } from './dto/submit-claim.dto';
 import { ReviewClaimDto } from './dto/review-claim.dto';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
+import { buildUpiLink } from './upi-link';
 
 const SETTINGS_ID = 'singleton';
 const SUBSCRIPTION_DAYS = 30;
@@ -39,6 +40,15 @@ export class HariharaaService {
       payeeName: settings.payeeName,
       primaryUpiId: settings.primaryUpiId,
       secondaryUpiId: settings.secondaryUpiId,
+      // Built here, once, so the landing page and the subscription page can't
+      // drift apart and the format is covered by unit tests.
+      upiLink: buildUpiLink({
+        vpa: settings.primaryUpiId,
+        payeeName: settings.payeeName,
+        amountInr: settings.subscriptionPriceInr,
+        merchantAid: settings.upiAid,
+        note: 'HARIHARAA subscription',
+      }),
     };
   }
 
@@ -72,18 +82,56 @@ export class HariharaaService {
   // their renewal is under review, same "resubmit resets the gate, doesn't
   // punish the customer" spirit as MarketplaceService.submitVendorProfile.
   async submitClaim(userId: string, dto: SubmitClaimDto) {
+    // UTRs are case-insensitive digits/letters; normalise so "abc123" and
+    // "ABC123 " can't be used to dodge the duplicate check below.
+    const reference = dto.paymentReference.trim().toUpperCase();
+
+    const existing = await this.prisma.hariharaaSubscription.findUnique({ where: { userId } });
+    if (existing?.paymentReference === reference && existing.status !== HariharaaSubscriptionStatus.REJECTED) {
+      throw new ConflictException(
+        bi('You already used this payment reference — enter the one for your new payment', 'మీరు ఈ చెల్లింపు రిఫరెన్స్‌ను ఇప్పటికే ఉపయోగించారు — మీ కొత్త చెల్లింపు రిఫరెన్స్‌ను నమోదు చేయండి'),
+      );
+    }
+    // One real payment must not unlock several accounts. Checked against every
+    // other customer's current claim AND the audit history of past submissions
+    // (each customer has a single claim row that later renewals overwrite).
+    const usedByOther = await this.prisma.hariharaaSubscription.findFirst({
+      where: {
+        paymentReference: reference,
+        NOT: { userId },
+        status: { not: HariharaaSubscriptionStatus.REJECTED },
+      },
+    });
+    const usedInHistory = await this.prisma.auditLog.findFirst({
+      where: {
+        action: 'hariharaa.subscription.submit',
+        NOT: { actorId: userId },
+        metadata: { path: ['paymentReference'], equals: reference },
+      },
+    });
+    if (usedByOther || usedInHistory) {
+      throw new ConflictException(
+        bi('This payment reference was already submitted by another account', 'ఈ చెల్లింపు రిఫరెన్స్‌ను మరొక ఖాతా ఇప్పటికే సమర్పించింది'),
+      );
+    }
+
+    const settings = await this.prisma.hariharaaSettings.findUnique({ where: { id: SETTINGS_ID } });
+    const expectedAmountInr = settings?.subscriptionPriceInr ?? null;
+
     const updated = await this.prisma.hariharaaSubscription.upsert({
       where: { userId },
       create: {
         userId,
         status: HariharaaSubscriptionStatus.PENDING_REVIEW,
-        paymentReference: dto.paymentReference,
+        paymentReference: reference,
+        expectedAmountInr,
         note: dto.note,
         submittedAt: new Date(),
       },
       update: {
         status: HariharaaSubscriptionStatus.PENDING_REVIEW,
-        paymentReference: dto.paymentReference,
+        paymentReference: reference,
+        expectedAmountInr,
         note: dto.note,
         submittedAt: new Date(),
       },
@@ -94,6 +142,7 @@ export class HariharaaService {
       action: 'hariharaa.subscription.submit',
       entityType: 'HariharaaSubscription',
       entityId: updated.id,
+      metadata: { paymentReference: reference, expectedAmountInr },
     });
     await this.notifications.notifyRole(
       Role.ADMINISTRATOR,
@@ -105,8 +154,21 @@ export class HariharaaService {
     return updated;
   }
 
+  // Adds the derived facts the UI must not re-derive (or get wrong): whether the
+  // customer has access *right now*, and an "effective" status that reads
+  // EXPIRED once the paid-through date has passed — the stored status stays
+  // ACTIVE until the next claim, so showing it raw told lapsed customers
+  // "Active" and hid the renewal form.
   async getMyStatus(userId: string) {
-    return this.prisma.hariharaaSubscription.findUnique({ where: { userId } });
+    const sub = await this.prisma.hariharaaSubscription.findUnique({ where: { userId } });
+    if (!sub) return null;
+    const hasAccess = sub.activeUntil !== null && sub.activeUntil > new Date();
+    const lapsed = sub.status === HariharaaSubscriptionStatus.ACTIVE && !hasAccess;
+    return {
+      ...sub,
+      hasAccess,
+      effectiveStatus: lapsed ? HariharaaSubscriptionStatus.EXPIRED : sub.status,
+    };
   }
 
   async listPendingReview() {
@@ -131,7 +193,10 @@ export class HariharaaService {
       throw new BadRequestException(bi('A reason is required when rejecting a claim', 'దావాను తిరస్కరించేటప్పుడు కారణం అవసరం'));
     }
 
-    const activeUntil = new Date();
+    // Renewing early adds to the days already paid for instead of discarding them.
+    const activeUntil = new Date(
+      Math.max(Date.now(), subscription.activeUntil?.getTime() ?? 0),
+    );
     activeUntil.setDate(activeUntil.getDate() + SUBSCRIPTION_DAYS);
 
     const updated = await this.prisma.hariharaaSubscription.update({
@@ -165,16 +230,14 @@ export class HariharaaService {
     return updated;
   }
 
-  // The one method every catalog/cart/checkout gate calls — compares
-  // activeUntil against now(), not just status === ACTIVE, so a lapsed month
-  // reads as not-subscribed immediately, without needing an explicit expiry
-  // sweep job.
+  // The one method every catalog/cart/checkout gate calls. Access is exactly
+  // "paid through a date that hasn't passed": activeUntil is only ever set by an
+  // Administrator approval, so it is the source of truth — not the status of the
+  // *latest claim*. That way a customer renewing early (status back to
+  // PENDING_REVIEW) or whose renewal is rejected keeps the days they already
+  // paid for, and a lapsed month reads as not-subscribed with no sweep job.
   async isActiveSubscriber(userId: string): Promise<boolean> {
     const subscription = await this.prisma.hariharaaSubscription.findUnique({ where: { userId } });
-    return (
-      subscription?.status === HariharaaSubscriptionStatus.ACTIVE &&
-      subscription.activeUntil !== null &&
-      subscription.activeUntil > new Date()
-    );
+    return subscription?.activeUntil != null && subscription.activeUntil > new Date();
   }
 }

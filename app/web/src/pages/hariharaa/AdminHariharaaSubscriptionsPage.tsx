@@ -93,6 +93,14 @@ export function AdminHariharaaSubscriptionsPage() {
                   </div>
                   <div>{c.paymentReference}</div>
                 </div>
+                {c.expectedAmountInr != null && (
+                  <div>
+                    <div className="field-label">
+                      <Bi id="hariharaaExpectedAmountLabel" />
+                    </div>
+                    <div>₹{c.expectedAmountInr.toFixed(2)}</div>
+                  </div>
+                )}
                 {c.note && <div className="hint">{c.note}</div>}
                 <button type="button" onClick={() => handleApprove(c.id)} disabled={isBusy}>
                   {isBusy ? <BiValue value={strings.approving} /> : <Bi id="approveButton" />}

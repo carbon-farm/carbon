@@ -112,18 +112,18 @@ enum SoilSampleStatus {
 }
 
 model User {
-  id                String   @id @default(uuid())
-  mobileNumber      String   @unique
+  id                String    @id @default(uuid())
+  mobileNumber      String    @unique
   passwordHash      String
   role              Role
   name              String
-  preferredLanguage String   @default("te") // Telugu, per 01-Product/05-Target-Users.md
-  isActive          Boolean  @default(true)
+  preferredLanguage String    @default("te") // Telugu, per 01-Product/05-Target-Users.md
+  isActive          Boolean   @default(true)
   // Set when an Administrator deactivates the account, so it is never mistaken
   // for a never-activated pending registration (which register() will resend).
   deactivatedAt     DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   // Membership fields apply to FARMER role only; left nullable for other roles.
   membershipTier   String?
@@ -723,22 +723,26 @@ enum HariharaaSubscriptionStatus {
 }
 
 model HariharaaSubscription {
-  id               String                      @id @default(uuid())
-  userId           String                      @unique
-  user             User                        @relation("HariharaaSubscriber", fields: [userId], references: [id], onDelete: Cascade)
-  status           HariharaaSubscriptionStatus @default(PENDING_REVIEW)
-  paymentReference String?
-  note             String?
-  submittedAt      DateTime                    @default(now())
-  reviewedByUserId String?
-  reviewedBy       User?                       @relation("HariharaaSubscriptionReviewer", fields: [reviewedByUserId], references: [id])
-  reviewedAt       DateTime?
-  activeUntil      DateTime? // set to submission/approval time + 30 days on approve; the load-bearing
+  id                String                      @id @default(uuid())
+  userId            String                      @unique
+  user              User                        @relation("HariharaaSubscriber", fields: [userId], references: [id], onDelete: Cascade)
+  status            HariharaaSubscriptionStatus @default(PENDING_REVIEW)
+  paymentReference  String?
+  // Price the customer was asked to pay when they submitted — the settings
+  // price can change later, and the reviewing Administrator needs to compare
+  // the bank credit against what was expected *then*.
+  expectedAmountInr Float?
+  note              String?
+  submittedAt       DateTime                    @default(now())
+  reviewedByUserId  String?
+  reviewedBy        User?                       @relation("HariharaaSubscriptionReviewer", fields: [reviewedByUserId], references: [id])
+  reviewedAt        DateTime?
+  activeUntil       DateTime? // set to submission/approval time + 30 days on approve; the load-bearing
   // "is this customer currently subscribed" check compares this against
   // now(), not just status === ACTIVE, so a lapsed month reads correctly
   // even before any explicit expiry job runs.
-  createdAt        DateTime                    @default(now())
-  updatedAt        DateTime                    @updatedAt
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt
 
   @@index([status])
 }
@@ -752,6 +756,10 @@ model HariharaaSettings {
   payeeName            String         @default("HARIHARAA Natural Food Stores")
   primaryUpiId         String
   secondaryUpiId       String?
+  // Google Pay merchant/aggregator ID (the `aid=` value inside the merchant's own
+  // static QR). Without it the UPI app treats the link as a person-to-person
+  // payment instead of a payment to the registered business.
+  upiAid               String?
   vendorProfileId      String?
   vendorProfile        VendorProfile? @relation(fields: [vendorProfileId], references: [id])
   updatedByUserId      String?
