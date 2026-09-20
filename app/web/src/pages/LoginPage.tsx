@@ -5,6 +5,7 @@ import { roleHomePath } from '../auth/roleHome';
 import { ApiError } from '../api/client';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
+import { TestimonialsPreview } from './hariharaa/TestimonialsPreview';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 
 export function LoginPage() {
@@ -92,6 +93,8 @@ export function LoginPage() {
           <Bi id="forgotPasswordLink" />
         </Link>
       </p>
+
+      <TestimonialsPreview />
     </div>
   );
 }
