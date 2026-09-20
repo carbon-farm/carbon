@@ -5,6 +5,7 @@ import { ApiError } from '../api/client';
 import { listUsers, createStaffUser, setUserActive, type AdminUser } from '../api/admin';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, type StringKey } from '../i18n/strings';
+import { PasswordInput } from '../components/PasswordInput';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 
 const ROLES = [
@@ -145,9 +146,8 @@ export function AdminStaffPage() {
           </label>
           <label>
             <Bi id="temporaryPasswordField" />
-            <input
+            <PasswordInput
               name="temporaryPassword"
-              type="password"
               minLength={8}
               onChange={clearCustomValidity}
               onInvalid={bilingualInvalidHandler}

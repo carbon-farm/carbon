@@ -5,6 +5,7 @@ import { roleHomePath } from '../auth/roleHome';
 import { ApiError } from '../api/client';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
+import { PasswordInput } from '../components/PasswordInput';
 import { TestimonialsPreview } from './hariharaa/TestimonialsPreview';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 
@@ -61,8 +62,7 @@ export function LoginPage() {
         </label>
         <label>
           <Bi id="passwordLabel" />
-          <input
-            type="password"
+          <PasswordInput
             autoComplete="current-password"
             value={password}
             onChange={(e) => {

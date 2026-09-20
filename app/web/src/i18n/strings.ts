@@ -1087,6 +1087,8 @@ export const strings = {
   paymentStripFreeEndsSoon: { en: 'Free access ends in {n} {days} — pay to continue', te: 'ఉచిత ప్రాప్యత {n} {days} ముగుస్తుంది — కొనసాగడానికి చెల్లించండి' },
   paymentStripRenew: { en: 'Renew', te: 'పునరుద్ధరించు' },
   testimonialsSeeAllButton: { en: 'See all testimonials', te: 'అన్ని అనుభవాలను చూడండి' },
+  passwordShow: { en: 'Show password', te: 'పాస్‌వర్డ్ చూపించు' },
+  passwordHide: { en: 'Hide password', te: 'పాస్‌వర్డ్ దాచు' },
 } as const satisfies Record<string, Bilingual>;
 
 export type StringKey = keyof typeof strings;

@@ -4,6 +4,7 @@ import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings, otpSentTo } from '../i18n/strings';
+import { PasswordInput } from '../components/PasswordInput';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 
 type Step = 'mobile' | 'otp' | 'newPassword' | 'done';
@@ -99,8 +100,7 @@ export function ForgotPasswordPage() {
         <form onSubmit={handleNewPasswordSubmit}>
           <label>
             <Bi id="newPasswordLabel" />
-            <input
-              type="password"
+            <PasswordInput
               autoComplete="new-password"
               minLength={8}
               value={newPassword}

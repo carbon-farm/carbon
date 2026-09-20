@@ -1404,3 +1404,40 @@ button.case-item:hover:not(:disabled) {
   font-weight: 500;
   color: var(--ink-soft);
 }
+
+/* Password fields: an eye button inside the right edge shows or hides the typed text */
+.password-field {
+  position: relative;
+  display: block;
+}
+.password-field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 52px;
+}
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  min-height: auto;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--ink-soft);
+  border-radius: 8px;
+}
+.password-toggle:hover:not(:disabled) {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  transform: translateY(-50%);
+}
+.password-toggle:active:not(:disabled) {
+  transform: translateY(-50%);
+}

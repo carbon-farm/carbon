@@ -4,6 +4,7 @@ import { ApiError } from '../api/client';
 import { changeMyPassword, getMe, type AdminUser } from '../api/admin';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
+import { PasswordInput } from '../components/PasswordInput';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 
 // Open to every role. Changing the password revokes all refresh tokens on
@@ -75,11 +76,11 @@ export function ChangePasswordPage() {
         <form onSubmit={handleSubmit} className="card">
           <label>
             <Bi id="currentPasswordField" />
-            <input name="currentPassword" type="password" autoComplete="current-password" onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler} required />
+            <PasswordInput name="currentPassword" autoComplete="current-password" onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler} required />
           </label>
           <label>
             <Bi id="newPasswordField" />
-            <input name="newPassword" type="password" autoComplete="new-password" minLength={8} onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler} required />
+            <PasswordInput name="newPassword" autoComplete="new-password" minLength={8} onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler} required />
           </label>
           <button type="submit" disabled={busy}>
             <Bi id="changePasswordButton" />

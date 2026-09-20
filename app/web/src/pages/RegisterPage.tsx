@@ -4,6 +4,7 @@ import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings, otpSentTo } from '../i18n/strings';
+import { PasswordInput } from '../components/PasswordInput';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 
 // Two steps only, per 01-Product/05-Target-Users.md — Ravi's journey has no
@@ -136,8 +137,7 @@ export function RegisterPage() {
         </label>
         <label>
           <Bi id="passwordLabel" />
-          <input
-            type="password"
+          <PasswordInput
             autoComplete="new-password"
             minLength={8}
             value={password}
