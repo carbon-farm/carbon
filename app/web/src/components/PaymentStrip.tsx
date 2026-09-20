@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { getMySubscription, getPublicSettings, type MySubscription } from '../api/hariharaa';
-import { Bi, BiValue } from '../i18n/Bi';
+import { Bi } from '../i18n/Bi';
 import { strings, type StringKey } from '../i18n/strings';
 
 const POLL_MS = 60_000;
@@ -62,9 +62,10 @@ export function PaymentStrip() {
 
   return (
     <div className={`payment-strip${state === 'REJECTED' || state === 'EXPIRED' ? ' alert' : ''}`} role="status">
-      <span>
-        <BiValue value={strings[textKey]} as="span" />
-        {state === 'NOT_PAID' && price !== null && <strong> ₹{price.toFixed(2)}</strong>}
+      {/* English / Telugu on ONE line (not stacked) so the strip stays slim on a phone. */}
+      <span className="strip-text">
+        {strings[textKey].en} / {strings[textKey].te}
+        {state === 'NOT_PAID' && price !== null && <strong> · ₹{price.toFixed(0)}</strong>}
       </span>
       <Link to="/hariharaa/subscription" className="strip-action">
         <Bi id={needsAction ? 'hariharaaPayNowButton' : 'paymentStripView'} />
