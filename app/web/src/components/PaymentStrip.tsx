@@ -68,7 +68,7 @@ export function PaymentStrip() {
         {state === 'NOT_PAID' && price !== null && <strong> · ₹{price.toFixed(0)}</strong>}
       </span>
       <Link to="/hariharaa/subscription" className="strip-action">
-        <Bi id={needsAction ? 'hariharaaPayNowButton' : 'paymentStripView'} />
+        <Bi id={needsAction ? 'paymentStripPay' : 'paymentStripView'} />
       </Link>
     </div>
   );

@@ -765,6 +765,7 @@ export const strings = {
   paymentStripAwaiting: { en: 'Payment submitted — being verified', te: 'చెల్లింపు సమర్పించబడింది — ధృవీకరణలో ఉంది' },
   paymentStripRejected: { en: 'Payment not verified — pay again', te: 'చెల్లింపు ధృవీకరించబడలేదు — మళ్ళీ చెల్లించండి' },
   paymentStripExpired: { en: 'Subscription expired — renew', te: 'సభ్యత్వం గడువు ముగిసింది — పునరుద్ధరించండి' },
+  paymentStripPay: { en: 'Pay', te: 'చెల్లించు' },
   paymentStripView: { en: 'View', te: 'చూడండి' },
   hariharaaStartingPayment: { en: 'Preparing…', te: 'సిద్ధం చేస్తోంది…' },
   hariharaaPayStepsTitle: { en: 'After you pay', te: 'మీరు చెల్లించిన తర్వాత' },
