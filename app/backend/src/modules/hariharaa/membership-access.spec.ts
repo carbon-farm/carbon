@@ -1,4 +1,4 @@
-import { computeAccess, memberLabel, parseGrantUntil, renewalStart } from './membership-access';
+import { accessEnd, computeAccess, daysLeft, memberLabel, parseGrantUntil, reminderDue, renewalStart } from './membership-access';
 
 const DAY = 864e5;
 const at = (n: number) => new Date(Date.now() + n * DAY);
@@ -65,4 +65,49 @@ describe('parseGrantUntil', () => {
     expect(parseGrantUntil('2026-12-31T10:00:00.000Z')!.toISOString()).toBe('2026-12-31T10:00:00.000Z');
   });
   it('returns null for junk', () => expect(parseGrantUntil('not a date')).toBeNull());
+});
+
+describe('expiry reminders', () => {
+  const none = { expiryReminderFor: null, expiredNoticeFor: null };
+  const state = (paid: number | null, free: number | null, extra: { expiryReminderFor?: Date; expiredNoticeFor?: Date } = {}) => ({ ...dates(paid, free), ...none, ...extra });
+
+  it('access ends when the LATER of paid and free ends', () => {
+    expect(accessEnd(dates(10, 30))!.source).toBe('FREE');
+    expect(accessEnd(dates(40, 30))!.source).toBe('PAID');
+    expect(accessEnd(dates(null, null))).toBeNull();
+  });
+  it('nothing due for a member with no dates, or with plenty of time left', () => {
+    expect(reminderDue(null)).toBeNull();
+    expect(reminderDue(state(null, null))).toBeNull();
+    expect(reminderDue(state(10, null))).toBeNull();
+    expect(reminderDue(state(3.5, null))).toBeNull();
+  });
+  it('EXPIRING once 3 days or fewer are left, with the days rounded up', () => {
+    expect(reminderDue(state(2.4, null))).toMatchObject({ kind: 'EXPIRING', daysLeft: 3, source: 'PAID' });
+    expect(reminderDue(state(0.2, null))).toMatchObject({ kind: 'EXPIRING', daysLeft: 1 });
+    expect(reminderDue(state(null, 1.5))).toMatchObject({ kind: 'EXPIRING', source: 'FREE' });
+  });
+  it('is announced once per end date, and a renewal makes the next expiry due again', () => {
+    const s = state(2, null);
+    const sent = reminderDue(s)!;
+    expect(reminderDue({ ...s, expiryReminderFor: sent.until })).toBeNull();
+    const renewed = { ...s, activeUntil: at(32), expiryReminderFor: sent.until };
+    expect(reminderDue(renewed)).toBeNull(); // far away again
+    const nextCycle = { ...renewed, activeUntil: at(1) };
+    expect(reminderDue(nextCycle)).toMatchObject({ kind: 'EXPIRING' }); // a different end date
+  });
+  it('EXPIRED once it has ended, announced once, and not for old expiries', () => {
+    expect(reminderDue(state(-0.5, null))).toMatchObject({ kind: 'EXPIRED', daysLeft: 0 });
+    const ended = reminderDue(state(-0.5, null))!;
+    expect(reminderDue({ ...state(-0.5, null), expiredNoticeFor: ended.until })).toBeNull();
+    expect(reminderDue(state(-20, null))).toBeNull(); // long lapsed: no back-filling
+  });
+  it('a member still covered by free access is not told the paid month ended', () => {
+    expect(reminderDue(state(-1, 30))).toBeNull();
+  });
+  it('daysLeft counts whole days of access, or null without access', () => {
+    expect(daysLeft(dates(2.2, null))).toBe(3);
+    expect(daysLeft(dates(-1, null))).toBeNull();
+    expect(daysLeft(null)).toBeNull();
+  });
 });

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { listAllProductsForAdmin, type Product } from '../api/marketplace';
+import { ProductThumb } from '../components/ProductThumb';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 
@@ -105,13 +106,16 @@ export function ProductsManagePage() {
       ) : (
         <div className="card">
           {visible.map((p) => (
-            <Link to={`/marketplace/manage/products/${p.id}`} key={p.id} className="case-item">
-              <div className="top-bar">
-                <div className="label">{p.name}</div>
-                <BiValue value={p.isActive ? strings.activeStatusLabel : strings.inactiveStatusLabel} as="span" className="priority-badge" />
-              </div>
-              <div className="meta">
-                ₹{p.price.toFixed(2)} {p.unit} · {p.vendor?.businessName ?? strings.platformSoldOption.en}
+            <Link to={`/marketplace/manage/products/${p.id}`} key={p.id} className="case-item with-thumb">
+              <ProductThumb product={p} />
+              <div className="thumb-body">
+                <div className="top-bar">
+                  <div className="label">{p.name}</div>
+                  <BiValue value={p.isActive ? strings.activeStatusLabel : strings.inactiveStatusLabel} as="span" className="priority-badge" />
+                </div>
+                <div className="meta">
+                  ₹{p.price.toFixed(2)} {p.unit} · {p.vendor?.businessName ?? strings.platformSoldOption.en}
+                </div>
               </div>
             </Link>
           ))}

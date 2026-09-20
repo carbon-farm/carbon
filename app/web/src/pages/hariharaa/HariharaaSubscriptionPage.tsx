@@ -5,6 +5,7 @@ import { ApiError } from '../../api/client';
 import { claimPayment, getMySubscription, startPayment, type MySubscription, type StartedPayment } from '../../api/hariharaa';
 import { Bi, BiValue } from '../../i18n/Bi';
 import { strings, hariharaaSubscriptionStatusLabel } from '../../i18n/strings';
+import { periodText, planTitle } from '../../membership/plans';
 import { bilingualInvalidHandler, clearCustomValidity } from '../../i18n/validation';
 import { TestimonialsGrid } from './TestimonialsGrid';
 import { UpiPaymentCard } from './UpiPaymentCard';
@@ -17,6 +18,7 @@ export function HariharaaSubscriptionPage() {
   const { session, logout } = useAuth();
   const [status, setStatus] = useState<MySubscription | null>(null);
   const [payment, setPayment] = useState<StartedPayment | null>(null);
+  const [planId, setPlanId] = useState('');
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -25,7 +27,10 @@ export function HariharaaSubscriptionPage() {
   useEffect(() => {
     if (!session) return;
     getMySubscription(session.accessToken)
-      .then(setStatus)
+      .then((st) => {
+        setStatus(st);
+        setPlanId((current) => current || st?.plans[0]?.id || '');
+      })
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) {
           logout();
@@ -41,7 +46,7 @@ export function HariharaaSubscriptionPage() {
     setStarting(true);
     setError(null);
     try {
-      setPayment(await startPayment(session.accessToken));
+      setPayment(await startPayment(session.accessToken, planId || undefined));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.couldNotStartPayment.en} / ${strings.couldNotStartPayment.te}`);
     } finally {
@@ -72,6 +77,8 @@ export function HariharaaSubscriptionPage() {
   }
 
   const state = status?.state ?? 'NOT_PAID';
+  const open = status ? !status.membershipRequired : false; // membership switched off by an Administrator
+  const plans = status?.plans ?? [];
   const awaiting = state === 'AWAITING_VERIFICATION';
   const isRenewal = state === 'ACTIVE' || state === 'EXPIRED' || state === 'FREE';
 
@@ -129,18 +136,40 @@ export function HariharaaSubscriptionPage() {
             )}
           </div>
 
+          {open && <BiValue value={strings.membershipOpenNotice} as="p" className="hint" />}
+
           {awaiting ? (
             <div className="card">
               <BiValue value={strings.hariharaaPayVerifyingNotice} as="p" />
             </div>
-          ) : (
+          ) : open ? null : (
             <div className="card">
               <Bi id={isRenewal ? 'hariharaaRenewHeading' : 'hariharaaPayHeading'} as="h2" />
 
               {!payment ? (
-                <button type="button" onClick={handleStart} disabled={starting}>
-                  {starting ? <BiValue value={strings.hariharaaStartingPayment} /> : <Bi id="hariharaaPayNowButton" />}
-                </button>
+                <>
+                  {plans.length === 0 ? (
+                    <BiValue value={strings.noPlansAvailableNotice} as="p" className="hint" />
+                  ) : (
+                    <div className="option-list" role="radiogroup" aria-label={strings.choosePlanHeading.en}>
+                      {plans.map((p) => (
+                        <label className={`option-card${planId === p.id ? ' selected' : ''}`} key={p.id}>
+                          <input type="radio" name="plan" checked={planId === p.id} onChange={() => setPlanId(p.id)} />
+                          <span>
+                            <span className="label">{planTitle(p)}</span>
+                            <span>
+                              <strong>₹{p.priceInr.toFixed(2)}</strong> · {periodText(p.periodDays)}
+                            </span>
+                            {p.description && <span className="hint">{p.description}</span>}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                  <button type="button" onClick={handleStart} disabled={starting || plans.length === 0}>
+                    {starting ? <BiValue value={strings.hariharaaStartingPayment} /> : <Bi id="hariharaaPayNowButton" />}
+                  </button>
+                </>
               ) : (
                 <>
                   <UpiPaymentCard payment={payment} />

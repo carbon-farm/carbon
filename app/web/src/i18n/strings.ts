@@ -13,6 +13,7 @@ export interface Bilingual {
 
 export const strings = {
   brand: { en: 'Organic Carbon Farming', te: 'ఆర్గానిక్ కార్బన్ ఫార్మింగ్' },
+  brandGroup: { en: 'HARIHARAA Group', te: 'హరిహర గ్రూప్' },
 
   // Landing page
   landingTagline: {
@@ -805,8 +806,8 @@ export const strings = {
   hariharaaSettingsAdminTitle: { en: 'HARIHARAA settings', te: 'HARIHARAA సెట్టింగ్‌లు' },
   hariharaaPriceField: { en: 'Monthly subscription price (₹)', te: 'నెలవారీ సభ్యత్వ ధర (₹)' },
   hariharaaPayeeNameField: { en: 'Payee name (shown on QR)', te: 'చెల్లింపుదారు పేరు (QRలో చూపబడుతుంది)' },
-  hariharaaPrimaryUpiField: { en: 'Primary UPI ID', te: 'ప్రధాన UPI ID' },
-  hariharaaSecondaryUpiField: { en: 'Secondary UPI ID (optional)', te: 'ద్వితీయ UPI ID (ఐచ్ఛికం)' },
+  hariharaaPrimaryUpiField: { en: 'UPI ID customers pay to', te: 'కస్టమర్లు చెల్లించే UPI ID' },
+  hariharaaSecondaryUpiField: { en: 'Spare UPI ID (kept on file, not used for payments)', te: 'స్పేర్ UPI ID (ఫైల్‌లో ఉంచబడుతుంది, చెల్లింపులకు వాడబడదు)' },
   hariharaaVendorIdField: { en: 'HARIHARAA vendor profile ID', te: 'HARIHARAA విక్రేత ప్రొఫైల్ ID' },
   hariharaaVendorIdHint: {
     en: "The VendorProfile ID whose products make up HARIHARAA's catalog — copy it from that vendor's row in Manage products.",
@@ -997,6 +998,94 @@ export const strings = {
   tourBack: { en: 'Back', te: 'వెనుకకు' },
   tourSkip: { en: 'Skip tour', te: 'టూర్ దాటవేయండి' },
   tourDone: { en: 'Got it', te: 'అర్థమైంది' },
+  navMenuButton: { en: 'Menu', te: 'మెను' },
+  navGroupShop: { en: 'Shop', te: 'షాప్' },
+  navGroupFarm: { en: 'Farm advice', te: 'వ్యవసాయ సలహా' },
+  navGroupPeople: { en: 'People', te: 'వ్యక్తులు' },
+  navGroupMembership: { en: 'Membership', te: 'సభ్యత్వం' },
+  navGroupContent: { en: 'Content', te: 'కంటెంట్' },
+  navGroupInsights: { en: 'Insights & setup', te: 'నివేదికలు & సెటప్' },
+  navGroupReview: { en: 'Review', te: 'సమీక్ష' },
+  // Membership plans + the membership switch
+  plansAdminNavTitle: { en: 'Membership plans', te: 'సభ్యత్వ ప్లాన్లు' },
+  plansAdminTitle: { en: 'Membership plans', te: 'సభ్యత్వ ప్లాన్లు' },
+  plansAdminHint: {
+    en: 'Each plan is a price for a length of access (for example Monthly ₹499 for 30 days, Yearly ₹4,999 for 365 days). Members choose one when they pay. Switch a plan off to stop selling it — nothing is deleted, and members who already paid keep their days.',
+    te: 'ప్రతి ప్లాన్ ఒక కాలానికి ప్రాప్యత ధర (ఉదాహరణకు నెలవారీ ₹499 — 30 రోజులు, వార్షిక ₹4,999 — 365 రోజులు). సభ్యులు చెల్లించేటప్పుడు ఒకదాన్ని ఎంచుకుంటారు. ప్లాన్ అమ్మకాన్ని ఆపడానికి దాన్ని ఆఫ్ చేయండి — ఏదీ తొలగించబడదు, ఇప్పటికే చెల్లించిన సభ్యులకు వారి రోజులు అలాగే ఉంటాయి.',
+  },
+  membershipSwitchHeading: { en: 'Is membership required?', te: 'సభ్యత్వం తప్పనిసరా?' },
+  membershipSwitchOn: {
+    en: 'Members need a paid or free membership for checkout and the farm-advice features.',
+    te: 'చెక్అవుట్, వ్యవసాయ సలహా సౌకర్యాలకు సభ్యులకు చెల్లించిన లేదా ఉచిత సభ్యత్వం అవసరం.',
+  },
+  membershipSwitchOff: {
+    en: 'Nobody needs a membership right now — checkout and farm advice are open to every signed-in member.',
+    te: 'ప్రస్తుతం ఎవరికీ సభ్యత్వం అవసరం లేదు — చెక్అవుట్, వ్యవసాయ సలహా సైన్ ఇన్ అయిన ప్రతి సభ్యునికి తెరిచి ఉన్నాయి.',
+  },
+  membershipTurnOffButton: { en: 'Turn membership off', te: 'సభ్యత్వాన్ని ఆఫ్ చేయండి' },
+  membershipTurnOnButton: { en: 'Turn membership on', te: 'సభ్యత్వాన్ని ఆన్ చేయండి' },
+  membershipTurnOffConfirm: {
+    en: 'Turn membership OFF? Checkout and all farm-advice features open to every signed-in member straight away, whether or not they paid. You can turn it back on at any time.',
+    te: 'సభ్యత్వాన్ని ఆఫ్ చేయాలా? చెల్లించినా, చెల్లించకపోయినా, సైన్ ఇన్ అయిన ప్రతి సభ్యునికి చెక్అవుట్, అన్ని వ్యవసాయ సలహా సౌకర్యాలు వెంటనే తెరుచుకుంటాయి. మీరు ఎప్పుడైనా దాన్ని తిరిగి ఆన్ చేయవచ్చు.',
+  },
+  membershipOpenNotice: {
+    en: 'Membership is not required at the moment — everything is unlocked for you. You do not need to pay.',
+    te: 'ప్రస్తుతం సభ్యత్వం అవసరం లేదు — మీకు అన్నీ అన్‌లాక్ అయి ఉన్నాయి. మీరు చెల్లించాల్సిన అవసరం లేదు.',
+  },
+  planOn: { en: 'On', te: 'ఆన్' },
+  planOff: { en: 'Off', te: 'ఆఫ్' },
+  planSwitchOn: { en: 'Switch on', te: 'ఆన్ చేయండి' },
+  planSwitchOff: { en: 'Switch off', te: 'ఆఫ్ చేయండి' },
+  addPlanButton: { en: 'Add a plan', te: 'ప్లాన్‌ను చేర్చండి' },
+  editPlanHeading: { en: 'Edit plan', te: 'ప్లాన్‌ను మార్చండి' },
+  planColumn: { en: 'Plan', te: 'ప్లాన్' },
+  planPriceColumn: { en: 'Price', te: 'ధర' },
+  planLengthColumn: { en: 'Length', te: 'వ్యవధి' },
+  planPaymentsColumn: { en: 'Payments', te: 'చెల్లింపులు' },
+  planOrderColumn: { en: 'Order', te: 'క్రమం' },
+  planNameField: { en: 'Plan name', te: 'ప్లాన్ పేరు' },
+  planNameTeField: { en: 'Telugu name (optional)', te: 'తెలుగు పేరు (ఐచ్ఛికం)' },
+  planPriceField: { en: 'Price (₹)', te: 'ధర (₹)' },
+  planDaysField: { en: 'Days of access', te: 'ప్రాప్యత రోజులు' },
+  planDescriptionField: { en: 'Short description (optional)', te: 'చిన్న వివరణ (ఐచ్ఛికం)' },
+  planOrderField: { en: 'Show in this order (1 first)', te: 'ఈ క్రమంలో చూపించండి (1 మొదట)' },
+  planSwitchedOnField: { en: 'Switched on (members can buy it)', te: 'ఆన్‌లో ఉంది (సభ్యులు కొనవచ్చు)' },
+  planQuickLengths: { en: 'Common lengths', te: 'సాధారణ వ్యవధులు' },
+  planPriceNote: {
+    en: 'Changing a price affects new payments only. Payments already made keep the price and days they were bought at.',
+    te: 'ధర మార్చడం కొత్త చెల్లింపులకు మాత్రమే వర్తిస్తుంది. ఇప్పటికే చేసిన చెల్లింపులు కొన్నప్పటి ధర, రోజులను నిలుపుకుంటాయి.',
+  },
+  planPriceFrom: { en: 'from', te: 'నుండి' },
+  noPlansYet: { en: 'No plans yet — add one so members can pay.', te: 'ఇంకా ప్లాన్లు లేవు — సభ్యులు చెల్లించడానికి ఒకదాన్ని చేర్చండి.' },
+  noPlansAvailableNotice: { en: 'No membership plan is available right now. Please check back soon.', te: 'ప్రస్తుతం సభ్యత్వ ప్లాన్ అందుబాటులో లేదు. దయచేసి త్వరలో మళ్ళీ చూడండి.' },
+  choosePlanHeading: { en: 'Choose a plan', te: 'ప్లాన్‌ను ఎంచుకోండి' },
+  couldNotLoadPlans: { en: 'Could not load the plans. Try again.', te: 'ప్లాన్లను లోడ్ చేయలేకపోయాము. మళ్ళీ ప్రయత్నించండి.' },
+  couldNotSavePlan: { en: 'Could not save. Check the details and try again.', te: 'సేవ్ చేయలేకపోయాము. వివరాలను తనిఖీ చేసి మళ్ళీ ప్రయత్నించండి.' },
+  // Settings: where payments go
+  settingsPaymentsHeading: { en: 'Where payments go', te: 'చెల్లింపులు ఎక్కడికి వెళ్తాయి' },
+  settingsPaymentsHint: {
+    en: 'Every membership and order payment QR is made out to the UPI ID below. Change it here whenever your account changes — new payments use it straight away; payments already made are not affected.',
+    te: 'ప్రతి సభ్యత్వ, ఆర్డర్ చెల్లింపు QR దిగువన ఉన్న UPI IDకి తయారవుతుంది. మీ ఖాతా మారినప్పుడల్లా ఇక్కడ మార్చండి — కొత్త చెల్లింపులు వెంటనే దాన్ని వాడతాయి; ఇప్పటికే చేసిన చెల్లింపులపై ప్రభావం ఉండదు.',
+  },
+  settingsPayingToLabel: { en: 'Customers are paying to:', te: 'కస్టమర్లు చెల్లిస్తున్నది:' },
+  upiSwapButton: { en: 'Swap with the spare', te: 'స్పేర్‌తో మార్చుకోండి' },
+  upiFormatHint: {
+    en: 'A UPI ID looks like name@bank (for example shop@okaxis). Check it carefully — a wrong ID sends payments to the wrong place. Clear the spare box to remove it.',
+    te: 'UPI ID ఇలా ఉంటుంది name@bank (ఉదాహరణకు shop@okaxis). జాగ్రత్తగా తనిఖీ చేయండి — తప్పు ID చెల్లింపులను తప్పు చోటికి పంపుతుంది. స్పేర్‌ను తొలగించడానికి ఆ బాక్స్‌ను ఖాళీ చేయండి.',
+  },
+  upiAidWarning: {
+    en: 'If you change to a UPI ID from a different merchant account, change or clear the merchant ID above too — it belongs to the old account.',
+    te: 'మీరు వేరే మర్చంట్ ఖాతా UPI IDకి మారితే, పైన ఉన్న మర్చంట్ IDని కూడా మార్చండి లేదా తొలగించండి — అది పాత ఖాతాకు చెందినది.',
+  },
+  upiChangeConfirm: {
+    en: 'Change the UPI ID customers pay to?\n\nFrom: {from}\nTo: {to}\n\nNew payments will go to the new ID straight away.',
+    te: 'కస్టమర్లు చెల్లించే UPI IDని మార్చాలా?\n\nనుండి: {from}\nకు: {to}\n\nకొత్త చెల్లింపులు వెంటనే కొత్త IDకి వెళ్తాయి.',
+  },
+  settingsSavedNotice: { en: 'Saved.', te: 'సేవ్ అయింది.' },
+  settingsPricesMovedNotice: { en: 'Prices and plans are managed on', te: 'ధరలు, ప్లాన్లు ఇక్కడ నిర్వహించబడతాయి:' },
+  paymentStripEndsSoon: { en: 'Membership ends in {n} {days} — renew', te: 'సభ్యత్వం {n} {days} ముగుస్తుంది — పునరుద్ధరించండి' },
+  paymentStripFreeEndsSoon: { en: 'Free access ends in {n} {days} — pay to continue', te: 'ఉచిత ప్రాప్యత {n} {days} ముగుస్తుంది — కొనసాగడానికి చెల్లించండి' },
+  paymentStripRenew: { en: 'Renew', te: 'పునరుద్ధరించు' },
 } as const satisfies Record<string, Bilingual>;
 
 export type StringKey = keyof typeof strings;
@@ -1155,6 +1244,7 @@ const HARIHARAA_SUBSCRIPTION_STATUS_KEYS: Record<string, StringKey> = {
   AWAITING_VERIFICATION: 'hariharaaStatusPendingReview',
   ACTIVE: 'hariharaaStatusActive',
   FREE: 'hariharaaStatusFree',
+  OPEN: 'membershipOpenNotice',
   REJECTED: 'hariharaaStatusRejected',
   EXPIRED: 'hariharaaStatusExpired',
 };

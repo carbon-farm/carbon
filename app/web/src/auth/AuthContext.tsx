@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { apiRequest } from '../api/client';
 import { normalizeRole } from './normalizeRole';
-import { mergeGuestCart } from '../api/marketplace';
+import { mergeGuestCart, mergeGuestWishlist } from '../api/marketplace';
+import { clearGuestWishlist, readGuestWishlist } from '../cart/guestWishlist';
 import { clearGuestCart, readGuestCart } from '../cart/guestCart';
 
 interface Session {
@@ -42,12 +43,23 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 async function foldGuestCartIntoAccount(accessToken: string, role: string) {
   if (role !== 'MEMBER') return;
   const lines = readGuestCart();
-  if (lines.length === 0) return;
-  try {
-    await mergeGuestCart(accessToken, lines);
-    clearGuestCart();
-  } catch {
-    // keep the browser cart; it will be offered again next sign-in
+  if (lines.length > 0) {
+    try {
+      await mergeGuestCart(accessToken, lines);
+      clearGuestCart();
+    } catch {
+      // keep the browser cart; it will be offered again next sign-in
+    }
+  }
+  // the hearts follow the same rule
+  const hearts = readGuestWishlist();
+  if (hearts.length > 0) {
+    try {
+      await mergeGuestWishlist(accessToken, hearts);
+      clearGuestWishlist();
+    } catch {
+      // keep them for next time
+    }
   }
 }
 

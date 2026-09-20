@@ -13,6 +13,7 @@ import {
   type ProductCategory,
 } from '../api/marketplace';
 import { flattenWithPaths } from '../catalog/categoryTree';
+import { ProductThumb } from '../components/ProductThumb';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
@@ -24,6 +25,10 @@ export function VendorDashboardPage() {
   const [profile, setProfile] = useState<VendorProfile | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
+  // filters for "my products"
+  const [listSearch, setListSearch] = useState('');
+  const [listStatus, setListStatus] = useState<'' | 'on' | 'off'>('');
+  const [listSort, setListSort] = useState<'newest' | 'name' | 'priceAsc' | 'priceDesc' | 'stock'>('newest');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submittingProfile, setSubmittingProfile] = useState(false);
@@ -190,18 +195,64 @@ export function VendorDashboardPage() {
             </div>
           )}
 
+          {products.length > 1 && (
+            <div className="list-toolbar">
+              <label>
+                <Bi id="searchPlaceholder" />
+                <input value={listSearch} onChange={(e) => setListSearch(e.target.value)} placeholder={biInline('searchPlaceholder')} />
+              </label>
+              <label>
+                <Bi id="statusFilterLabel" />
+                <select value={listStatus} onChange={(e) => setListStatus(e.target.value as '' | 'on' | 'off')}>
+                  <option value="">{biInline('allOption')}</option>
+                  <option value="on">{strings.activeStatusLabel.en} / {strings.activeStatusLabel.te}</option>
+                  <option value="off">{strings.inactiveStatusLabel.en} / {strings.inactiveStatusLabel.te}</option>
+                </select>
+              </label>
+              <label>
+                <Bi id="sortByLabel" />
+                <select value={listSort} onChange={(e) => setListSort(e.target.value as typeof listSort)}>
+                  <option value="newest">{biInline('sortNewestFirst')}</option>
+                  <option value="name">{biInline('sortTitleAZ')}</option>
+                  <option value="priceAsc">{biInline('productPriceLabel')} ↑</option>
+                  <option value="priceDesc">{biInline('productPriceLabel')} ↓</option>
+                  <option value="stock">{biInline('productStockLabel')} ↑</option>
+                </select>
+              </label>
+            </div>
+          )}
+
           <div className="card">
             {products.length === 0 ? (
               <BiValue value={strings.noProductsYet} as="p" className="hint" />
             ) : (
-              products.map((p) => (
-                <Link to={`/marketplace/manage/products/${p.id}`} key={p.id} className="case-item">
-                  <div className="top-bar">
-                    <div className="label">{p.name}</div>
-                    <BiValue value={p.isActive ? strings.activeStatusLabel : strings.inactiveStatusLabel} as="span" className="priority-badge" />
-                  </div>
-                  <div className="meta">
-                    ₹{p.price.toFixed(2)} {p.unit} · {p.stockQuantity} {strings.productStockLabel.en}
+              [...products]
+                .filter((p) => (!listStatus || (listStatus === 'on') === p.isActive) && (!listSearch.trim() || p.name.toLowerCase().includes(listSearch.trim().toLowerCase())))
+                .sort((a, b) => {
+                  switch (listSort) {
+                    case 'name':
+                      return a.name.localeCompare(b.name);
+                    case 'priceAsc':
+                      return a.price - b.price;
+                    case 'priceDesc':
+                      return b.price - a.price;
+                    case 'stock':
+                      return a.stockQuantity - b.stockQuantity;
+                    default:
+                      return b.updatedAt.localeCompare(a.updatedAt);
+                  }
+                })
+                .map((p) => (
+                <Link to={`/marketplace/manage/products/${p.id}`} key={p.id} className="case-item with-thumb">
+                  <ProductThumb product={p} />
+                  <div className="thumb-body">
+                    <div className="top-bar">
+                      <div className="label">{p.name}</div>
+                      <BiValue value={p.isActive ? strings.activeStatusLabel : strings.inactiveStatusLabel} as="span" className="priority-badge" />
+                    </div>
+                    <div className="meta">
+                      ₹{p.price.toFixed(2)} {p.unit} · {p.stockQuantity} {strings.productStockLabel.en}
+                    </div>
                   </div>
                 </Link>
               ))

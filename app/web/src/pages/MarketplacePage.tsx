@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
@@ -6,9 +6,12 @@ import {
   listCatalogProducts,
   listCatalogCategories,
   listWishlist,
+  toggleWishlist,
   type Product,
   type ProductCategory,
 } from '../api/marketplace';
+import { readGuestWishlist, toggleGuestWishlist } from '../cart/guestWishlist';
+import { ProductThumb } from '../components/ProductThumb';
 import { buildCategoryTree, categoryName } from '../catalog/categoryTree';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
@@ -22,7 +25,9 @@ export function MarketplacePage() {
   const { session, logout } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
-  const [wishlistIds, setWishlistIds] = useState<Set<string>>(new Set());
+  // Hearts: a signed-in member's saved wishlist, or — for a visitor — the ones kept in this browser.
+  const [wishlistIds, setWishlistIds] = useState<Set<string>>(() => new Set(readGuestWishlist()));
+  const canHeart = !session || session.role === 'MEMBER';
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [departmentId, setDepartmentId] = useState('');
@@ -43,13 +48,47 @@ export function MarketplacePage() {
   }, []);
 
   useEffect(() => {
-    if (!session || session.role !== 'MEMBER') return;
+    if (!session) {
+      setWishlistIds(new Set(readGuestWishlist()));
+      return;
+    }
+    if (session.role !== 'MEMBER') {
+      setWishlistIds(new Set());
+      return;
+    }
     listWishlist(session.accessToken)
       .then((items) => setWishlistIds(new Set(items.map((p) => p.id))))
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) logout();
       });
   }, [session, logout]);
+
+  // Heart / un-heart, updating the screen at once and putting it back if the server says no.
+  const handleHeart = useCallback(
+    async (productId: string) => {
+      const flip = (on: boolean) =>
+        setWishlistIds((prev) => {
+          const next = new Set(prev);
+          if (on) next.add(productId);
+          else next.delete(productId);
+          return next;
+        });
+      const was = wishlistIds.has(productId);
+      flip(!was);
+      if (!session) {
+        toggleGuestWishlist(productId);
+        return;
+      }
+      try {
+        const result = await toggleWishlist(session.accessToken, productId);
+        flip(result.wishlisted);
+      } catch (err) {
+        flip(was);
+        if (err instanceof ApiError && err.status === 401) logout();
+      }
+    },
+    [wishlistIds, session, logout],
+  );
 
   const tree = useMemo(() => buildCategoryTree(categories), [categories]);
   const department = tree.find((d) => d.id === departmentId);
@@ -201,12 +240,10 @@ export function MarketplacePage() {
       ) : (
         <div className="product-grid" data-tour="products">
           {visible.map((p) => (
-            <Link to={`/marketplace/products/${p.id}`} key={p.id} className="case-item product-tile">
-              {p.imageUrls[0] && <img src={p.imageUrls[0]} alt="" className="product-tile-img" loading="lazy" />}
-              <div className="top-bar">
-                <div className="label">{p.name}</div>
-                {wishlistIds.has(p.id) && <span className="priority-badge">♥</span>}
-              </div>
+            <div className="product-card" key={p.id}>
+            <Link to={`/marketplace/products/${p.id}`} className="case-item product-tile">
+              <ProductThumb product={p} variant="tile" />
+              <div className="label">{p.name}</div>
               <div className="meta">
                 ₹{p.price.toFixed(2)} {p.unit}
               </div>
@@ -216,6 +253,18 @@ export function MarketplacePage() {
               </div>
               {p.stockQuantity === 0 && <BiValue value={strings.outOfStockNotice} as="div" className="status-line" />}
             </Link>
+            {canHeart && (
+              <button
+                type="button"
+                className={`heart-btn${wishlistIds.has(p.id) ? ' on' : ''}`}
+                aria-pressed={wishlistIds.has(p.id)}
+                aria-label={`${strings.wishlistButton.en} / ${strings.wishlistButton.te}`}
+                onClick={() => handleHeart(p.id)}
+              >
+                {wishlistIds.has(p.id) ? '♥' : '♡'}
+              </button>
+            )}
+            </div>
           ))}
         </div>
       )}

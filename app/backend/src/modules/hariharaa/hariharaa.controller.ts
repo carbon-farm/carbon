@@ -5,6 +5,8 @@ import { ClaimPaymentDto } from './dto/claim-payment.dto';
 import { ReviewClaimDto } from './dto/review-claim.dto';
 import { GrantFreeAccessDto } from './dto/grant-free-access.dto';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
+import { CreatePlanDto, MembershipRequiredDto, StartPaymentDto, UpdatePlanDto } from './dto/plan.dto';
+import { MembershipPlansService } from './membership-plans.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -13,7 +15,10 @@ import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('hariharaa')
 export class HariharaaController {
-  constructor(private readonly hariharaaService: HariharaaService) {}
+  constructor(
+    private readonly hariharaaService: HariharaaService,
+    private readonly plansService: MembershipPlansService,
+  ) {}
 
   @Roles(Role.ADMINISTRATOR)
   @Get('settings')
@@ -36,8 +41,8 @@ export class HariharaaController {
   // Customer payment lifecycle: start (get the QR) -> claim (type the UTR).
   @Roles(Role.MEMBER)
   @Post('payments/start')
-  startPayment(@CurrentUser() user: AuthenticatedUser) {
-    return this.hariharaaService.startPayment(user.userId);
+  startPayment(@Body() dto: StartPaymentDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.hariharaaService.startPayment(user.userId, dto?.planId);
   }
 
   @Roles(Role.MEMBER)
@@ -76,5 +81,31 @@ export class HariharaaController {
   @Delete('members/:userId/free')
   revokeFree(@Param('userId') userId: string, @CurrentUser() user: AuthenticatedUser) {
     return this.hariharaaService.revokeFreeAccess(userId, user.userId);
+  }
+
+  // Membership plans (Administrator): any number, each switched on or off, plus the master
+  // switch for whether membership is required at all.
+  @Roles(Role.ADMINISTRATOR)
+  @Get('plans/manage')
+  listPlans() {
+    return this.plansService.listPlansForAdmin();
+  }
+
+  @Roles(Role.ADMINISTRATOR)
+  @Post('plans')
+  createPlan(@Body() dto: CreatePlanDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.plansService.createPlan(dto, user.userId);
+  }
+
+  @Roles(Role.ADMINISTRATOR)
+  @Patch('plans/:id')
+  updatePlan(@Param('id') id: string, @Body() dto: UpdatePlanDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.plansService.updatePlan(id, dto, user.userId);
+  }
+
+  @Roles(Role.ADMINISTRATOR)
+  @Patch('membership-required')
+  setMembershipRequired(@Body() dto: MembershipRequiredDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.plansService.setMembershipRequired(dto.required, user.userId);
   }
 }

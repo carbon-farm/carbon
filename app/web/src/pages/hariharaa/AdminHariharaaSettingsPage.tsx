@@ -7,17 +7,31 @@ import { Bi, BiValue } from '../../i18n/Bi';
 import { strings } from '../../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../../i18n/validation';
 
+// Same rule the server enforces: name@bank.
+const UPI_PATTERN = '[a-zA-Z0-9.\\-_]{2,256}@[a-zA-Z0-9]{2,64}';
+
+// Where payments go: the UPI ID customers pay to (and a spare kept on file), the merchant id that
+// goes with it, and who the payee is. Prices are not here any more — they live on the
+// Membership plans page.
 export function AdminHariharaaSettingsPage() {
   const { session, logout } = useAuth();
   const [settings, setSettings] = useState<AdminSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // the two UPI boxes are controlled so "Swap" can exchange them
+  const [primary, setPrimary] = useState('');
+  const [spare, setSpare] = useState('');
 
   useEffect(() => {
     if (!session) return;
     getAdminSettings(session.accessToken)
-      .then(setSettings)
+      .then((s) => {
+        setSettings(s);
+        setPrimary(s?.primaryUpiId ?? '');
+        setSpare(s?.secondaryUpiId ?? '');
+      })
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) {
           logout();
@@ -31,27 +45,35 @@ export function AdminHariharaaSettingsPage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!session) return;
-    const formEl = event.currentTarget;
-    const formData = new FormData(formEl);
-    const subscriptionPriceInr = Number(formData.get('subscriptionPriceInr') ?? 0);
+    const formData = new FormData(event.currentTarget);
     const payeeName = String(formData.get('payeeName') ?? '').trim();
-    const primaryUpiId = String(formData.get('primaryUpiId') ?? '').trim();
-    const secondaryUpiId = String(formData.get('secondaryUpiId') ?? '').trim();
-    const vendorProfileId = String(formData.get('vendorProfileId') ?? '').trim();
     const upiAid = String(formData.get('upiAid') ?? '').trim();
+    const vendorProfileId = String(formData.get('vendorProfileId') ?? '').trim();
+    const newPrimary = primary.trim();
+
+    // Changing where the money goes deserves a second look.
+    if (settings && newPrimary !== settings.primaryUpiId) {
+      const ok = window.confirm(
+        `${strings.upiChangeConfirm.en.replace('{from}', settings.primaryUpiId).replace('{to}', newPrimary)}\n\n${strings.upiChangeConfirm.te.replace('{from}', settings.primaryUpiId).replace('{to}', newPrimary)}`,
+      );
+      if (!ok) return;
+    }
 
     setSaving(true);
+    setSaved(false);
     setError(null);
     try {
       const updated = await updateSettings(session.accessToken, {
-        subscriptionPriceInr,
-        primaryUpiId,
+        primaryUpiId: newPrimary,
+        secondaryUpiId: spare.trim(), // empty removes it
+        upiAid, // empty removes it
+        vendorProfileId, // empty removes it
         ...(payeeName ? { payeeName } : {}),
-        ...(secondaryUpiId ? { secondaryUpiId } : {}),
-        ...(vendorProfileId ? { vendorProfileId } : {}),
-        ...(upiAid ? { upiAid } : {}),
       });
       setSettings(updated);
+      setPrimary(updated.primaryUpiId);
+      setSpare(updated.secondaryUpiId ?? '');
+      setSaved(true);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.couldNotSaveHariharaaSettings.en} / ${strings.couldNotSaveHariharaaSettings.te}`);
     } finally {
@@ -67,49 +89,82 @@ export function AdminHariharaaSettingsPage() {
       </div>
 
       {error && <div className="error-banner">{error}</div>}
+      {saved && <div className="success-banner">{strings.settingsSavedNotice.en} / {strings.settingsSavedNotice.te}</div>}
 
       {loading ? (
         <BiValue value={strings.loading} as="p" className="hint" />
       ) : (
         <form onSubmit={handleSubmit} className="card">
-          <label>
-            <Bi id="hariharaaPriceField" />
-            <input
-              name="subscriptionPriceInr"
-              type="number"
-              step="0.01"
-              min="1"
-              defaultValue={settings?.subscriptionPriceInr ?? ''}
-              onInvalid={bilingualInvalidHandler}
-              onChange={clearCustomValidity}
-              required
-            />
-          </label>
-          <label>
-            <Bi id="hariharaaPayeeNameField" />
-            <input name="payeeName" defaultValue={settings?.payeeName ?? ''} />
-          </label>
-          <label>
-            <Bi id="hariharaaPrimaryUpiField" />
-            <input
-              name="primaryUpiId"
-              defaultValue={settings?.primaryUpiId ?? ''}
-              minLength={3}
-              onInvalid={bilingualInvalidHandler}
-              onChange={clearCustomValidity}
-              required
-            />
-          </label>
-          <label>
-            <Bi id="hariharaaSecondaryUpiField" />
-            <input name="secondaryUpiId" defaultValue={settings?.secondaryUpiId ?? ''} />
-          </label>
+          <Bi id="settingsPaymentsHeading" as="h2" />
+          <BiValue value={strings.settingsPaymentsHint} as="p" className="hint" />
+          {settings && (
+            <p>
+              <Bi id="settingsPayingToLabel" /> <strong>{settings.primaryUpiId}</strong>
+            </p>
+          )}
+          <div className="form-grid">
+            <label>
+              <Bi id="hariharaaPrimaryUpiField" />
+              <input
+                name="primaryUpiId"
+                value={primary}
+                onChange={(e) => {
+                  setPrimary(e.target.value);
+                  clearCustomValidity(e);
+                }}
+                pattern={UPI_PATTERN}
+                placeholder="name@bank"
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
+                onInvalid={bilingualInvalidHandler}
+                required
+              />
+            </label>
+            <label>
+              <Bi id="hariharaaSecondaryUpiField" />
+              <input
+                name="secondaryUpiId"
+                value={spare}
+                onChange={(e) => {
+                  setSpare(e.target.value);
+                  clearCustomValidity(e);
+                }}
+                pattern={UPI_PATTERN}
+                placeholder="name@bank"
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
+                onInvalid={bilingualInvalidHandler}
+              />
+            </label>
+          </div>
+          <div className="form-actions">
+            <button
+              type="button"
+              className="secondary"
+              disabled={!spare.trim()}
+              onClick={() => {
+                setPrimary(spare);
+                setSpare(primary);
+              }}
+            >
+              <Bi id="upiSwapButton" />
+            </button>
+          </div>
+          <BiValue value={strings.upiFormatHint} as="p" className="hint" />
+
           <label>
             <Bi id="hariharaaUpiAidField" />
             <div className="hint">
               <Bi id="hariharaaUpiAidHint" />
             </div>
             <input name="upiAid" defaultValue={settings?.upiAid ?? ''} />
+          </label>
+          <BiValue value={strings.upiAidWarning} as="p" className="hint" />
+          <label>
+            <Bi id="hariharaaPayeeNameField" />
+            <input name="payeeName" defaultValue={settings?.payeeName ?? ''} />
           </label>
           <label>
             <Bi id="hariharaaVendorIdField" />
@@ -121,6 +176,12 @@ export function AdminHariharaaSettingsPage() {
           <button type="submit" disabled={saving}>
             {saving ? <BiValue value={strings.saving} /> : <Bi id="hariharaaSaveSettingsButton" />}
           </button>
+          <p className="hint">
+            <BiValue value={strings.settingsPricesMovedNotice} />{' '}
+            <Link to="/admin/membership-plans" className="link-button">
+              <Bi id="plansAdminNavTitle" />
+            </Link>
+          </p>
         </form>
       )}
 

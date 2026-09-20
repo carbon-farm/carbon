@@ -2,18 +2,38 @@ import { apiRequest } from './client';
 
 export type PaymentStatus = 'CREATED' | 'CLAIMED' | 'VERIFIED' | 'REJECTED';
 // Derived on the server (see HariharaaService.getMyStatus) — the UI never works it out itself.
-export type SubscriptionState = 'NOT_PAID' | 'AWAITING_VERIFICATION' | 'ACTIVE' | 'FREE' | 'EXPIRED' | 'REJECTED';
+export type SubscriptionState = 'NOT_PAID' | 'AWAITING_VERIFICATION' | 'ACTIVE' | 'FREE' | 'EXPIRED' | 'REJECTED' | 'OPEN';
 
 // What the public (logged-out) landing page may know — no UPI ID, no payment link.
+// One thing a member can buy: a price for a length of access.
+export interface PublicPlan {
+  id: string;
+  name: string;
+  nameTe: string | null;
+  description: string | null;
+  priceInr: number;
+  periodDays: number;
+}
+
 export interface PublicSettings {
-  subscriptionPriceInr: number;
+  subscriptionPriceInr: number; // the cheapest plan (kept for older screens)
   payeeName: string;
+  membershipRequired: boolean;
+  plans: PublicPlan[];
+}
+
+export interface AdminPlan extends PublicPlan {
+  isActive: boolean;
+  sortOrder: number;
+  paymentCount: number;
+  createdAt: string;
 }
 
 export interface AdminSettings {
   id: string;
-  subscriptionPriceInr: number;
+  subscriptionPriceInr: number; // legacy — prices live on the plans
   payeeName: string;
+  membershipRequired: boolean;
   primaryUpiId: string;
   secondaryUpiId: string | null;
   upiAid: string | null;
@@ -23,7 +43,10 @@ export interface AdminSettings {
 export interface MySubscription {
   userCode: string | null;
   hasAccess: boolean;
-  accessKind: 'PAID' | 'FREE' | 'NONE';
+  accessKind: 'PAID' | 'FREE' | 'NONE' | 'OPEN';
+  membershipRequired: boolean;
+  daysLeft: number | null; // whole days of access left, when there is access
+  plans: PublicPlan[];
   freeNote: string | null;
   activeUntil: string | null;
   state: SubscriptionState;
@@ -31,6 +54,8 @@ export interface MySubscription {
     id: string;
     status: PaymentStatus;
     amountInr: number;
+    planName: string | null;
+    periodDays: number;
     utr: string | null;
     rejectionReason: string | null;
     createdAt: string;
@@ -41,6 +66,8 @@ export interface MySubscription {
 export interface StartedPayment {
   paymentId: string;
   amountInr: number;
+  planName: string | null;
+  periodDays: number;
   userCode: string | null;
   payeeName: string;
   upiLink: string;
@@ -49,6 +76,8 @@ export interface StartedPayment {
 export interface PendingPayment {
   id: string;
   amountInr: number;
+  planName: string | null;
+  periodDays: number;
   utr: string | null;
   note: string | null;
   claimedAt: string | null;
@@ -65,8 +94,8 @@ export function getAdminSettings(token: string) {
 
 export function updateSettings(
   token: string,
+  // An empty string for the spare UPI ID, merchant id or vendor link removes it.
   data: {
-    subscriptionPriceInr: number;
     payeeName?: string;
     primaryUpiId: string;
     secondaryUpiId?: string;
@@ -82,8 +111,8 @@ export function getMySubscription(token: string) {
 }
 
 // Step 1: the customer taps Pay — returns the QR link for this payment.
-export function startPayment(token: string) {
-  return apiRequest<StartedPayment>('/hariharaa/payments/start', { method: 'POST', token });
+export function startPayment(token: string, planId?: string) {
+  return apiRequest<StartedPayment>('/hariharaa/payments/start', { method: 'POST', body: planId ? { planId } : {}, token });
 }
 
 // Step 2: after paying, the customer types the UTR from their UPI app.
@@ -125,4 +154,25 @@ export function grantFreeAccess(token: string, userId: string, data: { until: st
 
 export function revokeFreeAccess(token: string, userId: string) {
   return apiRequest(`/hariharaa/members/${userId}/free`, { method: 'DELETE', token });
+}
+
+// ---------- Membership plans (Administrator) ----------
+
+export function listPlans(token: string) {
+  return apiRequest<AdminPlan[]>('/hariharaa/plans/manage', { token });
+}
+
+export type PlanInput = { name: string; nameTe?: string; description?: string; priceInr: number; periodDays: number; sortOrder?: number; isActive?: boolean };
+
+export function createPlan(token: string, data: PlanInput) {
+  return apiRequest<AdminPlan>('/hariharaa/plans', { method: 'POST', body: data, token });
+}
+
+export function updatePlan(token: string, id: string, data: Partial<PlanInput>) {
+  return apiRequest<AdminPlan>(`/hariharaa/plans/${id}`, { method: 'PATCH', body: data, token });
+}
+
+// The master switch: when off, nobody needs a membership.
+export function setMembershipRequired(token: string, required: boolean) {
+  return apiRequest<{ membershipRequired: boolean }>('/hariharaa/membership-required', { method: 'PATCH', body: { required }, token });
 }

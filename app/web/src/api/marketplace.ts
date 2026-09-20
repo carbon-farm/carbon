@@ -242,6 +242,11 @@ export function toggleWishlist(token: string, productId: string) {
   return apiRequest<{ wishlisted: boolean }>(`/marketplace/products/${productId}/wishlist`, { method: 'POST', token });
 }
 
+// Folds hearts given while signed out into the saved wishlist.
+export function mergeGuestWishlist(token: string, productIds: string[]) {
+  return apiRequest<Product[]>('/marketplace/wishlist/merge', { method: 'POST', body: { productIds }, token });
+}
+
 export function listWishlist(token: string) {
   return apiRequest<Product[]>('/marketplace/wishlist', { token });
 }

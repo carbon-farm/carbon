@@ -52,6 +52,7 @@ import { HariharaaLandingPage } from './pages/hariharaa/HariharaaLandingPage';
 import { HariharaaSubscriptionPage } from './pages/hariharaa/HariharaaSubscriptionPage';
 import { AdminHariharaaSubscriptionsPage } from './pages/hariharaa/AdminHariharaaSubscriptionsPage';
 import { AdminMembersPage } from './pages/hariharaa/AdminMembersPage';
+import { AdminMembershipPlansPage } from './pages/hariharaa/AdminMembershipPlansPage';
 import { AdminHariharaaSettingsPage } from './pages/hariharaa/AdminHariharaaSettingsPage';
 import { ChangePasswordPage } from './pages/ChangePasswordPage';
 import { MediaLibraryPage } from './pages/MediaLibraryPage';
@@ -408,6 +409,14 @@ export function App() {
             element={
               <ProtectedRoute roles={['MEMBER']}>
                 <HariharaaSubscriptionPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/membership-plans"
+            element={
+              <ProtectedRoute roles={['ADMINISTRATOR']}>
+                <AdminMembershipPlansPage />
               </ProtectedRoute>
             }
           />

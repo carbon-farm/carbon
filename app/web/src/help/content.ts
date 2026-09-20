@@ -206,8 +206,27 @@ export const HELP_SECTIONS: HelpSection[] = [
         te: 'వర్గీకరణ → ఉత్పత్తి వర్గాలు షాప్ చెట్టును నిర్మిస్తుంది: విభాగాన్ని చేర్చండి, దానిలో వర్గాలు, వాటిలో ఉప-వర్గాలు చేర్చండి (దానికి మించి లోతుకు వెళ్ళదు). ప్రతిదానికి తెలుగు పేరు ఉండవచ్చు. ఒకదాన్ని ఆఫ్ చేస్తే ఏదీ తొలగించకుండా షాప్ నుండి దాచబడుతుంది.',
       },
       {
-        en: 'Settings holds the membership price and the UPI details customers pay to. Staff accounts creates experts, moderators, vendors, support agents and administrators (people sign themselves up as members).',
-        te: 'సెట్టింగ్‌లు సభ్యత్వ ధర, కస్టమర్లు చెల్లించే UPI వివరాలను కలిగి ఉంటాయి. సిబ్బంది ఖాతాలు నిపుణులు, మోడరేటర్లు, విక్రేతలు, సపోర్ట్ ఏజెంట్లు, అడ్మినిస్ట్రేటర్లను సృష్టిస్తాయి (ప్రజలు తామే సభ్యులుగా సైన్ అప్ అవుతారు).',
+        en: 'Staff accounts creates experts, moderators, vendors, support agents and administrators (people sign themselves up as members).',
+        te: 'సిబ్బంది ఖాతాలు నిపుణులు, మోడరేటర్లు, విక్రేతలు, సపోర్ట్ ఏజెంట్లు, అడ్మినిస్ట్రేటర్లను సృష్టిస్తాయి (ప్రజలు తామే సభ్యులుగా సైన్ అప్ అవుతారు).',
+      },
+    ],
+  },
+  {
+    id: 'admin-plans',
+    audience: ['ADMINISTRATOR'],
+    title: { en: 'Membership plans, the UPI ID and the membership switch', te: 'సభ్యత్వ ప్లాన్లు, UPI ID, సభ్యత్వ స్విచ్' },
+    body: [
+      {
+        en: 'Membership plans: each plan is a price for a length of access (for example Monthly ₹499 / 30 days, Yearly ₹4,999 / 365 days). Add as many as you like, edit prices, and switch a plan Off to stop selling it — nothing is deleted, and people who already paid keep their days. When there is more than one plan, members pick one on the payment screen. Price changes only affect new payments.',
+        te: 'సభ్యత్వ ప్లాన్లు: ప్రతి ప్లాన్ ఒక కాలానికి ప్రాప్యత ధర (ఉదాహరణకు నెలవారీ ₹499 / 30 రోజులు, వార్షిక ₹4,999 / 365 రోజులు). మీకు కావలసినన్ని చేర్చండి, ధరలను మార్చండి, అమ్మకాన్ని ఆపడానికి ప్లాన్‌ను ఆఫ్ చేయండి — ఏదీ తొలగించబడదు, ఇప్పటికే చెల్లించిన వారికి వారి రోజులు అలాగే ఉంటాయి. ఒకటి కంటే ఎక్కువ ప్లాన్లు ఉన్నప్పుడు, సభ్యులు చెల్లింపు స్క్రీన్‌లో ఒకదాన్ని ఎంచుకుంటారు. ధర మార్పులు కొత్త చెల్లింపులకు మాత్రమే వర్తిస్తాయి.',
+      },
+      {
+        en: 'The membership switch (top of the plans page) decides whether membership is needed at all. Turn it Off and checkout and farm advice open to every signed-in member — useful while testing. Turn it On again and members without a paid or free membership are locked as before.',
+        te: 'సభ్యత్వ స్విచ్ (ప్లాన్ల పేజీ పైన) అసలు సభ్యత్వం అవసరమా కాదా నిర్ణయిస్తుంది. దాన్ని ఆఫ్ చేస్తే చెక్అవుట్, వ్యవసాయ సలహా సైన్ ఇన్ అయిన ప్రతి సభ్యునికి తెరుచుకుంటాయి — పరీక్ష సమయంలో ఉపయోగకరం. మళ్ళీ ఆన్ చేస్తే చెల్లించిన లేదా ఉచిత సభ్యత్వం లేని సభ్యులు మునుపటిలా లాక్ అవుతారు.',
+      },
+      {
+        en: 'Settings → Where payments go: change the UPI ID customers pay to whenever your account changes. It must look like name@bank; you are asked to confirm, and the change is recorded in the audit log. Keep a spare UPI ID on file and use Swap to switch to it. If the new ID belongs to a different merchant account, change or clear the merchant ID too.',
+        te: 'సెట్టింగ్‌లు → చెల్లింపులు ఎక్కడికి వెళ్తాయి: మీ ఖాతా మారినప్పుడల్లా కస్టమర్లు చెల్లించే UPI IDని మార్చండి. అది name@bank లా ఉండాలి; ధృవీకరణ అడుగుతుంది, మార్పు ఆడిట్ లాగ్‌లో నమోదవుతుంది. స్పేర్ UPI IDని ఫైల్‌లో ఉంచి, స్వాప్‌తో దానికి మారండి. కొత్త ID వేరే మర్చంట్ ఖాతాకు చెందినదైతే మర్చంట్ IDని కూడా మార్చండి లేదా తొలగించండి.',
       },
     ],
   },

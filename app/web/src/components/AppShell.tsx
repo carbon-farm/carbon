@@ -1,78 +1,17 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { roleHomePath } from '../auth/roleHome';
 import { getUnreadCount } from '../api/notifications';
 import { getMe, type AdminUser } from '../api/admin';
 import { PaymentStrip } from './PaymentStrip';
+import { MainNav } from './MainNav';
 import { Tour } from '../tour/Tour';
 import { audienceFor } from '../tour/steps';
 import { Bi } from '../i18n/Bi';
-import { strings, type StringKey } from '../i18n/strings';
+import { strings } from '../i18n/strings';
 
 const UNREAD_POLL_MS = 60_000;
-
-interface NavItem {
-  to: string;
-  labelKey: StringKey;
-}
-
-const NAV_BY_ROLE: Record<string, NavItem[]> = {
-  MEMBER: [
-    { to: '/marketplace', labelKey: 'marketplaceEyebrow' },
-    { to: '/marketplace/cart', labelKey: 'cartTitle' },
-    { to: '/marketplace/orders', labelKey: 'myOrdersTitle' },
-    { to: '/account/addresses', labelKey: 'addressesNavTitle' },
-    { to: '/dashboard', labelKey: 'dashboardEyebrow' },
-    { to: '/cases', labelKey: 'myCasesTitle' },
-    { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
-    { to: '/courses', labelKey: 'coursesEyebrow' },
-    { to: '/soil-samples', labelKey: 'soilSamplesEyebrow' },
-    { to: '/hariharaa/subscription', labelKey: 'hariharaaSubscriptionNavTitle' },
-  ],
-  MODERATOR: [
-    { to: '/moderator/queue', labelKey: 'moderatorQueueTitle' },
-    { to: '/moderator/articles', labelKey: 'articleQueueTitle' },
-    { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
-    { to: '/courses/manage', labelKey: 'coursesManageTitle' },
-    { to: '/soil-samples/manage', labelKey: 'sampleQueueTitle' },
-    { to: '/admin/media', labelKey: 'mediaNavTitle' },
-  ],
-  EXPERT: [
-    { to: '/expert/cases', labelKey: 'expertCasesTitle' },
-    { to: '/expert/articles', labelKey: 'myArticlesTitle' },
-    { to: '/expert/credentials', labelKey: 'myCredentialsLinkTitle' },
-    { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
-  ],
-  VENDOR: [
-    { to: '/marketplace/vendor', labelKey: 'vendorDashboardTitle' },
-    { to: '/marketplace', labelKey: 'marketplaceEyebrow' },
-  ],
-  ADMINISTRATOR: [
-    { to: '/admin', labelKey: 'adminHubTitle' },
-    { to: '/admin/staff', labelKey: 'staffLinkTitle' },
-    { to: '/admin/credentials', labelKey: 'credentialsLinkTitle' },
-    { to: '/admin/taxonomy', labelKey: 'taxonomyLinkTitle' },
-    { to: '/admin/audit', labelKey: 'auditLogLinkTitle' },
-    { to: '/admin/reports', labelKey: 'reportsLinkTitle' },
-    { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
-    { to: '/courses/manage', labelKey: 'coursesManageTitle' },
-    { to: '/soil-samples/manage', labelKey: 'sampleQueueTitle' },
-    { to: '/marketplace/manage/vendors', labelKey: 'vendorApprovalsTitle' },
-    { to: '/marketplace/manage/products', labelKey: 'productsManageTitle' },
-    { to: '/marketplace/manage/orders', labelKey: 'ordersQueueTitle' },
-    { to: '/admin/members', labelKey: 'membersAdminNavTitle' },
-    { to: '/admin/hariharaa-subscriptions', labelKey: 'hariharaaSubscriptionsAdminNavTitle' },
-    { to: '/admin/hariharaa-settings', labelKey: 'hariharaaSettingsAdminNavTitle' },
-    { to: '/admin/media', labelKey: 'mediaNavTitle' },
-  ],
-  SUPPORT_AGENT: [{ to: '/support/dispatch-queue', labelKey: 'dispatchQueueNavTitle' }],
-  // Visitors who are not signed in: the shop window and their cart.
-  GUEST: [
-    { to: '/marketplace', labelKey: 'marketplaceEyebrow' },
-    { to: '/marketplace/cart', labelKey: 'cartTitle' },
-  ],
-};
 
 // Persistent header + role-aware nav — every authenticated page renders
 // inside this instead of building its own ad-hoc top-bar, so the product
@@ -80,7 +19,6 @@ const NAV_BY_ROLE: Record<string, NavItem[]> = {
 // forms (direct user feedback: it didn't).
 export function AppShell({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
   const { session, logout } = useAuth();
-  const navItems = NAV_BY_ROLE[session ? session.role : 'GUEST'] ?? [];
   const [unreadCount, setUnreadCount] = useState(0);
   const [me, setMe] = useState<AdminUser | null>(null);
 
@@ -122,8 +60,12 @@ export function AppShell({ children, wide = false }: { children: ReactNode; wide
     <div>
       <header className="app-header">
         <Link to={session ? roleHomePath(session.role) : '/'} className="brand-wordmark">
-          <span className="bi-en">Organic Carbon Farming</span>
-          <span className="bi-te">ఆర్గానిక్ కార్బన్ ఫార్మింగ్</span>
+          <span className="bi-en">
+            {strings.brand.en} <small className="brand-group">· {strings.brandGroup.en}</small>
+          </span>
+          <span className="bi-te">
+            {strings.brand.te} <small className="brand-group">· {strings.brandGroup.te}</small>
+          </span>
         </Link>
         {!session && (
           <div className="header-actions" data-tour="auth">
@@ -172,21 +114,7 @@ export function AppShell({ children, wide = false }: { children: ReactNode; wide
       <PaymentStrip />
       <Tour audience={audienceFor(session?.role)} userId={session ? me?.id : null} ready={!session || !!me} />
 
-      {navItems.length > 0 && (
-        <nav className="app-nav">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              data-tour={item.to}
-              end={item.to === '/admin'}
-              className={({ isActive }) => `nav-pill${isActive ? ' active' : ''}`}
-            >
-              {strings[item.labelKey].en} / {strings[item.labelKey].te}
-            </NavLink>
-          ))}
-        </nav>
-      )}
+      <MainNav role={session ? session.role : 'GUEST'} />
 
       <main className="app-main">
         <div className={wide ? 'screen wide' : 'screen'}>{children}</div>

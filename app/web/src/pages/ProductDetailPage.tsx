@@ -8,12 +8,14 @@ import {
   getCatalogReviews,
   setCartItem,
   toggleWishlist,
+  listWishlist,
   getReviews,
   submitReview,
   type Product,
   type ReviewsSummary,
 } from '../api/marketplace';
 import { setGuestCartItem } from '../cart/guestCart';
+import { readGuestWishlist, toggleGuestWishlist } from '../cart/guestWishlist';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 
@@ -35,6 +37,19 @@ export function ProductDetailPage() {
 
   // Anyone (signed in or not) can shop; staff only look.
   const canShop = !session || session.role === 'MEMBER';
+
+  // Is it already hearted? A visitor's hearts live in this browser; a member's on the server.
+  useEffect(() => {
+    if (!id) return;
+    if (!session) {
+      setWishlisted(readGuestWishlist().includes(id));
+      return;
+    }
+    if (session.role !== 'MEMBER') return;
+    listWishlist(session.accessToken)
+      .then((items) => setWishlisted(items.some((p) => p.id === id)))
+      .catch(() => {});
+  }, [id, session]);
 
   useEffect(() => {
     if (!id) return;
@@ -75,7 +90,11 @@ export function ProductDetailPage() {
   }
 
   async function handleToggleWishlist() {
-    if (!session || !id) return;
+    if (!id) return;
+    if (!session) {
+      setWishlisted(toggleGuestWishlist(id));
+      return;
+    }
     setWishlistBusy(true);
     try {
       const result = await toggleWishlist(session.accessToken, id);
@@ -157,7 +176,7 @@ export function ProductDetailPage() {
                 </button>
               </>
             )}
-            {session && canShop && (
+            {canShop && (
               <button type="button" className="secondary" onClick={handleToggleWishlist} disabled={wishlistBusy}>
                 {wishlisted ? <Bi id="wishlistedButton" /> : <Bi id="wishlistButton" />}
               </button>

@@ -8,14 +8,16 @@ import { ClaimPaymentDto } from './dto/claim-payment.dto';
 import { ReviewClaimDto } from './dto/review-claim.dto';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
 import { buildUpiLink } from './upi-link';
-import { computeAccess, memberLabel, parseGrantUntil, renewalStart } from './membership-access';
+import { computeAccess, daysLeft, memberLabel, parseGrantUntil, renewalStart } from './membership-access';
 import { GrantFreeAccessDto } from './dto/grant-free-access.dto';
+import { MembershipPlansService } from './membership-plans.service';
+import { MembershipRemindersService } from './membership-reminders.service';
 
 const SETTINGS_ID = 'singleton';
-const PERIOD_DAYS = 30;
 const MAX_FREE_ACCESS_DAYS = 731; // ~2 years
 
-export type SubscriptionState = 'NOT_PAID' | 'AWAITING_VERIFICATION' | 'ACTIVE' | 'FREE' | 'EXPIRED' | 'REJECTED';
+// OPEN = an Administrator has switched membership off, so nothing is locked.
+export type SubscriptionState = 'NOT_PAID' | 'AWAITING_VERIFICATION' | 'ACTIVE' | 'FREE' | 'EXPIRED' | 'REJECTED' | 'OPEN';
 
 // Accounts that can hold a membership: every self-signup. FARMER/CUSTOMER are the legacy
 // values from before the merge into MEMBER (see common/role-compat.ts).
@@ -36,6 +38,8 @@ export class HariharaaService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly notifications: NotificationsService,
+    private readonly plans: MembershipPlansService,
+    private readonly reminders: MembershipRemindersService,
   ) {}
 
   // ---------- Settings ----------
@@ -43,8 +47,18 @@ export class HariharaaService {
   // Public on purpose (no login): only what the landing page may show. The UPI ID and
   // payment QR are never exposed here — only a registered customer can start a payment.
   async getPublicSettings() {
-    const settings = await this.getSettingsOrThrow();
-    return { subscriptionPriceInr: settings.subscriptionPriceInr, payeeName: settings.payeeName };
+    const [settings, plans, membershipRequired] = await Promise.all([
+      this.getSettingsOrThrow(),
+      this.plans.listPublicPlans(),
+      this.plans.isMembershipRequired(),
+    ]);
+    // subscriptionPriceInr stays for screens cached from before there were plans: the cheapest one.
+    return {
+      subscriptionPriceInr: plans[0] ? Math.min(...plans.map((p) => p.priceInr)) : settings.subscriptionPriceInr,
+      payeeName: settings.payeeName,
+      membershipRequired,
+      plans,
+    };
   }
 
   async getSettingsForAdmin() {
@@ -52,12 +66,34 @@ export class HariharaaService {
   }
 
   async upsertSettings(dto: UpdateSettingsDto, adminId: string) {
+    const before = await this.prisma.hariharaaSettings.findUnique({ where: { id: SETTINGS_ID } });
+    // An empty box means "remove it", not "store an empty string" (which for the vendor link
+    // would not even be a valid reference).
+    const blankToNull = (v: string | undefined) => (v === undefined ? undefined : v.trim() === '' ? null : v.trim());
+    const clean = {
+      ...dto,
+      primaryUpiId: dto.primaryUpiId.trim(),
+      payeeName: dto.payeeName?.trim() || undefined,
+      secondaryUpiId: blankToNull(dto.secondaryUpiId),
+      upiAid: blankToNull(dto.upiAid),
+      vendorProfileId: blankToNull(dto.vendorProfileId),
+    };
     const updated = await this.prisma.hariharaaSettings.upsert({
       where: { id: SETTINGS_ID },
-      create: { id: SETTINGS_ID, ...dto, updatedByUserId: adminId },
-      update: { ...dto, updatedByUserId: adminId },
+      create: { id: SETTINGS_ID, ...clean, subscriptionPriceInr: dto.subscriptionPriceInr ?? 499, updatedByUserId: adminId },
+      update: { ...clean, updatedByUserId: adminId },
     });
-    await this.audit.log({ actorId: adminId, action: 'hariharaa.settings.update', entityType: 'HariharaaSettings', entityId: updated.id });
+    // Where the money goes is the most sensitive setting: record exactly what changed.
+    const changed = (['primaryUpiId', 'secondaryUpiId', 'upiAid', 'payeeName'] as const)
+      .filter((k) => (before?.[k] ?? null) !== (updated[k] ?? null))
+      .map((k) => ({ field: k, from: before?.[k] ?? null, to: updated[k] ?? null }));
+    await this.audit.log({
+      actorId: adminId,
+      action: changed.some((c) => c.field === 'primaryUpiId') ? 'hariharaa.settings.upi.change' : 'hariharaa.settings.update',
+      entityType: 'HariharaaSettings',
+      entityId: updated.id,
+      metadata: { changed },
+    });
     return updated;
   }
 
@@ -86,18 +122,30 @@ export class HariharaaService {
       this.prisma.hariharaaSubscription.findUnique({ where: { userId } }),
       this.prisma.hariharaaPayment.findFirst({ where: { userId }, orderBy: { createdAt: 'desc' } }),
     ]);
+    const [membershipRequired, plans] = await Promise.all([this.plans.isMembershipRequired(), this.plans.listPublicPlans()]);
     const access = computeAccess(subscription);
+
+    // Opening the membership status is the moment a member most needs to hear that access is
+    // about to end — send the notice now rather than wait for the hourly sweep (which a sleeping
+    // server would miss). Idempotent, and never allowed to break the status itself.
+    await this.reminders.remindIfDue(userId).catch(() => null);
 
     let state: SubscriptionState = 'NOT_PAID';
     if (latest?.status === HariharaaPaymentStatus.CLAIMED) state = 'AWAITING_VERIFICATION';
     else if (access.hasAccess) state = access.kind === 'FREE' ? 'FREE' : 'ACTIVE';
+    else if (!membershipRequired) state = 'OPEN';
     else if (latest?.status === HariharaaPaymentStatus.REJECTED) state = 'REJECTED';
     else if (access.until !== null) state = 'EXPIRED';
 
     return {
       userCode: user?.userCode ?? null,
-      hasAccess: access.hasAccess,
-      accessKind: access.kind,
+      // With membership switched off everyone has access — nothing to pay for.
+      hasAccess: access.hasAccess || !membershipRequired,
+      accessKind: access.hasAccess ? access.kind : membershipRequired ? access.kind : ('OPEN' as const),
+      membershipRequired,
+      // Whole days of access left, so the screens can say "ends in 2 days" (null when none).
+      daysLeft: membershipRequired ? daysLeft(subscription) : null,
+      plans,
       activeUntil: access.until, // when current access ends (or when the last one ended)
       freeNote: access.kind === 'FREE' ? subscription?.complimentaryNote ?? null : null,
       state,
@@ -106,6 +154,8 @@ export class HariharaaService {
             id: latest.id,
             status: latest.status,
             amountInr: latest.amountInr,
+            planName: latest.planName,
+            periodDays: latest.periodDays,
             utr: latest.utr,
             rejectionReason: latest.rejectionReason,
             createdAt: latest.createdAt,
@@ -121,6 +171,7 @@ export class HariharaaService {
   // verified payment or an Administrator's grant, so a customer renewing early, or whose
   // renewal is rejected, keeps what they already had, and nothing needs a sweep job.
   async isActiveSubscriber(userId: string): Promise<boolean> {
+    if (!(await this.plans.isMembershipRequired())) return true; // membership switched off: open to all
     const subscription = await this.prisma.hariharaaSubscription.findUnique({ where: { userId } });
     return computeAccess(subscription).hasAccess;
   }
@@ -131,7 +182,8 @@ export class HariharaaService {
   // needs to pay it. Reusing an open payment means tapping Pay twice, or coming back
   // after abandoning, never piles up records. The note carries the customer's own ID
   // (HHC-0042) so the bank credit can be matched to them.
-  async startPayment(userId: string) {
+  async startPayment(userId: string, planId?: string) {
+    const plan = await this.plans.getPlanForPurchase(planId);
     const [user, settings, latest] = await Promise.all([
       this.prisma.user.findUnique({ where: { id: userId }, select: { userCode: true } }),
       this.getSettingsOrThrow(),
@@ -148,25 +200,39 @@ export class HariharaaService {
       orderBy: { createdAt: 'desc' },
     });
     if (payment) {
-      if (payment.amountInr !== settings.subscriptionPriceInr) {
-        payment = await this.prisma.hariharaaPayment.update({ where: { id: payment.id }, data: { amountInr: settings.subscriptionPriceInr } });
+      // An abandoned open payment is re-priced to the plan chosen now (the price may have
+      // changed, or they picked a different plan).
+      if (payment.amountInr !== plan.priceInr || payment.planId !== plan.id || payment.periodDays !== plan.periodDays) {
+        payment = await this.prisma.hariharaaPayment.update({
+          where: { id: payment.id },
+          data: { amountInr: plan.priceInr, periodDays: plan.periodDays, planId: plan.id, planName: plan.name },
+        });
       }
     } else {
       payment = await this.prisma.hariharaaPayment.create({
-        data: { userId, amountInr: settings.subscriptionPriceInr, method: PaymentMethod.UPI_MANUAL, periodDays: PERIOD_DAYS },
+        data: {
+          userId,
+          amountInr: plan.priceInr,
+          method: PaymentMethod.UPI_MANUAL,
+          periodDays: plan.periodDays,
+          planId: plan.id,
+          planName: plan.name,
+        },
       });
       await this.audit.log({
         actorId: userId,
         action: 'hariharaa.payment.start',
         entityType: 'HariharaaPayment',
         entityId: payment.id,
-        metadata: { amountInr: payment.amountInr },
+        metadata: { amountInr: payment.amountInr, plan: plan.name, periodDays: plan.periodDays },
       });
     }
 
     return {
       paymentId: payment.id,
       amountInr: payment.amountInr,
+      planName: payment.planName,
+      periodDays: payment.periodDays,
       userCode: user?.userCode ?? null,
       payeeName: settings.payeeName,
       upiLink: buildUpiLink({

@@ -5,6 +5,7 @@ import { ApiError } from '../../api/client';
 import { listPendingPayments, reviewPayment, type PendingPayment } from '../../api/hariharaa';
 import { Bi, BiValue, biInline } from '../../i18n/Bi';
 import { strings } from '../../i18n/strings';
+import { periodText } from '../../membership/plans';
 import { bilingualInvalidHandler, clearCustomValidity } from '../../i18n/validation';
 
 type SortMode = 'oldest' | 'newest' | 'amount';
@@ -117,7 +118,10 @@ export function AdminHariharaaSubscriptionsPage() {
                   <div className="field-label">
                     <Bi id="hariharaaExpectedAmountLabel" />
                   </div>
-                  <div>₹{p.amountInr.toFixed(2)}</div>
+                  <div>
+                    ₹{p.amountInr.toFixed(2)}
+                    {p.planName ? ` · ${p.planName}` : ''} · {periodText(p.periodDays)}
+                  </div>
                 </div>
                 {p.claimedAt && <div className="meta">{new Date(p.claimedAt).toLocaleString()}</div>}
                 {p.note && <div className="hint">{p.note}</div>}

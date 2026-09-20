@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useMembership } from '../auth/MembershipContext';
-import { getPublicSettings } from '../api/hariharaa';
 import { Bi } from '../i18n/Bi';
 import { strings, type StringKey } from '../i18n/strings';
 
@@ -20,18 +18,33 @@ const TEXT: Record<string, StringKey> = {
 export function PaymentStrip() {
   const { applies, status } = useMembership();
   const { pathname } = useLocation();
-  const [price, setPrice] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (!applies) return;
-    getPublicSettings()
-      .then((s) => setPrice(s.subscriptionPriceInr))
-      .catch(() => {});
-  }, [applies]);
-
-  if (!applies || !status || status.hasAccess) return null;
+  if (!applies || !status) return null;
   if (pathname === '/hariharaa/subscription') return null;
 
+  // Access is running but about to end: a gentle "renew" reminder (3 days or fewer), unless a
+  // renewal is already waiting for verification.
+  if (status.hasAccess) {
+    const left = status.daysLeft;
+    if (!status.membershipRequired || left === null || left > 3 || status.state === 'AWAITING_VERIFICATION') return null;
+    const key = status.accessKind === 'FREE' ? 'paymentStripFreeEndsSoon' : 'paymentStripEndsSoon';
+    const text = (lang: 'en' | 'te') =>
+      strings[key][lang].replace('{n}', String(left)).replace('{days}', lang === 'en' ? (left === 1 ? 'day' : 'days') : left === 1 ? 'రోజులో' : 'రోజుల్లో');
+    return (
+      <div data-tour="payment-strip" className="payment-strip" role="status">
+        <span className="strip-text">
+          {text('en')} / {text('te')}
+        </span>
+        <Link to="/hariharaa/subscription" className="strip-action">
+          <Bi id="paymentStripRenew" />
+        </Link>
+      </div>
+    );
+  }
+
+  // "from ₹499" when there is a choice of plans, plain "₹499" when there is one.
+  const prices = status.plans.map((p) => p.priceInr);
+  const price = prices.length ? Math.min(...prices) : null;
   const state = status.state;
   const textKey = TEXT[state] ?? TEXT.NOT_PAID;
   const needsAction = state !== 'AWAITING_VERIFICATION';
@@ -41,7 +54,12 @@ export function PaymentStrip() {
       {/* English / Telugu on ONE line (not stacked) so the strip stays slim on a phone. */}
       <span className="strip-text">
         {strings[textKey].en} / {strings[textKey].te}
-        {state === 'NOT_PAID' && price !== null && <strong> · ₹{price.toFixed(0)}</strong>}
+        {state === 'NOT_PAID' && price !== null && (
+          <strong>
+            {' '}
+            · {prices.length > 1 ? `${strings.planPriceFrom.en} / ${strings.planPriceFrom.te} ` : ''}₹{price.toFixed(0)}
+          </strong>
+        )}
       </span>
       <Link to="/hariharaa/subscription" className="strip-action">
         <Bi id={needsAction ? 'paymentStripPay' : 'paymentStripView'} />

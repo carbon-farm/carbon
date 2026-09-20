@@ -4,6 +4,8 @@ import { HariharaaService } from './hariharaa.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { MembershipPlansService } from './membership-plans.service';
+import { MembershipRemindersService } from './membership-reminders.service';
 
 const DAY = 24 * 60 * 60 * 1000;
 const days = (n: number) => new Date(Date.now() + n * DAY);
@@ -12,6 +14,7 @@ describe('HariharaaService', () => {
   let prisma: any;
   let audit: { log: jest.Mock };
   let notifications: { create: jest.Mock; notifyRole: jest.Mock };
+  let plans: { isMembershipRequired: jest.Mock; getPlanForPurchase: jest.Mock; listPublicPlans: jest.Mock };
   let service: HariharaaService;
 
   const settings = { subscriptionPriceInr: 499, payeeName: 'HARIHARAA Natural Food Stores', primaryUpiId: 'hh@okaxis', upiAid: 'AID123' };
@@ -22,7 +25,10 @@ describe('HariharaaService', () => {
   beforeEach(() => {
     prisma = {
       user: { findUnique: jest.fn().mockResolvedValue({ userCode: 'HHC-0042', name: 'Ravi', role: 'MEMBER' }), findMany: jest.fn().mockResolvedValue([]) },
-      hariharaaSettings: { findUnique: jest.fn().mockResolvedValue(settings) },
+      hariharaaSettings: {
+        findUnique: jest.fn().mockResolvedValue(settings),
+        upsert: jest.fn().mockImplementation(({ update }) => Promise.resolve({ id: 'singleton', ...settings, ...update })),
+      },
       hariharaaSubscription: { findUnique: jest.fn().mockResolvedValue(null), upsert: jest.fn().mockResolvedValue({ id: 's1' }), update: jest.fn().mockResolvedValue({ id: 's1' }) },
       hariharaaPayment: {
         findFirst: jest.fn().mockResolvedValue(null),
@@ -36,13 +42,25 @@ describe('HariharaaService', () => {
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     notifications = { create: jest.fn().mockResolvedValue(undefined), notifyRole: jest.fn().mockResolvedValue(undefined) };
-    service = new HariharaaService(prisma as PrismaService, audit as unknown as AuditService, notifications as unknown as NotificationsService);
+    plans = {
+      isMembershipRequired: jest.fn().mockResolvedValue(true),
+      getPlanForPurchase: jest.fn().mockResolvedValue({ id: 'pl1', name: 'Monthly', priceInr: 499, periodDays: 30 }),
+      listPublicPlans: jest.fn().mockResolvedValue([{ id: 'pl1', name: 'Monthly', nameTe: null, description: null, priceInr: 499, periodDays: 30 }]),
+    };
+    service = new HariharaaService(
+      prisma as PrismaService,
+      audit as unknown as AuditService,
+      notifications as unknown as NotificationsService,
+      plans as unknown as MembershipPlansService,
+      { remindIfDue: jest.fn().mockResolvedValue(null) } as unknown as MembershipRemindersService,
+    );
   });
 
   describe('public settings', () => {
     it('never exposes the UPI ID, merchant id or a payment link without login', async () => {
       const pub = await service.getPublicSettings();
-      expect(pub).toEqual({ subscriptionPriceInr: 499, payeeName: 'HARIHARAA Natural Food Stores' });
+      expect(Object.keys(pub).sort()).toEqual(['membershipRequired', 'payeeName', 'plans', 'subscriptionPriceInr']);
+      expect(pub).toMatchObject({ subscriptionPriceInr: 499, payeeName: 'HARIHARAA Natural Food Stores', membershipRequired: true });
     });
   });
 
@@ -82,6 +100,12 @@ describe('HariharaaService', () => {
       setup(days(-3), { status: S.VERIFIED });
       expect(await service.getMyStatus('u1')).toMatchObject({ state: 'EXPIRED', hasAccess: false });
     });
+    it('reports whole days of access left (rounded up), or null when there is none', async () => {
+      setup(days(2.5), { status: S.VERIFIED });
+      expect((await service.getMyStatus('u1')).daysLeft).toBe(3);
+      setup(null, null);
+      expect((await service.getMyStatus('u1')).daysLeft).toBeNull();
+    });
     it('REJECTED when the last payment was rejected', async () => {
       setup(null, { status: S.REJECTED, rejectionReason: 'Amount mismatch' });
       expect(await service.getMyStatus('u1')).toMatchObject({ state: 'REJECTED', latestPayment: { rejectionReason: 'Amount mismatch' } });
@@ -92,7 +116,9 @@ describe('HariharaaService', () => {
     it('creates a payment at the current price and puts the customer ID in the UPI note', async () => {
       prisma.hariharaaPayment.create.mockResolvedValue(payment());
       const r = await service.startPayment('u1');
-      expect(prisma.hariharaaPayment.create).toHaveBeenCalledWith({ data: expect.objectContaining({ userId: 'u1', amountInr: 499 }) });
+      expect(prisma.hariharaaPayment.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ userId: 'u1', amountInr: 499, periodDays: 30, planId: 'pl1', planName: 'Monthly' }),
+      });
       expect(r.upiLink).toContain('tn=HARIHARAA%20HHC-0042');
       expect(r.upiLink).toContain('aid=AID123');
       expect(r.upiLink).toContain('am=499.00');
@@ -101,7 +127,7 @@ describe('HariharaaService', () => {
     it('reuses the open payment instead of piling up records', async () => {
       prisma.hariharaaPayment.findFirst
         .mockResolvedValueOnce(payment({ status: S.REJECTED })) // latest overall
-        .mockResolvedValueOnce(payment()); // open CREATED one
+        .mockResolvedValueOnce(payment({ planId: 'pl1' })); // open CREATED one
       await service.startPayment('u1');
       expect(prisma.hariharaaPayment.create).not.toHaveBeenCalled();
     });
@@ -109,11 +135,74 @@ describe('HariharaaService', () => {
       prisma.hariharaaPayment.findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce(payment({ amountInr: 399 }));
       prisma.hariharaaPayment.update.mockResolvedValue(payment({ amountInr: 499 }));
       await service.startPayment('u1');
-      expect(prisma.hariharaaPayment.update).toHaveBeenCalledWith({ where: { id: 'p1' }, data: { amountInr: 499 } });
+      expect(prisma.hariharaaPayment.update).toHaveBeenCalledWith({
+        where: { id: 'p1' },
+        data: { amountInr: 499, periodDays: 30, planId: 'pl1', planName: 'Monthly' },
+      });
     });
     it('refuses to start another while one is already awaiting verification', async () => {
       prisma.hariharaaPayment.findFirst.mockResolvedValueOnce(payment({ status: S.CLAIMED }));
       await expect(service.startPayment('u1')).rejects.toBeInstanceOf(BadRequestException);
+    });
+  });
+
+  describe('changing the UPI ID', () => {
+    it('records exactly what changed, under its own audit action', async () => {
+      await service.upsertSettings({ primaryUpiId: ' new@okaxis ', upiAid: '' }, 'admin');
+      const call = audit.log.mock.calls.at(-1)[0];
+      expect(call.action).toBe('hariharaa.settings.upi.change');
+      expect(call.metadata.changed).toEqual(
+        expect.arrayContaining([
+          { field: 'primaryUpiId', from: 'hh@okaxis', to: 'new@okaxis' },
+          { field: 'upiAid', from: 'AID123', to: null },
+        ]),
+      );
+    });
+    it('an empty box removes the spare UPI ID, merchant id and vendor link instead of storing ""', async () => {
+      await service.upsertSettings({ primaryUpiId: 'hh@okaxis', secondaryUpiId: '', upiAid: ' ', vendorProfileId: '' }, 'admin');
+      expect(prisma.hariharaaSettings.upsert.mock.calls[0][0].update).toMatchObject({ secondaryUpiId: null, upiAid: null, vendorProfileId: null });
+    });
+    it('an unrelated change (name only) is not audited as a UPI change', async () => {
+      await service.upsertSettings({ primaryUpiId: 'hh@okaxis', payeeName: 'Another Name' }, 'admin');
+      expect(audit.log.mock.calls.at(-1)[0].action).toBe('hariharaa.settings.update');
+    });
+  });
+
+  describe('plans and the membership switch', () => {
+    it('buys the plan that was chosen: its price, its length, its name', async () => {
+      plans.getPlanForPurchase.mockResolvedValue({ id: 'pl9', name: 'Yearly', priceInr: 4999, periodDays: 365 });
+      prisma.hariharaaPayment.create.mockResolvedValue(payment({ amountInr: 4999, periodDays: 365 }));
+      const r = await service.startPayment('u1', 'pl9');
+      expect(plans.getPlanForPurchase).toHaveBeenCalledWith('pl9');
+      expect(prisma.hariharaaPayment.create.mock.calls[0][0].data).toMatchObject({ amountInr: 4999, periodDays: 365, planId: 'pl9', planName: 'Yearly' });
+      expect(r.upiLink).toContain('am=4999.00');
+    });
+    it('re-prices an open payment when a different plan is chosen', async () => {
+      plans.getPlanForPurchase.mockResolvedValue({ id: 'pl9', name: 'Yearly', priceInr: 4999, periodDays: 365 });
+      prisma.hariharaaPayment.findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce(payment({ planId: 'pl1' }));
+      prisma.hariharaaPayment.update.mockResolvedValue(payment({ amountInr: 4999, periodDays: 365 }));
+      await service.startPayment('u1', 'pl9');
+      expect(prisma.hariharaaPayment.update.mock.calls[0][0].data).toMatchObject({ planId: 'pl9', periodDays: 365, amountInr: 4999 });
+    });
+    it('public settings list the plans that are on, with the cheapest price for older screens', async () => {
+      plans.listPublicPlans.mockResolvedValue([
+        { id: 'a', name: 'Yearly', priceInr: 4999, periodDays: 365 },
+        { id: 'b', name: 'Monthly', priceInr: 499, periodDays: 30 },
+      ]);
+      const pub = await service.getPublicSettings();
+      expect(pub).toMatchObject({ subscriptionPriceInr: 499, membershipRequired: true });
+      expect(pub.plans).toHaveLength(2);
+    });
+    it('with membership switched off everyone has access and nothing is locked', async () => {
+      plans.isMembershipRequired.mockResolvedValue(false);
+      prisma.hariharaaSubscription.findUnique.mockResolvedValue(null);
+      await expect(service.isActiveSubscriber('u1')).resolves.toBe(true);
+      expect(await service.getMyStatus('u1')).toMatchObject({ hasAccess: true, state: 'OPEN', accessKind: 'OPEN', membershipRequired: false });
+    });
+    it('switching it back on locks a member with no access again', async () => {
+      prisma.hariharaaSubscription.findUnique.mockResolvedValue(null);
+      await expect(service.isActiveSubscriber('u1')).resolves.toBe(false);
+      expect(await service.getMyStatus('u1')).toMatchObject({ hasAccess: false, state: 'NOT_PAID', membershipRequired: true });
     });
   });
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { TOURS, tourStorageKey, type Audience, type TourStep } from './steps';
+import { CLOSE_NAV_EVENT, OPEN_NAV_EVENT } from '../components/navConfig';
 import { Bi } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 
@@ -63,7 +64,16 @@ export function Tour({ audience, userId, ready }: { audience: Audience; userId?:
     markSeen(key);
     setSteps(null);
     setRect(null);
+    window.dispatchEvent(new Event(CLOSE_NAV_EVENT));
   }, [key]);
+
+  // While the tour is showing, the menu must stay open where the tour opened it (see MainNav).
+  const active = steps !== null;
+  useEffect(() => {
+    if (!active) return;
+    document.body.classList.add('tour-on');
+    return () => document.body.classList.remove('tour-on');
+  }, [active]);
 
   // Auto-start once the screen has settled: wait until the number of things the tour can point
   // at stops growing (lists and menus load in after the first paint), for at most 6 seconds.
@@ -99,16 +109,31 @@ export function Tour({ audience, userId, ready }: { audience: Audience; userId?:
       setRect(null);
       return;
     }
+    // A menu link lives inside a dropdown / the phone menu: open the right one first, and
+    // close any menu for the other steps.
+    const inMenu = !!step.target && step.target.startsWith('/');
+    if (inMenu) window.dispatchEvent(new CustomEvent(OPEN_NAV_EVENT, { detail: step.target }));
+    else window.dispatchEvent(new Event(CLOSE_NAV_EVENT));
+
     const narrow = window.innerWidth <= 720;
-    el.scrollIntoView({ block: narrow ? 'start' : 'center', inline: 'center', behavior: 'auto' });
     const measure = () => {
       const r = el.getBoundingClientRect();
       setRect({ top: r.top - PAD, left: r.left - PAD, width: r.width + PAD * 2, height: r.height + PAD * 2 });
     };
-    measure();
+    // wait a beat for the menu to open before bringing the target into view and measuring it
+    const timer = setTimeout(
+      () => {
+        el.scrollIntoView({ block: narrow ? 'nearest' : 'center', inline: 'center', behavior: 'auto' });
+        measure();
+      },
+      inMenu ? 90 : 0,
+    );
+    if (!inMenu) el.scrollIntoView({ block: narrow ? 'start' : 'center', inline: 'center', behavior: 'auto' });
+    setRect(null);
     window.addEventListener('resize', measure);
     window.addEventListener('scroll', measure, true);
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('resize', measure);
       window.removeEventListener('scroll', measure, true);
     };
@@ -143,7 +168,11 @@ export function Tour({ audience, userId, ready }: { audience: Audience; userId?:
   // room, above it if not), clamped to the screen; centred when there is nothing to point at.
   let cardStyle: React.CSSProperties;
   if (narrow) {
-    cardStyle = { left: 12, right: 12, bottom: 12 };
+    // a bottom sheet — unless the highlighted thing is too low for the card to fit under it and
+    // there is room above it, in which case the sheet goes to the top of the screen
+    const fitsBelow = !rect || vh - (rect.top + rect.height) - 12 >= cardSize.h;
+    const fitsAbove = !!rect && rect.top - 12 >= cardSize.h;
+    cardStyle = !fitsBelow && fitsAbove ? { left: 12, right: 12, top: 12 } : { left: 12, right: 12, bottom: 12 };
   } else if (!rect) {
     cardStyle = { left: Math.max(12, (vw - cardSize.w) / 2), top: Math.max(12, (vh - cardSize.h) / 2) };
   } else {

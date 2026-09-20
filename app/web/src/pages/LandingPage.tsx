@@ -9,6 +9,10 @@ export function LandingPage() {
         <div className="hero-inner">
           <div className="hero-mark" aria-hidden="true">🌱</div>
           <Bi id="brand" as="h1" />
+          <p className="hero-group">
+            <span className="bi-en">{strings.brandGroup.en}</span>
+            <span className="bi-te">{strings.brandGroup.te}</span>
+          </p>
           <BiValue value={strings.landingTagline} as="p" className="hero-tagline" />
           <div className="hero-actions">
             <Link to="/login">

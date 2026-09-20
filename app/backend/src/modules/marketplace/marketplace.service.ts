@@ -645,6 +645,19 @@ export class MarketplaceService {
     return { wishlisted: true };
   }
 
+  // Adds every still-sold product in the list; ones already hearted, and ones no longer sold, are
+  // skipped quietly.
+  async mergeWishlist(userId: string, productIds: string[]) {
+    const products = await this.prisma.product.findMany({
+      where: { id: { in: productIds }, isActive: true, OR: [{ vendorId: null }, { vendor: { isApproved: true } }] },
+      select: { id: true },
+    });
+    if (products.length > 0) {
+      await this.prisma.productWishlist.createMany({ data: products.map((p) => ({ productId: p.id, userId })), skipDuplicates: true });
+    }
+    return this.listWishlist(userId);
+  }
+
   async listWishlist(userId: string) {
     const rows = await this.prisma.productWishlist.findMany({
       where: { userId },

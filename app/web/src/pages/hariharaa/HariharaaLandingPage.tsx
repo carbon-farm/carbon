@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getPublicSettings, type PublicSettings } from '../../api/hariharaa';
 import { Bi, BiValue } from '../../i18n/Bi';
 import { strings } from '../../i18n/strings';
+import { periodText, planTitle } from '../../membership/plans';
 import { TestimonialsGrid } from './TestimonialsGrid';
 
 // Public, unauthenticated — mirrors LandingPage.tsx's bare rendering (no AppShell, no
@@ -37,10 +38,20 @@ export function HariharaaLandingPage() {
           <Bi id="hariharaaSubscribeHeading" as="h2" />
           <BiValue value={strings.hariharaaSubscribeDescription} as="p" className="hint" />
 
-          {settings && (
-            <p>
-              ₹{settings.subscriptionPriceInr.toFixed(2)} <Bi id="hariharaaMonthlyPrice" />
-            </p>
+          {settings && settings.plans.length > 0 ? (
+            <ul className="plain-list">
+              {settings.plans.map((p) => (
+                <li key={p.id}>
+                  <strong>{planTitle(p)}</strong> — ₹{p.priceInr.toFixed(2)} · {periodText(p.periodDays)}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            settings && (
+              <p>
+                ₹{settings.subscriptionPriceInr.toFixed(2)} <Bi id="hariharaaMonthlyPrice" />
+              </p>
+            )
           )}
 
           <Link to="/hariharaa/register">
