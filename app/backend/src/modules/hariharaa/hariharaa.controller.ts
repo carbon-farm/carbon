@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { HariharaaService } from './hariharaa.service';
-import { SubmitClaimDto } from './dto/submit-claim.dto';
+import { ClaimPaymentDto } from './dto/claim-payment.dto';
 import { ReviewClaimDto } from './dto/review-claim.dto';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -27,25 +27,33 @@ export class HariharaaController {
   }
 
   @Roles(Role.CUSTOMER)
-  @Post('subscription/claim')
-  submitClaim(@Body() dto: SubmitClaimDto, @CurrentUser() user: AuthenticatedUser) {
-    return this.hariharaaService.submitClaim(user.userId, dto);
-  }
-
-  @Roles(Role.CUSTOMER)
   @Get('subscription/me')
   getMyStatus(@CurrentUser() user: AuthenticatedUser) {
     return this.hariharaaService.getMyStatus(user.userId);
   }
 
+  // Customer payment lifecycle: start (get the QR) -> claim (type the UTR).
+  @Roles(Role.CUSTOMER)
+  @Post('payments/start')
+  startPayment(@CurrentUser() user: AuthenticatedUser) {
+    return this.hariharaaService.startPayment(user.userId);
+  }
+
+  @Roles(Role.CUSTOMER)
+  @Post('payments/:id/claim')
+  claimPayment(@Param('id') id: string, @Body() dto: ClaimPaymentDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.hariharaaService.claimPayment(user.userId, id, dto);
+  }
+
+  // Static path first, then :id, as elsewhere in this app.
   @Roles(Role.ADMINISTRATOR)
-  @Get('subscription/pending')
+  @Get('payments/pending')
   listPending() {
     return this.hariharaaService.listPendingReview();
   }
 
   @Roles(Role.ADMINISTRATOR)
-  @Post('subscription/:id/review')
+  @Post('payments/:id/review')
   review(@Param('id') id: string, @Body() dto: ReviewClaimDto, @CurrentUser() user: AuthenticatedUser) {
     return this.hariharaaService.review(id, dto, user.userId);
   }

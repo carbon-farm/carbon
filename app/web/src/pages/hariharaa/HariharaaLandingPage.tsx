@@ -1,14 +1,24 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getPublicSettings, type PublicSettings } from '../../api/hariharaa';
 import { Bi, BiValue } from '../../i18n/Bi';
 import { strings } from '../../i18n/strings';
-import { TESTIMONIALS } from './testimonials';
-import { UpiPaymentCard } from './UpiPaymentCard';
+import { TestimonialsGrid } from './TestimonialsGrid';
 
-// Public, unauthenticated — mirrors LandingPage.tsx's bare rendering (no
-// AppShell, no ProtectedRoute). Deliberately shows nothing about the
-// business beyond testimonials and how to subscribe, per the product
-// owner's own instruction: "nothing else till they pay and subscribe."
+// Public, unauthenticated — mirrors LandingPage.tsx's bare rendering (no AppShell, no
+// ProtectedRoute). Shows only the testimonials and how to join, per the product owner's
+// instruction: "nothing else till they pay and subscribe". There is deliberately NO
+// payment QR here: only a registered customer can pay, so every payment is tied to an
+// account (see UpiPaymentCard, shown on the logged-in Pay page).
 export function HariharaaLandingPage() {
+  const [settings, setSettings] = useState<PublicSettings | null>(null);
+
+  useEffect(() => {
+    getPublicSettings()
+      .then(setSettings)
+      .catch(() => {});
+  }, []);
+
   return (
     <div>
       <section className="hero">
@@ -21,31 +31,17 @@ export function HariharaaLandingPage() {
       </section>
 
       <div className="landing-body">
-        <div className="card">
-          <Bi id="hariharaaTestimonialsHeading" as="h2" />
-          <div className="feature-grid">
-            {TESTIMONIALS.map((t) => (
-              <div className="feature-card" key={t.youtubeId}>
-                <Bi id={t.titleKey} as="h3" />
-                <iframe
-                  width="100%"
-                  height="200"
-                  src={`https://www.youtube.com/embed/${t.youtubeId}`}
-                  title={t.youtubeId}
-                  loading="lazy"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+        <TestimonialsGrid />
 
         <div className="card">
           <Bi id="hariharaaSubscribeHeading" as="h2" />
           <BiValue value={strings.hariharaaSubscribeDescription} as="p" className="hint" />
 
-          <UpiPaymentCard />
+          {settings && (
+            <p>
+              ₹{settings.subscriptionPriceInr.toFixed(2)} <Bi id="hariharaaMonthlyPrice" />
+            </p>
+          )}
 
           <Link to="/hariharaa/register">
             <button type="button">

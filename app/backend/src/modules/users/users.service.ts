@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { bi } from '../../common/i18n';
+import { nextUserCode } from '../../common/user-code';
 import { CreateStaffUserDto } from './dto/create-staff-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 
@@ -33,6 +34,7 @@ export class UsersService {
         passwordHash,
         name: dto.name,
         role: dto.role,
+        userCode: await nextUserCode(this.prisma, dto.role),
         isActive: true, // staff accounts are pre-activated by Administration
       },
     });

@@ -1,7 +1,7 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
-import { changeMyPassword } from '../api/admin';
+import { changeMyPassword, getMe, type AdminUser } from '../api/admin';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
@@ -13,6 +13,12 @@ export function ChangePasswordPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [me, setMe] = useState<AdminUser | null>(null);
+
+  useEffect(() => {
+    if (!session) return;
+    getMe(session.accessToken).then(setMe).catch(() => {});
+  }, [session]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -37,6 +43,29 @@ export function ChangePasswordPage() {
         <Bi id="accountNavTitle" as="span" className="eyebrow" />
         <Bi id="changePasswordTitle" as="h1" />
       </div>
+
+      {me && (
+        <div className="card">
+          {me.userCode && (
+            <div>
+              <div className="field-label">
+                <Bi id="accountIdLabel" />
+              </div>
+              <div>
+                <strong>{me.userCode}</strong>
+              </div>
+            </div>
+          )}
+          <div className="field-label">
+            <Bi id="nameLabel" />
+          </div>
+          <div>{me.name}</div>
+          <div className="field-label">
+            <Bi id="mobileNumberLabel" />
+          </div>
+          <div>{me.mobileNumber}</div>
+        </div>
+      )}
 
       {error && <div className="error-banner">{error}</div>}
 

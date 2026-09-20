@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { ApiError } from '../../api/client';
 import { listHariharaaCatalog, type Product } from '../../api/marketplace';
@@ -65,6 +65,10 @@ export function HariharaaShopPage() {
     return rows;
   }, [products, search, sortMode]);
 
+  // No active subscription: the shop is locked, so send them to where they can pay
+  // instead of showing an error (this is where a newly registered customer lands first).
+  if (needsSubscription) return <Navigate to="/hariharaa/subscription" replace />;
+
   return (
     <>
       <div className="top-bar">
@@ -80,17 +84,6 @@ export function HariharaaShopPage() {
       </div>
 
       {error && <div className="error-banner">{error}</div>}
-
-      {needsSubscription && (
-        <div className="card">
-          <BiValue value={strings.hariharaaSubscriptionNeeded} as="p" />
-          <Link to="/hariharaa/subscription">
-            <button type="button">
-              <Bi id="hariharaaGoToSubscription" />
-            </button>
-          </Link>
-        </div>
-      )}
 
       {!loading && products.length > 0 && (
         <div className="list-toolbar">
@@ -112,7 +105,7 @@ export function HariharaaShopPage() {
 
       {loading ? (
         <BiValue value={strings.loading} as="p" className="hint" />
-      ) : needsSubscription ? null : products.length === 0 ? (
+      ) : products.length === 0 ? (
         <BiValue value={strings.noHariharaaProductsYet} as="p" className="hint" />
       ) : visible.length === 0 ? (
         <BiValue value={strings.reportNoData} as="p" className="hint" />

@@ -1,5 +1,6 @@
 import { PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { nextUserCode } from '../src/common/user-code';
 
 const prisma = new PrismaClient();
 
@@ -15,6 +16,7 @@ async function main() {
         passwordHash: await bcrypt.hash('ChangeMe123!', 12),
         name: 'Initial Administrator',
         role: Role.ADMINISTRATOR,
+        userCode: await nextUserCode(prisma, Role.ADMINISTRATOR),
         isActive: true,
       },
     });

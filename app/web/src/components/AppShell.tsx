@@ -3,6 +3,7 @@ import { NavLink, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { roleHomePath } from '../auth/roleHome';
 import { getUnreadCount } from '../api/notifications';
+import { getMe, type AdminUser } from '../api/admin';
 import { Bi } from '../i18n/Bi';
 import { strings, type StringKey } from '../i18n/strings';
 
@@ -74,6 +75,22 @@ export function AppShell({ children, wide = false }: { children: ReactNode; wide
   const { session, logout } = useAuth();
   const navItems = session ? (NAV_BY_ROLE[session.role] ?? []) : [];
   const [unreadCount, setUnreadCount] = useState(0);
+  const [me, setMe] = useState<AdminUser | null>(null);
+
+  // Who is logged in, shown in the header on every screen. Failure just hides it.
+  useEffect(() => {
+    if (!session) return;
+    let cancelled = false;
+    setMe(null); // never show the previous user's name while the new one loads
+    getMe(session.accessToken)
+      .then((u) => {
+        if (!cancelled) setMe(u);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [session]);
 
   useEffect(() => {
     if (!session) return;
@@ -124,6 +141,12 @@ export function AppShell({ children, wide = false }: { children: ReactNode; wide
             <Link to="/account/password" className="link-button">
               <Bi id="accountNavTitle" />
             </Link>
+            {me && (
+              <div className="header-user" title={`${me.name} · ${me.userCode ?? ''}`}>
+                <span className="header-user-name">{me.name}</span>
+                {me.userCode && <span className="header-user-code">{me.userCode}</span>}
+              </div>
+            )}
             <span className="header-role-badge">{session.role}</span>
             <button type="button" className="logout-icon-btn" onClick={logout}>
               <Bi id="logoutButton" />

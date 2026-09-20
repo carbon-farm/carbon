@@ -37,6 +37,7 @@ export function AdminStaffPage() {
   const [activeFilter, setActiveFilter] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('newest');
   const [busyUserId, setBusyUserId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (!session) return;
@@ -101,6 +102,8 @@ export function AdminStaffPage() {
     let rows = users;
     if (roleFilter) rows = rows.filter((u) => u.role === roleFilter);
     if (activeFilter) rows = rows.filter((u) => (activeFilter === 'active' ? u.isActive : !u.isActive));
+    const q = search.trim().toLowerCase();
+    if (q) rows = rows.filter((u) => [u.userCode, u.name, u.mobileNumber].some((v) => v?.toLowerCase().includes(q)));
     rows = [...rows];
     if (sortMode === 'name') {
       rows.sort((a, b) => a.name.localeCompare(b.name));
@@ -108,7 +111,7 @@ export function AdminStaffPage() {
       rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     }
     return rows;
-  }, [users, roleFilter, activeFilter, sortMode]);
+  }, [users, roleFilter, activeFilter, sortMode, search]);
 
   return (
     <>
@@ -174,6 +177,10 @@ export function AdminStaffPage() {
         {!loading && users.length > 0 && (
           <div className="list-toolbar">
             <label>
+              <Bi id="searchPlaceholder" />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={biInline('searchPlaceholder')} />
+            </label>
+            <label>
               <Bi id="roleFieldLabel" />
               <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
                 <option value="">{biInline('allOption')}</option>
@@ -219,7 +226,7 @@ export function AdminStaffPage() {
                 {u.name} {!u.isActive && <BiValue value={strings.inactiveBadge} as="span" className="priority-badge" />}
               </div>
               <div className="meta">
-                {u.mobileNumber} · {u.role}
+                {u.userCode} · {u.mobileNumber} · {u.role}
               </div>
               {/* The backend refuses self-deactivation and removing the last
                   active Administrator, and its message is shown above. */}

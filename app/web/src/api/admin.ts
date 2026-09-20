@@ -2,11 +2,17 @@ import { apiRequest } from './client';
 
 export interface AdminUser {
   id: string;
+  userCode: string | null;
   mobileNumber: string;
   role: string;
   name: string;
   isActive: boolean;
   createdAt: string;
+}
+
+// The logged-in user's own record (name, mobile, user code) — shown in the header.
+export function getMe(token: string) {
+  return apiRequest<AdminUser>('/users/me', { token });
 }
 
 export function listUsers(token: string, role?: string) {

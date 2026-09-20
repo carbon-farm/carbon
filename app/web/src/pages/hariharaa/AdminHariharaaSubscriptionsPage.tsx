@@ -1,31 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { ApiError } from '../../api/client';
-import { listPendingClaims, reviewClaim, type PendingSubscriptionClaim } from '../../api/hariharaa';
-import { Bi, BiValue } from '../../i18n/Bi';
+import { listPendingPayments, reviewPayment, type PendingPayment } from '../../api/hariharaa';
+import { Bi, BiValue, biInline } from '../../i18n/Bi';
 import { strings } from '../../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../../i18n/validation';
 
+type SortMode = 'oldest' | 'newest' | 'amount';
+
+// Payments customers say they've made, waiting for an Administrator to check the bank
+// credit. The same list is what a gateway would eventually clear on its own.
 export function AdminHariharaaSubscriptionsPage() {
   const { session, logout } = useAuth();
-  const [claims, setClaims] = useState<PendingSubscriptionClaim[]>([]);
+  const [payments, setPayments] = useState<PendingPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState<Record<string, string>>({});
+  const [search, setSearch] = useState('');
+  const [sortMode, setSortMode] = useState<SortMode>('oldest');
 
   useEffect(() => {
     if (!session) return;
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session]);
-
-  function load() {
-    if (!session) return;
-    setLoading(true);
-    listPendingClaims(session.accessToken)
-      .then(setClaims)
+    listPendingPayments(session.accessToken)
+      .then(setPayments)
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) {
           logout();
@@ -34,31 +33,31 @@ export function AdminHariharaaSubscriptionsPage() {
         setError(err instanceof ApiError ? err.message : `${strings.couldNotLoadHariharaaSubscriptions.en} / ${strings.couldNotLoadHariharaaSubscriptions.te}`);
       })
       .finally(() => setLoading(false));
-  }
+  }, [session, logout]);
 
-  async function handleApprove(id: string) {
-    if (!session) return;
-    setBusyId(id);
-    setError(null);
-    try {
-      await reviewClaim(session.accessToken, id, true);
-      setClaims((prev) => prev.filter((c) => c.id !== id));
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : `${strings.couldNotReviewHariharaaSubscription.en} / ${strings.couldNotReviewHariharaaSubscription.te}`);
-    } finally {
-      setBusyId(null);
+  const visible = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    let rows = payments;
+    if (q) {
+      rows = rows.filter((p) =>
+        [p.user.userCode, p.user.name, p.user.mobileNumber, p.utr].some((v) => v?.toLowerCase().includes(q)),
+      );
     }
-  }
+    rows = [...rows];
+    if (sortMode === 'amount') rows.sort((a, b) => b.amountInr - a.amountInr);
+    else rows.sort((a, b) => (a.claimedAt ?? '').localeCompare(b.claimedAt ?? '') * (sortMode === 'newest' ? -1 : 1));
+    return rows;
+  }, [payments, search, sortMode]);
 
-  async function handleReject(id: string) {
+  async function decide(id: string, approve: boolean) {
     if (!session) return;
     const reason = rejectReason[id]?.trim();
-    if (!reason) return;
+    if (!approve && !reason) return;
     setBusyId(id);
     setError(null);
     try {
-      await reviewClaim(session.accessToken, id, false, reason);
-      setClaims((prev) => prev.filter((c) => c.id !== id));
+      await reviewPayment(session.accessToken, id, approve, approve ? undefined : reason);
+      setPayments((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.couldNotReviewHariharaaSubscription.en} / ${strings.couldNotReviewHariharaaSubscription.te}`);
     } finally {
@@ -75,53 +74,68 @@ export function AdminHariharaaSubscriptionsPage() {
 
       {error && <div className="error-banner">{error}</div>}
 
+      {!loading && payments.length > 0 && (
+        <div className="list-toolbar">
+          <label>
+            <Bi id="searchPlaceholder" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={biInline('searchPlaceholder')} />
+          </label>
+          <label>
+            <Bi id="sortByLabel" />
+            <select value={sortMode} onChange={(e) => setSortMode(e.target.value as SortMode)}>
+              <option value="oldest">{biInline('sortOldestFirst')}</option>
+              <option value="newest">{biInline('sortNewestFirst')}</option>
+              <option value="amount">{biInline('productPriceLabel')} ↓</option>
+            </select>
+          </label>
+        </div>
+      )}
+
       {loading ? (
         <BiValue value={strings.loading} as="p" className="hint" />
-      ) : claims.length === 0 ? (
+      ) : payments.length === 0 ? (
         <BiValue value={strings.noHariharaaSubscriptionsPending} as="p" className="hint" />
+      ) : visible.length === 0 ? (
+        <BiValue value={strings.reportNoData} as="p" className="hint" />
       ) : (
         <div className="card">
-          {claims.map((c) => {
-            const isBusy = busyId === c.id;
+          {visible.map((p) => {
+            const isBusy = busyId === p.id;
             return (
-              <div className="farm-item" key={c.id}>
-                <div className="label">{c.user.name}</div>
-                <div className="meta">{c.user.mobileNumber}</div>
+              <div className="farm-item" key={p.id}>
+                <div className="label">
+                  {p.user.userCode} · {p.user.name}
+                </div>
+                <div className="meta">{p.user.mobileNumber}</div>
                 <div>
                   <div className="field-label">
                     <Bi id="hariharaaPaymentReferenceLabel" />
                   </div>
-                  <div>{c.paymentReference}</div>
+                  <div>{p.utr}</div>
                 </div>
-                {c.expectedAmountInr != null && (
-                  <div>
-                    <div className="field-label">
-                      <Bi id="hariharaaExpectedAmountLabel" />
-                    </div>
-                    <div>₹{c.expectedAmountInr.toFixed(2)}</div>
+                <div>
+                  <div className="field-label">
+                    <Bi id="hariharaaExpectedAmountLabel" />
                   </div>
-                )}
-                {c.note && <div className="hint">{c.note}</div>}
-                <button type="button" onClick={() => handleApprove(c.id)} disabled={isBusy}>
+                  <div>₹{p.amountInr.toFixed(2)}</div>
+                </div>
+                {p.claimedAt && <div className="meta">{new Date(p.claimedAt).toLocaleString()}</div>}
+                {p.note && <div className="hint">{p.note}</div>}
+                <button type="button" onClick={() => decide(p.id, true)} disabled={isBusy}>
                   {isBusy ? <BiValue value={strings.approving} /> : <Bi id="approveButton" />}
                 </button>
                 <label>
                   <Bi id="rejectReasonField" />
                   <input
-                    value={rejectReason[c.id] ?? ''}
+                    value={rejectReason[p.id] ?? ''}
                     onChange={(e) => {
-                      setRejectReason((prev) => ({ ...prev, [c.id]: e.target.value }));
+                      setRejectReason((prev) => ({ ...prev, [p.id]: e.target.value }));
                       clearCustomValidity(e);
                     }}
                     onInvalid={bilingualInvalidHandler}
                   />
                 </label>
-                <button
-                  type="button"
-                  className="secondary"
-                  onClick={() => handleReject(c.id)}
-                  disabled={isBusy || !rejectReason[c.id]?.trim()}
-                >
+                <button type="button" className="secondary" onClick={() => decide(p.id, false)} disabled={isBusy || !rejectReason[p.id]?.trim()}>
                   {isBusy ? <BiValue value={strings.rejecting} /> : <Bi id="rejectButton" />}
                 </button>
               </div>

@@ -11,6 +11,7 @@ import * as crypto from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { bi } from '../../common/i18n';
+import { nextUserCode } from '../../common/user-code';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RequestOtpDto } from './dto/request-otp.dto';
@@ -52,6 +53,9 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
+    const role = dto.role ?? Role.FARMER;
+    // Only a brand-new account takes a number; a resent registration keeps its own.
+    const userCode = existing ? undefined : await nextUserCode(this.prisma, role);
     const user = existing
       ? await this.prisma.user.update({
           where: { id: existing.id },
@@ -62,7 +66,8 @@ export class AuthService {
             mobileNumber: dto.mobileNumber,
             passwordHash,
             name: dto.name,
-            role: dto.role ?? Role.FARMER,
+            role,
+            userCode,
             preferredLanguage: dto.preferredLanguage ?? 'te',
             isActive: false, // activated once REGISTRATION OTP is verified
           },

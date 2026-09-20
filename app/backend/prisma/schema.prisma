@@ -122,6 +122,10 @@ model User {
   // Set when an Administrator deactivates the account, so it is never mistaken
   // for a never-activated pending registration (which register() will resend).
   deactivatedAt     DateTime?
+  // Short, human-usable ID (HHC-0042 = customer #42) for people to say, write and
+  // search by — the UUID above stays the internal key. Assigned once at creation,
+  // never reused or changed; see common/user-code.ts.
+  userCode          String?   @unique
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -156,6 +160,8 @@ model User {
   hariharaaSubscription        HariharaaSubscription?  @relation("HariharaaSubscriber")
   hariharaaSubscriptionReviews HariharaaSubscription[] @relation("HariharaaSubscriptionReviewer")
   hariharaaSettingsUpdates     HariharaaSettings[]     @relation("HariharaaSettingsUpdater")
+  hariharaaPayments            HariharaaPayment[]      @relation("HariharaaPayer")
+  hariharaaPaymentsVerified    HariharaaPayment[]      @relation("HariharaaPaymentVerifier")
 
   @@index([role])
 }
@@ -715,6 +721,61 @@ model ProductWishlist {
 // an Administrator) — mirrors ExpertProfile's submit/verify shape exactly
 // so a later swap to automated gateway verification only changes how a
 // claim gets created, not this approval/notification/audit plumbing.
+// One row per role prefix; incremented atomically so two simultaneous sign-ups can
+// never be handed the same number.
+model UserCodeCounter {
+  prefix    String @id
+  lastValue Int    @default(0)
+}
+
+// HARIHARAA payments are recorded one row per attempt (not overwritten on each
+// renewal), independent of *how* they are made. Manual UPI today: a customer starts
+// a payment, pays, types the UTR (CLAIMED), an Administrator verifies it. A payment
+// gateway later plugs into the same lifecycle — it creates the payment, and its
+// webhook drives CLAIMED -> VERIFIED through the same verify step — so access,
+// notifications and audit don't change.
+enum PaymentMethod {
+  UPI_MANUAL
+  GATEWAY
+}
+
+enum HariharaaPaymentStatus {
+  CREATED
+  CLAIMED
+  VERIFIED
+  REJECTED
+}
+
+model HariharaaPayment {
+  id               String                 @id @default(uuid())
+  userId           String
+  user             User                   @relation("HariharaaPayer", fields: [userId], references: [id], onDelete: Cascade)
+  amountInr        Float // price at the moment the payment was started
+  method           PaymentMethod          @default(UPI_MANUAL)
+  status           HariharaaPaymentStatus @default(CREATED)
+  // Bank reference the customer typed (manual) — unique while the claim stands, so one
+  // real payment can never unlock two accounts. Moved to rejectedUtr on rejection so the
+  // customer can retry, while a *different* account still can't reuse it.
+  utr              String?                @unique
+  rejectedUtr      String?
+  providerRef      String?                @unique // gateway payment id, when method = GATEWAY
+  note             String?
+  periodDays       Int                    @default(30) // access this payment buys
+  claimedAt        DateTime?
+  verifiedAt       DateTime?
+  verifiedByUserId String? // null when a gateway webhook verified it
+  verifiedBy       User?                  @relation("HariharaaPaymentVerifier", fields: [verifiedByUserId], references: [id])
+  rejectionReason  String?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+// LEGACY: subscription claims now live in HariharaaPayment. Only activeUntil
+// (paid-through date) is still used from this model; the other columns are removed in
+// a follow-up migration once the new code is live.
 enum HariharaaSubscriptionStatus {
   PENDING_REVIEW
   ACTIVE

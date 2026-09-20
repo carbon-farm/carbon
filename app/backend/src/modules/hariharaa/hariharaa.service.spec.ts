@@ -1,148 +1,195 @@
-import { ConflictException } from '@nestjs/common';
-import { HariharaaSubscriptionStatus } from '@prisma/client';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import { HariharaaPaymentStatus as S, Prisma } from '@prisma/client';
 import { HariharaaService } from './hariharaa.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
 
 const DAY = 24 * 60 * 60 * 1000;
+const days = (n: number) => new Date(Date.now() + n * DAY);
 
 describe('HariharaaService', () => {
-  let prisma: {
-    hariharaaSubscription: { findUnique: jest.Mock; findFirst: jest.Mock; upsert: jest.Mock; update: jest.Mock };
-    hariharaaSettings: { findUnique: jest.Mock };
-    auditLog: { findFirst: jest.Mock };
-  };
+  let prisma: any;
   let audit: { log: jest.Mock };
   let notifications: { create: jest.Mock; notifyRole: jest.Mock };
   let service: HariharaaService;
 
+  const settings = { subscriptionPriceInr: 499, payeeName: 'HARIHARAA Natural Food Stores', primaryUpiId: 'hh@okaxis', upiAid: 'AID123' };
+  const payment = (over: Record<string, unknown> = {}) => ({
+    id: 'p1', userId: 'u1', amountInr: 499, status: S.CREATED, utr: null, periodDays: 30, method: 'UPI_MANUAL', createdAt: new Date(), ...over,
+  });
+
   beforeEach(() => {
     prisma = {
-      hariharaaSubscription: { findUnique: jest.fn(), findFirst: jest.fn().mockResolvedValue(null), upsert: jest.fn(), update: jest.fn() },
-      hariharaaSettings: { findUnique: jest.fn().mockResolvedValue({ subscriptionPriceInr: 499 }) },
-      auditLog: { findFirst: jest.fn().mockResolvedValue(null) },
+      user: { findUnique: jest.fn().mockResolvedValue({ userCode: 'HHC-0042', name: 'Ravi' }) },
+      hariharaaSettings: { findUnique: jest.fn().mockResolvedValue(settings) },
+      hariharaaSubscription: { findUnique: jest.fn().mockResolvedValue(null), upsert: jest.fn().mockResolvedValue({}) },
+      hariharaaPayment: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        findUnique: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+      },
+      $transaction: jest.fn((cb: (tx: unknown) => unknown) => cb(prisma)),
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
     notifications = { create: jest.fn().mockResolvedValue(undefined), notifyRole: jest.fn().mockResolvedValue(undefined) };
-    service = new HariharaaService(
-      prisma as unknown as PrismaService,
-      audit as unknown as AuditService,
-      notifications as unknown as NotificationsService,
-    );
+    service = new HariharaaService(prisma as PrismaService, audit as unknown as AuditService, notifications as unknown as NotificationsService);
+  });
+
+  describe('public settings', () => {
+    it('never exposes the UPI ID, merchant id or a payment link without login', async () => {
+      const pub = await service.getPublicSettings();
+      expect(pub).toEqual({ subscriptionPriceInr: 499, payeeName: 'HARIHARAA Natural Food Stores' });
+    });
   });
 
   describe('isActiveSubscriber — access is paid-through date only', () => {
-    const sub = (status: HariharaaSubscriptionStatus, activeUntil: Date | null) =>
-      prisma.hariharaaSubscription.findUnique.mockResolvedValue({ status, activeUntil });
-
-    it('true while activeUntil is in the future', async () => {
-      sub(HariharaaSubscriptionStatus.ACTIVE, new Date(Date.now() + 10 * DAY));
-      await expect(service.isActiveSubscriber('u')).resolves.toBe(true);
-    });
-    it('false once activeUntil has passed, even though status is still ACTIVE', async () => {
-      sub(HariharaaSubscriptionStatus.ACTIVE, new Date(Date.now() - DAY));
-      await expect(service.isActiveSubscriber('u')).resolves.toBe(false);
-    });
-    it('false with no subscription row', async () => {
-      prisma.hariharaaSubscription.findUnique.mockResolvedValue(null);
-      await expect(service.isActiveSubscriber('u')).resolves.toBe(false);
-    });
-    it('false for a first-time claim still PENDING_REVIEW (never paid-through)', async () => {
-      sub(HariharaaSubscriptionStatus.PENDING_REVIEW, null);
-      await expect(service.isActiveSubscriber('u')).resolves.toBe(false);
-    });
-    it('KEEPS access while an early renewal is pending review', async () => {
-      sub(HariharaaSubscriptionStatus.PENDING_REVIEW, new Date(Date.now() + 5 * DAY));
-      await expect(service.isActiveSubscriber('u')).resolves.toBe(true);
-    });
-    it('KEEPS the days already paid for when a renewal is rejected', async () => {
-      sub(HariharaaSubscriptionStatus.REJECTED, new Date(Date.now() + 5 * DAY));
-      await expect(service.isActiveSubscriber('u')).resolves.toBe(true);
-    });
+    const sub = (activeUntil: Date | null) => prisma.hariharaaSubscription.findUnique.mockResolvedValue(activeUntil === null ? null : { activeUntil });
+    it('true while paid through a future date', async () => { sub(days(10)); await expect(service.isActiveSubscriber('u')).resolves.toBe(true); });
+    it('false once the date has passed', async () => { sub(days(-1)); await expect(service.isActiveSubscriber('u')).resolves.toBe(false); });
+    it('false when never paid', async () => { sub(null); await expect(service.isActiveSubscriber('u')).resolves.toBe(false); });
   });
 
   describe('getMyStatus', () => {
-    it('reports EXPIRED (not ACTIVE) once the paid-through date has passed', async () => {
-      prisma.hariharaaSubscription.findUnique.mockResolvedValue({
-        status: HariharaaSubscriptionStatus.ACTIVE,
-        activeUntil: new Date(Date.now() - 3 * DAY),
-      });
-      const s = await service.getMyStatus('u');
-      expect(s).toMatchObject({ hasAccess: false, effectiveStatus: HariharaaSubscriptionStatus.EXPIRED });
+    const setup = (activeUntil: Date | null, latest: Record<string, unknown> | null) => {
+      prisma.hariharaaSubscription.findUnique.mockResolvedValue(activeUntil ? { activeUntil } : null);
+      prisma.hariharaaPayment.findFirst.mockResolvedValue(latest ? payment(latest) : null);
+    };
+    it('NOT_PAID for a brand-new customer, and shows their ID', async () => {
+      setup(null, null);
+      expect(await service.getMyStatus('u1')).toMatchObject({ state: 'NOT_PAID', hasAccess: false, userCode: 'HHC-0042', latestPayment: null });
     });
-    it('reports ACTIVE with access while still paid through', async () => {
-      prisma.hariharaaSubscription.findUnique.mockResolvedValue({
-        status: HariharaaSubscriptionStatus.ACTIVE,
-        activeUntil: new Date(Date.now() + 3 * DAY),
-      });
-      expect(await service.getMyStatus('u')).toMatchObject({ hasAccess: true, effectiveStatus: HariharaaSubscriptionStatus.ACTIVE });
+    it('NOT_PAID after an abandoned (CREATED) payment — failed/abandoned payment leaves them unpaid', async () => {
+      setup(null, { status: S.CREATED });
+      expect(await service.getMyStatus('u1')).toMatchObject({ state: 'NOT_PAID', hasAccess: false });
+    });
+    it('AWAITING_VERIFICATION once a UTR is submitted', async () => {
+      setup(null, { status: S.CLAIMED });
+      expect(await service.getMyStatus('u1')).toMatchObject({ state: 'AWAITING_VERIFICATION', hasAccess: false });
+    });
+    it('ACTIVE while paid through', async () => {
+      setup(days(5), { status: S.VERIFIED });
+      expect(await service.getMyStatus('u1')).toMatchObject({ state: 'ACTIVE', hasAccess: true });
+    });
+    it('keeps access while an early renewal is awaiting verification', async () => {
+      setup(days(5), { status: S.CLAIMED });
+      expect(await service.getMyStatus('u1')).toMatchObject({ state: 'AWAITING_VERIFICATION', hasAccess: true });
+    });
+    it('EXPIRED after the paid month lapses', async () => {
+      setup(days(-3), { status: S.VERIFIED });
+      expect(await service.getMyStatus('u1')).toMatchObject({ state: 'EXPIRED', hasAccess: false });
+    });
+    it('REJECTED when the last payment was rejected', async () => {
+      setup(null, { status: S.REJECTED, rejectionReason: 'Amount mismatch' });
+      expect(await service.getMyStatus('u1')).toMatchObject({ state: 'REJECTED', latestPayment: { rejectionReason: 'Amount mismatch' } });
     });
   });
 
-  describe('submitClaim', () => {
-    it('stores a normalised reference and the price expected at submit time, and notifies admins', async () => {
-      prisma.hariharaaSubscription.findUnique.mockResolvedValue(null);
-      prisma.hariharaaSubscription.upsert.mockResolvedValue({ id: 's1' });
-      await service.submitClaim('u1', { paymentReference: '  utr123abc ' });
-      expect(prisma.hariharaaSubscription.upsert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          update: expect.objectContaining({ paymentReference: 'UTR123ABC', expectedAmountInr: 499, status: HariharaaSubscriptionStatus.PENDING_REVIEW }),
-        }),
-      );
-      expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ metadata: { paymentReference: 'UTR123ABC', expectedAmountInr: 499 } }));
-      expect(notifications.notifyRole).toHaveBeenCalled();
+  describe('startPayment', () => {
+    it('creates a payment at the current price and puts the customer ID in the UPI note', async () => {
+      prisma.hariharaaPayment.create.mockResolvedValue(payment());
+      const r = await service.startPayment('u1');
+      expect(prisma.hariharaaPayment.create).toHaveBeenCalledWith({ data: expect.objectContaining({ userId: 'u1', amountInr: 499 }) });
+      expect(r.upiLink).toContain('tn=HARIHARAA%20HHC-0042');
+      expect(r.upiLink).toContain('aid=AID123');
+      expect(r.upiLink).toContain('am=499.00');
+      expect(r.userCode).toBe('HHC-0042');
     });
+    it('reuses the open payment instead of piling up records', async () => {
+      prisma.hariharaaPayment.findFirst
+        .mockResolvedValueOnce(payment({ status: S.REJECTED })) // latest overall
+        .mockResolvedValueOnce(payment()); // open CREATED one
+      await service.startPayment('u1');
+      expect(prisma.hariharaaPayment.create).not.toHaveBeenCalled();
+    });
+    it('refreshes an open payment to the new price if the price changed', async () => {
+      prisma.hariharaaPayment.findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce(payment({ amountInr: 399 }));
+      prisma.hariharaaPayment.update.mockResolvedValue(payment({ amountInr: 499 }));
+      await service.startPayment('u1');
+      expect(prisma.hariharaaPayment.update).toHaveBeenCalledWith({ where: { id: 'p1' }, data: { amountInr: 499 } });
+    });
+    it('refuses to start another while one is already awaiting verification', async () => {
+      prisma.hariharaaPayment.findFirst.mockResolvedValueOnce(payment({ status: S.CLAIMED }));
+      await expect(service.startPayment('u1')).rejects.toBeInstanceOf(BadRequestException);
+    });
+  });
 
-    it('rejects a reference another customer currently holds', async () => {
-      prisma.hariharaaSubscription.findUnique.mockResolvedValue(null);
-      prisma.hariharaaSubscription.findFirst.mockResolvedValue({ id: 'other' });
-      await expect(service.submitClaim('u1', { paymentReference: 'UTR1' })).rejects.toBeInstanceOf(ConflictException);
+  describe('claimPayment', () => {
+    it('normalises the UTR, marks CLAIMED and tells the admins who paid', async () => {
+      prisma.hariharaaPayment.findUnique.mockResolvedValue(payment());
+      prisma.hariharaaPayment.update.mockResolvedValue({ ...payment({ status: S.CLAIMED }), user: { userCode: 'HHC-0042', name: 'Ravi' } });
+      await service.claimPayment('u1', 'p1', { utr: '  utr123abc ' });
+      expect(prisma.hariharaaPayment.update).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: S.CLAIMED, utr: 'UTR123ABC' }) }));
+      expect(notifications.notifyRole.mock.calls[0][3]).toContain('HHC-0042');
+    });
+    it("won't let a customer claim someone else's payment", async () => {
+      prisma.hariharaaPayment.findUnique.mockResolvedValue(payment({ userId: 'other' }));
+      await expect(service.claimPayment('u1', 'p1', { utr: 'UTR123ABC' })).rejects.toBeInstanceOf(NotFoundException);
+    });
+    it('cannot claim a payment twice', async () => {
+      prisma.hariharaaPayment.findUnique.mockResolvedValue(payment({ status: S.CLAIMED }));
+      await expect(service.claimPayment('u1', 'p1', { utr: 'UTR123ABC' })).rejects.toBeInstanceOf(BadRequestException);
+    });
+    it('rejects a UTR another account had rejected', async () => {
+      prisma.hariharaaPayment.findUnique.mockResolvedValue(payment());
+      prisma.hariharaaPayment.findFirst.mockResolvedValue({ id: 'old' });
+      await expect(service.claimPayment('u1', 'p1', { utr: 'UTR123ABC' })).rejects.toBeInstanceOf(ConflictException);
+    });
+    it('rejects a UTR already on another payment (database unique index, even under a race)', async () => {
+      prisma.hariharaaPayment.findUnique.mockResolvedValue(payment());
+      prisma.hariharaaPayment.update.mockRejectedValue(new Prisma.PrismaClientKnownRequestError('dup', { code: 'P2002', clientVersion: 'x' }));
+      await expect(service.claimPayment('u1', 'p1', { utr: 'UTR123ABC' })).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  describe('review / markVerified', () => {
+    const grantedDays = () => Math.round((prisma.hariharaaSubscription.upsert.mock.calls[0][0].update.activeUntil.getTime() - Date.now()) / DAY);
+    const claimed = () => prisma.hariharaaPayment.findUnique.mockResolvedValue(payment({ status: S.CLAIMED, utr: 'UTR123ABC' }));
+
+    it('approval grants 30 days from today for a first payment', async () => {
+      claimed();
+      prisma.hariharaaPayment.update.mockResolvedValue(payment({ status: S.VERIFIED }));
+      await service.review('p1', { approve: true }, 'admin');
+      expect(grantedDays()).toBe(30);
+    });
+    it('renewing early adds 30 days ON TOP of the days remaining', async () => {
+      claimed();
+      prisma.hariharaaSubscription.findUnique.mockResolvedValue({ activeUntil: days(10) });
+      prisma.hariharaaPayment.update.mockResolvedValue(payment({ status: S.VERIFIED }));
+      await service.review('p1', { approve: true }, 'admin');
+      expect(grantedDays()).toBe(40);
+    });
+    it('renewing after a lapse starts from today, not from the past', async () => {
+      claimed();
+      prisma.hariharaaSubscription.findUnique.mockResolvedValue({ activeUntil: days(-20) });
+      prisma.hariharaaPayment.update.mockResolvedValue(payment({ status: S.VERIFIED }));
+      await service.review('p1', { approve: true }, 'admin');
+      expect(grantedDays()).toBe(30);
+    });
+    it('a gateway can verify with no admin — same step, audited as viaGateway', async () => {
+      prisma.hariharaaPayment.findUnique.mockResolvedValue(payment({ status: S.CLAIMED, method: 'GATEWAY' }));
+      prisma.hariharaaPayment.update.mockResolvedValue(payment({ status: S.VERIFIED }));
+      await service.markVerified('p1', null);
+      expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ action: 'hariharaa.payment.verify', metadata: { method: 'GATEWAY', viaGateway: true } }));
+      expect(notifications.create).toHaveBeenCalled();
+    });
+    it('rejecting needs a reason', async () => {
+      claimed();
+      await expect(service.review('p1', { approve: false }, 'admin')).rejects.toBeInstanceOf(BadRequestException);
+    });
+    it('rejecting frees the UTR for a retry but remembers it against other accounts', async () => {
+      claimed();
+      prisma.hariharaaPayment.update.mockResolvedValue(payment({ status: S.REJECTED }));
+      await service.review('p1', { approve: false, reason: 'Not found in bank' }, 'admin');
+      expect(prisma.hariharaaPayment.update).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ status: S.REJECTED, utr: null, rejectedUtr: 'UTR123ABC', rejectionReason: 'Not found in bank' }) }),
+      );
       expect(prisma.hariharaaSubscription.upsert).not.toHaveBeenCalled();
     });
-
-    it('rejects a reference another customer used earlier (found in audit history)', async () => {
-      prisma.hariharaaSubscription.findUnique.mockResolvedValue(null);
-      prisma.auditLog.findFirst.mockResolvedValue({ id: 'old' });
-      await expect(service.submitClaim('u1', { paymentReference: 'UTR1' })).rejects.toBeInstanceOf(ConflictException);
-    });
-
-    it('rejects renewing with the same reference the customer already used', async () => {
-      prisma.hariharaaSubscription.findUnique.mockResolvedValue({ paymentReference: 'UTR1', status: HariharaaSubscriptionStatus.ACTIVE });
-      await expect(service.submitClaim('u1', { paymentReference: 'utr1' })).rejects.toBeInstanceOf(ConflictException);
-    });
-
-    it('lets a customer resubmit the same reference after their claim was rejected (typo in the note etc.)', async () => {
-      prisma.hariharaaSubscription.findUnique.mockResolvedValue({ paymentReference: 'UTR1', status: HariharaaSubscriptionStatus.REJECTED });
-      prisma.hariharaaSubscription.upsert.mockResolvedValue({ id: 's1' });
-      await expect(service.submitClaim('u1', { paymentReference: 'UTR1' })).resolves.toBeDefined();
-    });
-  });
-
-  describe('review', () => {
-    const pending = (activeUntil: Date | null) =>
-      prisma.hariharaaSubscription.findUnique.mockResolvedValue({ id: 's1', userId: 'u1', status: HariharaaSubscriptionStatus.PENDING_REVIEW, activeUntil });
-    const approvedUntil = () => (prisma.hariharaaSubscription.update.mock.calls[0][0].data.activeUntil as Date).getTime();
-
-    it('gives 30 days from today for a first approval', async () => {
-      pending(null);
-      prisma.hariharaaSubscription.update.mockResolvedValue({ id: 's1', userId: 'u1' });
-      await service.review('s1', { approve: true }, 'admin');
-      expect(Math.round((approvedUntil() - Date.now()) / DAY)).toBe(30);
-    });
-
-    it('adds 30 days ON TOP of the days still remaining when renewing early', async () => {
-      pending(new Date(Date.now() + 10 * DAY));
-      prisma.hariharaaSubscription.update.mockResolvedValue({ id: 's1', userId: 'u1' });
-      await service.review('s1', { approve: true }, 'admin');
-      expect(Math.round((approvedUntil() - Date.now()) / DAY)).toBe(40);
-    });
-
-    it('starts from today (not from the past) when renewing after a lapse', async () => {
-      pending(new Date(Date.now() - 20 * DAY));
-      prisma.hariharaaSubscription.update.mockResolvedValue({ id: 's1', userId: 'u1' });
-      await service.review('s1', { approve: true }, 'admin');
-      expect(Math.round((approvedUntil() - Date.now()) / DAY)).toBe(30);
+    it('only a submitted payment can be reviewed', async () => {
+      prisma.hariharaaPayment.findUnique.mockResolvedValue(payment({ status: S.VERIFIED }));
+      await expect(service.review('p1', { approve: true }, 'admin')).rejects.toBeInstanceOf(BadRequestException);
     });
   });
 });
