@@ -40,6 +40,7 @@ import { ProductDetailPage } from './pages/ProductDetailPage';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { AddressesPage } from './pages/AddressesPage';
+import { HelpPage } from './pages/HelpPage';
 import { OrdersPage } from './pages/OrdersPage';
 import { OrderDetailPage } from './pages/OrderDetailPage';
 import { VendorDashboardPage } from './pages/VendorDashboardPage';
@@ -68,6 +69,14 @@ export function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
           <Route path="/hariharaa" element={<HariharaaLandingPage />} />
+          <Route
+            path="/help"
+            element={
+              <OpenRoute>
+                <HelpPage />
+              </OpenRoute>
+            }
+          />
           {/* One account type: the old HARIHARAA sign-up and shop addresses lead to the shared ones. */}
           <Route path="/hariharaa/register" element={<Navigate to="/register" replace />} />
           <Route path="/hariharaa/shop" element={<Navigate to="/marketplace" replace />} />

@@ -117,7 +117,7 @@ export function MarketplacePage() {
       {error && <div className="error-banner">{error}</div>}
 
       {!loading && products.length > 0 && (
-        <div className="list-toolbar">
+        <div className="list-toolbar" data-tour="filters">
           <label>
             <Bi id="searchPlaceholder" />
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={biInline('searchPlaceholder')} />
@@ -199,7 +199,7 @@ export function MarketplacePage() {
       ) : visible.length === 0 ? (
         <BiValue value={strings.reportNoData} as="p" className="hint" />
       ) : (
-        <div className="product-grid">
+        <div className="product-grid" data-tour="products">
           {visible.map((p) => (
             <Link to={`/marketplace/products/${p.id}`} key={p.id} className="case-item product-tile">
               {p.imageUrls[0] && <img src={p.imageUrls[0]} alt="" className="product-tile-img" loading="lazy" />}

@@ -962,3 +962,119 @@ button.case-item:hover:not(:disabled) {
     padding: 8px 6px;
   }
 }
+
+/* Help page */
+.help-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.help-section p {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.help-section h2 .bi-en,
+.help-section h2 .bi-te {
+  display: block;
+}
+.help-section .bi-te {
+  color: var(--ink-soft);
+}
+
+/* First-visit guided tour */
+[data-tour] {
+  scroll-margin: 130px 16px;
+}
+.tour-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+.tour-shield {
+  position: absolute;
+  inset: 0;
+}
+.tour-dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 20, 12, 0.62);
+}
+.tour-spot {
+  position: absolute;
+  border-radius: 10px;
+  border: 2px solid #fff;
+  /* the huge shadow dims everything except the highlighted element */
+  box-shadow: 0 0 0 9999px rgba(8, 20, 12, 0.62);
+  pointer-events: none;
+  transition: top 0.25s var(--ease), left 0.25s var(--ease), width 0.25s var(--ease), height 0.25s var(--ease);
+}
+.tour-card {
+  position: absolute;
+  box-sizing: border-box;
+  width: min(380px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+@media (max-width: 720px) {
+  .tour-card {
+    width: auto;
+  }
+}
+.tour-count {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+.tour-text {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 15px;
+}
+.tour-text .bi-te {
+  color: var(--ink-soft);
+}
+.tour-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tour-nav {
+  display: flex;
+  gap: 8px;
+}
+.tour-actions button {
+  padding: 8px 14px;
+  font-size: 14px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour-spot {
+    transition: none;
+  }
+}
+
+/* Links in the dark title bar (Help, Log in, Register, Account) must read on the green. */
+.app-header .link-button {
+  color: #fff;
+  text-decoration: none;
+  font-size: 13px;
+}
+.app-header .link-button:hover {
+  text-decoration: underline;
+}

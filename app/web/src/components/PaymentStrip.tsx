@@ -37,7 +37,7 @@ export function PaymentStrip() {
   const needsAction = state !== 'AWAITING_VERIFICATION';
 
   return (
-    <div className={`payment-strip${state === 'REJECTED' || state === 'EXPIRED' ? ' alert' : ''}`} role="status">
+    <div data-tour="payment-strip" className={`payment-strip${state === 'REJECTED' || state === 'EXPIRED' ? ' alert' : ''}`} role="status">
       {/* English / Telugu on ONE line (not stacked) so the strip stays slim on a phone. */}
       <span className="strip-text">
         {strings[textKey].en} / {strings[textKey].te}

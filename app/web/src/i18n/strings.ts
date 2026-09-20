@@ -984,6 +984,19 @@ export const strings = {
   switchOnButton: { en: 'Switch on', te: 'ఆన్ చేయండి' },
   showSwitchedOffLabel: { en: 'Show switched-off ones', te: 'ఆఫ్ చేసినవి చూపించండి' },
   couldNotSaveCategory: { en: 'Could not save the category. Try again.', te: 'వర్గాన్ని సేవ్ చేయలేకపోయాము. మళ్ళీ ప్రయత్నించండి.' },
+  helpNavTitle: { en: 'Help', te: 'సహాయం' },
+  helpPageTitle: { en: 'How to use this app', te: 'ఈ యాప్‌ను ఎలా ఉపయోగించాలి' },
+  helpIntro: {
+    en: 'Plain answers for the screens you can see. Search for a word, or replay the guided tour.',
+    te: 'మీకు కనిపించే స్క్రీన్‌లకు సులభమైన సమాధానాలు. ఒక పదం కోసం శోధించండి, లేదా గైడెడ్ టూర్‌ను మళ్ళీ చూడండి.',
+  },
+  tourReplayButton: { en: 'Take the tour', te: 'టూర్ చూడండి' },
+  tourLabel: { en: 'Guided tour', te: 'గైడెడ్ టూర్' },
+  tourStepOf: { en: 'Step {n} of {total}', te: '{total} లో {n}వ దశ' },
+  tourNext: { en: 'Next', te: 'తదుపరి' },
+  tourBack: { en: 'Back', te: 'వెనుకకు' },
+  tourSkip: { en: 'Skip tour', te: 'టూర్ దాటవేయండి' },
+  tourDone: { en: 'Got it', te: 'అర్థమైంది' },
 } as const satisfies Record<string, Bilingual>;
 
 export type StringKey = keyof typeof strings;
