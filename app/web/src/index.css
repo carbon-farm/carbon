@@ -1,42 +1,64 @@
-/* Same palette used across the Organic Carbon Farming documentation diagrams, for
-   visual continuity between the docs and the actual product. */
+/* "Earthy Agritech" design system (Stitch, 2026-09) — "grown from the soil": fertile-soil
+   greens, unbleached parchment, red-clay terracotta and sun-cured amber, warm-tinted shadows
+   instead of cold grey ones. Shared across the Organic Carbon Farming documentation diagrams
+   and the product for visual continuity. See docs/earthy-agritech-design-system.md for the
+   full rationale (colors, type scale, elevation, shape, component specs). */
 :root {
   --bg: #EFF1E6;
-  --bg-sunk: #E4E8D8;
-  --card: #FBFBF6;
-  --card-border: #CBD2B9;
-  --ink: #1D2A1A;
-  --ink-soft: #55624C;
-  --ink-faint: #838F76;
-  --rule: #C4CCB2;
+  --bg-elevated: #F8F9F3;
+  --bg-sunk: #E4E7D9;
+  --card: #FFFFFF;
+  --card-border: #E4E7D9;
+  --ink: #16261E;
+  --ink-soft: #4A5B52;
+  --ink-faint: #707972;
+  --rule: #E4E7D9;
   --accent: #2F6D4F;
   --accent-deep: #1F4E38;
   --accent-ink: #0F2A1C;
-  --accent-soft: #DCE7DA;
-  --danger: #A6402F;
-  --danger-soft: #F3DED9;
-  --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --accent-soft: #DCEEE2;
+  /* Terracotta — pending/attention states and high-urgency commercial actions. */
+  --warning: #C95A2B;
+  --warning-soft: #F7E3D7;
+  /* Muted river-slate — informational / "free tier" states. */
+  --info: #3A6966;
+  --info-soft: #DCEAE8;
+  --danger: #A83232;
+  --danger-soft: #F7DCDC;
+  --font-heading: 'Plus Jakarta Sans', var(--font-body);
+  --font-body: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
-  --shadow-sm: 0 1px 2px rgba(15, 42, 28, 0.06), 0 1px 1px rgba(15, 42, 28, 0.08);
-  --shadow-md: 0 4px 10px rgba(15, 42, 28, 0.08), 0 2px 4px rgba(15, 42, 28, 0.06);
-  --shadow-lg: 0 12px 28px rgba(15, 42, 28, 0.14), 0 4px 10px rgba(15, 42, 28, 0.08);
+  /* Shadows are warm-tinted (soil/moss, not cold grey) per the design system. */
+  --shadow-sm: 0 2px 6px rgba(22, 38, 30, 0.05), 0 1px 1px rgba(22, 38, 30, 0.06);
+  --shadow-md: 0 6px 16px rgba(22, 38, 30, 0.1), 0 2px 4px rgba(22, 38, 30, 0.06);
+  --shadow-lg: 0 12px 32px rgba(22, 38, 30, 0.16), 0 4px 10px rgba(22, 38, 30, 0.08);
   --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  /* Shape scale: small badges/thumbnails, tappable controls, cards — never a sharp corner. */
+  --radius-sm: 8px;
+  --radius-control: 12px;
+  --radius-card: 16px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #12160F;
-    --bg-sunk: #0C0F09;
-    --card: #1A2117;
-    --card-border: #3A4432;
-    --ink: #EDF0E5;
-    --ink-soft: #ABB79C;
-    --ink-faint: #78826B;
-    --rule: #3A4432;
+    --bg: #131E18;
+    --bg-elevated: #1B2921;
+    --bg-sunk: #1B2921;
+    --card: #23342B;
+    --card-border: #2F4338;
+    --ink: #E2F5E8;
+    --ink-soft: #A7C0B0;
+    --ink-faint: #7E9388;
+    --rule: #2F4338;
     --accent: #5FA37E;
     --accent-deep: #487F62;
     --accent-ink: #EAF3ED;
     --accent-soft: #223A2D;
+    --warning: #E08A5E;
+    --warning-soft: #3A2A1E;
+    --info: #7FB3AE;
+    --info-soft: #1E3330;
     --danger: #E08066;
     --danger-soft: #3A241E;
 
@@ -104,6 +126,7 @@ body {
 }
 
 .brand-wordmark .bi-en {
+  font-family: var(--font-heading);
   font-weight: 800;
   font-size: 17px;
   letter-spacing: -0.01em;
@@ -488,6 +511,7 @@ body {
 }
 
 h1 {
+  font-family: var(--font-heading);
   font-size: 26px;
   font-weight: 800;
   letter-spacing: -0.015em;
@@ -496,6 +520,7 @@ h1 {
 }
 
 h2 {
+  font-family: var(--font-heading);
   font-size: 18px;
   font-weight: 700;
   margin: 0;
@@ -504,7 +529,7 @@ h2 {
 .card {
   background: var(--card);
   border: 1px solid var(--card-border);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 18px;
   display: flex;
   flex-direction: column;
@@ -561,10 +586,10 @@ button .bi-te {
 input, select, textarea, button {
   font-size: 16px;
   font-family: inherit;
-  padding: 14px 16px;
-  border-radius: 8px;
-  border: 1px solid var(--card-border);
-  background: var(--bg);
+  padding: 16px 16px;
+  border-radius: var(--radius-control);
+  border: 1.5px solid var(--card-border);
+  background: var(--card);
   color: var(--ink);
   transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease), background 0.15s var(--ease), transform 0.1s var(--ease);
 }
@@ -577,6 +602,11 @@ textarea {
 input:focus, select:focus, textarea:focus, button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(47, 109, 79, 0.15);
 }
 
 .checkbox-label {
@@ -633,7 +663,7 @@ button.secondary:hover:not(:disabled) {
 .error-banner {
   background: var(--danger-soft);
   color: var(--danger);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   padding: 12px 14px;
   font-size: 14px;
 }
@@ -652,7 +682,7 @@ button.secondary:hover:not(:disabled) {
 .stat-tile {
   flex: 1 1 120px;
   background: var(--accent-soft);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   padding: 12px 14px;
 }
 
@@ -669,7 +699,7 @@ button.secondary:hover:not(:disabled) {
 
 .farm-item {
   border: 1px solid var(--card-border);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   padding: 12px 14px;
 }
 
@@ -687,7 +717,7 @@ button.secondary:hover:not(:disabled) {
   flex-direction: column;
   gap: 4px;
   border: 1px solid var(--card-border);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   padding: 12px 14px;
   text-decoration: none;
   color: inherit;
@@ -775,7 +805,7 @@ button.case-item:hover:not(:disabled) {
   width: 84px;
   height: 84px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--card-border);
 }
 
@@ -786,7 +816,7 @@ button.case-item:hover:not(:disabled) {
 .table-scroll {
   overflow-x: auto;
   border: 1px solid var(--card-border);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
 }
 
 .data-table {
@@ -961,7 +991,7 @@ button.case-item:hover:not(:disabled) {
 .feature-card {
   background: var(--card);
   border: 1px solid var(--card-border);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 20px;
   box-shadow: var(--shadow-sm);
   display: flex;
@@ -1034,7 +1064,7 @@ button.case-item:hover:not(:disabled) {
   gap: 10px;
   padding: 12px 14px;
   border: 1.5px solid var(--card-border);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   background: var(--card);
   color: var(--ink);
   cursor: pointer;
@@ -1168,7 +1198,7 @@ button.case-item:hover:not(:disabled) {
   background: var(--card);
   color: var(--ink);
   border: 1px solid var(--card-border);
-  border-radius: 14px;
+  border-radius: var(--radius-card);
   padding: 16px;
   box-shadow: var(--shadow-lg);
   display: flex;
@@ -1255,7 +1285,7 @@ button.case-item:hover:not(:disabled) {
   background: var(--accent-soft);
   color: var(--accent-ink);
   border: 1px solid var(--accent);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   padding: 10px 14px;
   font-size: 14px;
 }
@@ -1264,13 +1294,14 @@ button.case-item:hover:not(:disabled) {
 .product-thumb {
   display: block;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--card-border);
   background: var(--accent-soft);
 }
 .product-thumb.tile {
   width: 100%;
   aspect-ratio: 4 / 3;
+  border-radius: var(--radius-control);
 }
 .product-thumb.row {
   width: 64px;
@@ -1375,7 +1406,7 @@ button.case-item:hover:not(:disabled) {
   position: relative;
   display: block;
   aspect-ratio: 16 / 9;
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   overflow: hidden;
   background: var(--accent-deep);
   border: 1px solid var(--card-border);
