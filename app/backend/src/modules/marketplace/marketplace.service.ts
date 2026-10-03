@@ -19,6 +19,10 @@ import { CheckoutDto } from './dto/checkout.dto';
 import { SubmitReviewDto } from './dto/review.dto';
 import { SetDispatchStatusDto } from './dto/dispatch-status.dto';
 
+// Interactive transactions default to a 5s limit; checkout/cancel make several round trips to a
+// remote database and simultaneous buyers of one product queue on its stock row, so allow longer.
+const TX_OPTIONS = { maxWait: 15000, timeout: 30000 };
+
 const PRODUCT_INCLUDE = {
   category: true,
   vendor: { select: { id: true, businessName: true } },
@@ -605,7 +609,7 @@ export class MarketplaceService {
       }
       await tx.cartItem.deleteMany({ where: { userId } });
       return created;
-    });
+    }, TX_OPTIONS);
 
     await this.audit.log({
       actorId: userId,
@@ -737,7 +741,7 @@ export class MarketplaceService {
         });
       }
       return tx.order.findUniqueOrThrow({ where: { id: orderId }, include: { items: true } });
-    });
+    }, TX_OPTIONS);
     await this.audit.log({ actorId: adminId, action: 'order.cancel', entityType: 'Order', entityId: orderId });
     await this.notifications.create(
       updated.farmerId,
