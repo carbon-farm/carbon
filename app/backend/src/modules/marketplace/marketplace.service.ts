@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { DispatchStatus, Order, OrderPaymentStatus, OrderStatus, Prisma, Product, Role, VendorProfile } from '@prisma/client';
+import { DispatchStatus, Order, OrderPaymentStatus, OrderStatus, Prisma, Product, Role, StockMovementType, VendorProfile } from '@prisma/client';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
@@ -12,7 +12,8 @@ import { CreateCategoryDto, UpdateCategoryDto } from './dto/create-category.dto'
 import { AddressesService } from '../addresses/addresses.service';
 import { addressSnapshot, formatAddress } from '../addresses/address-format';
 import { MAX_CATEGORY_LEVEL, levelOf, resolveCategoryIds } from './category-tree';
-import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
+import { AdjustStockDto, CreateProductDto, UpdateProductDto } from './dto/product.dto';
+import { giveStock, recordMovement, roundMoney, takeStock } from './stock-ledger';
 import { AddToCartDto, GuestCartDto } from './dto/cart.dto';
 import { CheckoutDto } from './dto/checkout.dto';
 import { SubmitReviewDto } from './dto/review.dto';
@@ -192,28 +193,81 @@ export class MarketplaceService {
 
   async createProduct(requester: { userId: string; role: Role }, dto: CreateProductDto): Promise<Product> {
     const vendorId = requester.role === Role.VENDOR ? (await this.getApprovedVendorProfile(requester.userId)).id : null;
-    const created = await this.prisma.product.create({
-      data: {
-        name: dto.name,
-        description: dto.description,
-        price: dto.price,
-        unit: dto.unit,
-        stockQuantity: dto.stockQuantity,
-        categoryId: dto.categoryId,
-        vendorId,
-      },
-      include: PRODUCT_INCLUDE,
+    if (dto.categoryId) {
+      const category = await this.prisma.productCategoryMaster.findUnique({ where: { id: dto.categoryId } });
+      if (!category || !category.isActive) {
+        throw new BadRequestException(bi('Choose a category that exists', 'ఉన్న వర్గాన్ని ఎంచుకోండి'));
+      }
+    }
+    const created = await this.prisma.$transaction(async (tx) => {
+      const product = await tx.product.create({
+        data: {
+          name: dto.name.trim(),
+          description: dto.description.trim(),
+          price: dto.price,
+          unit: dto.unit.trim(),
+          stockQuantity: dto.stockQuantity,
+          categoryId: dto.categoryId,
+          vendorId,
+        },
+        include: PRODUCT_INCLUDE,
+      });
+      // the opening balance is the first line of the product's stock history
+      if (dto.stockQuantity > 0) {
+        await recordMovement(tx, {
+          productId: product.id,
+          type: StockMovementType.INITIAL,
+          quantityChange: dto.stockQuantity,
+          balanceAfter: dto.stockQuantity,
+          reason: 'Opening stock when the product was created',
+          actorId: requester.userId,
+        });
+      }
+      return product;
     });
-    await this.audit.log({ actorId: requester.userId, action: 'product.create', entityType: 'Product', entityId: created.id });
+    await this.audit.log({
+      actorId: requester.userId,
+      action: 'product.create',
+      entityType: 'Product',
+      entityId: created.id,
+      metadata: { price: created.price, stockQuantity: created.stockQuantity, sellerIsVendor: !!vendorId },
+    });
     return created;
   }
 
   async updateProduct(productId: string, requester: { userId: string; role: Role }, dto: UpdateProductDto): Promise<Product> {
     const existing = await this.getProductOrThrow(productId);
     await this.assertProductOwnership(existing, requester);
-    const updated = await this.prisma.product.update({ where: { id: productId }, data: dto, include: PRODUCT_INCLUDE });
-    await this.audit.log({ actorId: requester.userId, action: 'product.update', entityType: 'Product', entityId: productId });
-    return updated;
+    // Stock is never overwritten blindly: a screen that was opened before an order came in would
+    // otherwise put the sold units back. A stock figure in an edit is applied as a recorded stock-take.
+    const { stockQuantity, ...fields } = dto;
+    if (fields.categoryId) {
+      const category = await this.prisma.productCategoryMaster.findUnique({ where: { id: fields.categoryId } });
+      if (!category || !category.isActive) {
+        throw new BadRequestException(bi('Choose a category that exists', 'ఉన్న వర్గాన్ని ఎంచుకోండి'));
+      }
+    }
+    const before = { price: existing.price, isActive: existing.isActive };
+    await this.prisma.product.update({
+      where: { id: productId },
+      data: {
+        ...fields,
+        ...(fields.name !== undefined ? { name: fields.name.trim() } : {}),
+        ...(fields.description !== undefined ? { description: fields.description.trim() } : {}),
+        ...(fields.unit !== undefined ? { unit: fields.unit.trim() } : {}),
+      },
+    });
+    if (stockQuantity !== undefined && stockQuantity !== existing.stockQuantity) {
+      await this.adjustStock(productId, requester, { mode: 'SET', quantity: stockQuantity, reason: 'Edited on the product screen' });
+    }
+    await this.audit.log({
+      actorId: requester.userId,
+      action: 'product.update',
+      entityType: 'Product',
+      entityId: productId,
+      metadata: { before, changed: Object.keys(fields) },
+    });
+    return this.getProductOrThrow(productId);
   }
 
   async uploadProductImage(productId: string, requester: { userId: string; role: Role }, file: Express.Multer.File): Promise<Product> {
@@ -227,6 +281,79 @@ export class MarketplaceService {
     });
     await this.audit.log({ actorId: requester.userId, action: 'product.image.upload', entityType: 'Product', entityId: productId });
     return updated;
+  }
+
+  // Add stock (received), reduce it (damaged, expired, given away) or set it to a counted figure. Each
+  // is one atomic step with a line in the stock history, and a reduction can never take stock
+  // below zero.
+  async adjustStock(productId: string, requester: { userId: string; role: Role }, dto: AdjustStockDto) {
+    const existing = await this.getProductOrThrow(productId);
+    await this.assertProductOwnership(existing, requester);
+    const reason = dto.reason?.trim() || null;
+    if (dto.mode !== 'ADD' && (!reason || reason.length < 3)) {
+      throw new BadRequestException(
+        bi('Give a short reason for reducing or correcting stock', 'స్టాక్‌ను తగ్గించడానికి లేదా సరిచేయడానికి చిన్న కారణం ఇవ్వండి'),
+      );
+    }
+    if (dto.mode !== 'SET' && dto.quantity < 1) {
+      throw new BadRequestException(bi('Enter a quantity of at least 1', 'కనీసం 1 పరిమాణాన్ని నమోదు చేయండి'));
+    }
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      if (dto.mode === 'ADD') {
+        const balance = await giveStock(tx, productId, dto.quantity);
+        await recordMovement(tx, { productId, type: StockMovementType.ADD, quantityChange: dto.quantity, balanceAfter: balance, reason, actorId: requester.userId });
+        return { balance, change: dto.quantity, type: StockMovementType.ADD };
+      }
+      if (dto.mode === 'REDUCE') {
+        const balance = await takeStock(tx, productId, dto.quantity);
+        if (balance === null) {
+          const current = await tx.product.findUniqueOrThrow({ where: { id: productId }, select: { stockQuantity: true } });
+          throw new BadRequestException(
+            bi(`Only ${current.stockQuantity} in stock — you cannot reduce by ${dto.quantity}`, `స్టాక్‌లో కేవలం ${current.stockQuantity} ఉన్నాయి — ${dto.quantity} తగ్గించలేరు`),
+          );
+        }
+        await recordMovement(tx, { productId, type: StockMovementType.REDUCE, quantityChange: -dto.quantity, balanceAfter: balance, reason, actorId: requester.userId });
+        return { balance, change: -dto.quantity, type: StockMovementType.REDUCE };
+      }
+      // SET: correct to the counted figure. Applied only if the count did not move underneath us
+      // (an order arriving mid-count); otherwise we look again, so the recorded change is exact.
+      for (let attempt = 0; attempt < 4; attempt++) {
+        const current = await tx.product.findUniqueOrThrow({ where: { id: productId }, select: { stockQuantity: true } });
+        if (current.stockQuantity === dto.quantity) return { balance: current.stockQuantity, change: 0, type: StockMovementType.SET };
+        const won = await tx.product.updateMany({ where: { id: productId, stockQuantity: current.stockQuantity }, data: { stockQuantity: dto.quantity } });
+        if (won.count === 1) {
+          const change = dto.quantity - current.stockQuantity;
+          await recordMovement(tx, { productId, type: StockMovementType.SET, quantityChange: change, balanceAfter: dto.quantity, reason, actorId: requester.userId });
+          return { balance: dto.quantity, change, type: StockMovementType.SET };
+        }
+      }
+      throw new BadRequestException(bi('Stock is changing right now — try again', 'స్టాక్ ఇప్పుడు మారుతోంది — మళ్ళీ ప్రయత్నించండి'));
+    });
+
+    if (result.change !== 0) {
+      await this.audit.log({
+        actorId: requester.userId,
+        action: 'product.stock.adjust',
+        entityType: 'Product',
+        entityId: productId,
+        metadata: { mode: dto.mode, change: result.change, balanceAfter: result.balance, reason },
+      });
+    }
+    return { stockQuantity: result.balance, change: result.change };
+  }
+
+  // The product's stock history, newest first, with who did each change.
+  async listStockMovements(productId: string, requester: { userId: string; role: Role }) {
+    const existing = await this.getProductOrThrow(productId);
+    await this.assertProductOwnership(existing, requester);
+    const movements = await this.prisma.stockMovement.findMany({ where: { productId }, orderBy: { createdAt: 'desc' }, take: 300 });
+    const actorIds = [...new Set(movements.map((m) => m.actorId).filter((x): x is string => !!x))];
+    const actors = actorIds.length
+      ? await this.prisma.user.findMany({ where: { id: { in: actorIds } }, select: { id: true, name: true } })
+      : [];
+    const nameOf = new Map(actors.map((a) => [a.id, a.name]));
+    return { stockQuantity: existing.stockQuantity, movements: movements.map((m) => ({ ...m, actorName: m.actorId ? nameOf.get(m.actorId) ?? null : null })) };
   }
 
   // Public catalog — only active products from the platform itself
@@ -295,8 +422,16 @@ export class MarketplaceService {
 
   async setCartItem(userId: string, dto: AddToCartDto) {
     const product = await this.getProductOrThrow(dto.productId);
-    if (!product.isActive) {
+    if (!product.isActive || !(await this.isVendorApproved(product.vendorId))) {
       throw new BadRequestException(bi('This product is no longer available', 'ఈ ఉత్పత్తి ఇకపై అందుబాటులో లేదు'));
+    }
+    if (product.stockQuantity < 1) {
+      throw new BadRequestException(bi('This product is out of stock', 'ఈ ఉత్పత్తి స్టాక్‌లో లేదు'));
+    }
+    if (dto.quantity > product.stockQuantity) {
+      throw new BadRequestException(
+        bi(`Only ${product.stockQuantity} available`, `కేవలం ${product.stockQuantity} మాత్రమే అందుబాటులో ఉన్నాయి`),
+      );
     }
     await this.prisma.cartItem.upsert({
       where: { userId_productId: { userId, productId: dto.productId } },
@@ -384,12 +519,16 @@ export class MarketplaceService {
 
   async checkout(userId: string, role: Role, dto: CheckoutDto): Promise<Order> {
     await this.assertMembershipForCheckout(userId, role);
-    const cart = await this.prisma.cartItem.findMany({ where: { userId }, include: { product: true } });
+    const cart = await this.prisma.cartItem.findMany({
+      where: { userId },
+      include: { product: { include: { vendor: { select: { isApproved: true } } } } },
+      orderBy: { productId: 'asc' }, // a fixed order, so two checkouts can never wait on each other
+    });
     if (cart.length === 0) {
       throw new BadRequestException(bi('Your cart is empty', 'మీ కార్ట్ ఖాళీగా ఉంది'));
     }
     for (const item of cart) {
-      if (!item.product.isActive) {
+      if (!item.product.isActive || (item.product.vendor && !item.product.vendor.isApproved)) {
         throw new BadRequestException(
           bi(`"${item.product.name}" is no longer available`, `"${item.product.name}" ఇకపై అందుబాటులో లేదు`),
         );
@@ -416,8 +555,22 @@ export class MarketplaceService {
     }
     const paymentMethod = dto.paymentMethod ?? 'COD';
 
-    const totalAmount = cart.reduce((sum, item) => sum + item.quantity * item.product.price, 0);
+    const lines = cart.map((item) => ({ item, lineTotal: roundMoney(item.quantity * item.product.price) }));
+    const totalAmount = roundMoney(lines.reduce((sum, l) => sum + l.lineTotal, 0));
     const order = await this.prisma.$transaction(async (tx) => {
+      // Take the stock FIRST, one atomic statement per line that only succeeds while enough is
+      // there. The earlier check above is just for a friendly message; this is the one that
+      // counts — two people buying the last unit at the same moment get exactly one order.
+      const balances = new Map<string, number>();
+      for (const { item } of lines) {
+        const balance = await takeStock(tx, item.productId, item.quantity);
+        if (balance === null) {
+          throw new BadRequestException(
+            bi(`Not enough stock for "${item.product.name}"`, `"${item.product.name}"కు తగినంత స్టాక్ లేదు`),
+          );
+        }
+        balances.set(item.productId, balance);
+      }
       const created = await tx.order.create({
         data: {
           orderNumber: this.generateOrderNumber(),
@@ -427,20 +580,28 @@ export class MarketplaceService {
           paymentMethod,
           ...(shippingAddress ? { shippingAddress } : {}),
           items: {
-            create: cart.map((item) => ({
+            create: lines.map(({ item, lineTotal }) => ({
               productId: item.productId,
               vendorId: item.product.vendorId,
               productName: item.product.name,
               unitPrice: item.product.price,
               quantity: item.quantity,
-              lineTotal: item.quantity * item.product.price,
+              lineTotal,
             })),
           },
         },
         include: { items: true },
       });
-      for (const item of cart) {
-        await tx.product.update({ where: { id: item.productId }, data: { stockQuantity: { decrement: item.quantity } } });
+      for (const { item } of lines) {
+        await recordMovement(tx, {
+          productId: item.productId,
+          type: StockMovementType.SALE,
+          quantityChange: -item.quantity,
+          balanceAfter: balances.get(item.productId)!,
+          reason: `Order ${created.orderNumber}`,
+          orderId: created.id,
+          actorId: userId,
+        });
       }
       await tx.cartItem.deleteMany({ where: { userId } });
       return created;
@@ -554,10 +715,28 @@ export class MarketplaceService {
     }
     const items = await this.prisma.orderItem.findMany({ where: { orderId } });
     const updated = await this.prisma.$transaction(async (tx) => {
-      for (const item of items) {
-        await tx.product.update({ where: { id: item.productId }, data: { stockQuantity: { increment: item.quantity } } });
+      // Only one caller can win this switch, so a double click or two administrators cannot
+      // put the same units back on the shelf twice.
+      const flipped = await tx.order.updateMany({
+        where: { id: orderId, status: { notIn: [OrderStatus.DELIVERED, OrderStatus.CANCELLED] } },
+        data: { status: OrderStatus.CANCELLED },
+      });
+      if (flipped.count === 0) {
+        throw new BadRequestException(bi('This order was already cancelled or delivered', 'ఈ ఆర్డర్ ఇప్పటికే రద్దు చేయబడింది లేదా డెలివరీ అయింది'));
       }
-      return tx.order.update({ where: { id: orderId }, data: { status: OrderStatus.CANCELLED }, include: { items: true } });
+      for (const item of items) {
+        const balance = await giveStock(tx, item.productId, item.quantity);
+        await recordMovement(tx, {
+          productId: item.productId,
+          type: StockMovementType.CANCEL_RESTOCK,
+          quantityChange: item.quantity,
+          balanceAfter: balance,
+          reason: `Order ${existing.orderNumber} cancelled`,
+          orderId,
+          actorId: adminId,
+        });
+      }
+      return tx.order.findUniqueOrThrow({ where: { id: orderId }, include: { items: true } });
     });
     await this.audit.log({ actorId: adminId, action: 'order.cancel', entityType: 'Order', entityId: orderId });
     await this.notifications.create(

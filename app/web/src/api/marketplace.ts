@@ -217,7 +217,7 @@ export function getProduct(token: string, id: string) {
 export function updateProduct(
   token: string,
   id: string,
-  data: Partial<{ name: string; description: string; price: number; unit: string; stockQuantity: number; categoryId: string; isActive: boolean }>,
+  data: Partial<{ name: string; description: string; price: number; unit: string; categoryId: string; isActive: boolean }>,
 ) {
   return apiRequest<Product>(`/marketplace/products/${id}`, { method: 'PATCH', body: data, token });
 }
@@ -331,4 +331,30 @@ export function setItemDispatchStatus(token: string, orderId: string, itemId: st
     body: { status },
     token,
   });
+}
+
+// ---------- Stock ----------
+
+export type StockMode = 'ADD' | 'REDUCE' | 'SET';
+export type StockMovementType = 'INITIAL' | 'SALE' | 'CANCEL_RESTOCK' | 'ADD' | 'REDUCE' | 'SET';
+
+export interface StockMovement {
+  id: string;
+  type: StockMovementType;
+  quantityChange: number;
+  balanceAfter: number;
+  reason: string | null;
+  orderId: string | null;
+  actorName: string | null;
+  createdAt: string;
+}
+
+// ADD: stock received. REDUCE: stock taken out (needs a reason, cannot go below zero). SET: a
+// stock-take — correct the count to the counted figure (needs a reason).
+export function adjustStock(token: string, productId: string, data: { mode: StockMode; quantity: number; reason?: string }) {
+  return apiRequest<{ stockQuantity: number; change: number }>(`/marketplace/products/${productId}/stock`, { method: 'POST', body: data, token });
+}
+
+export function listStockMovements(token: string, productId: string) {
+  return apiRequest<{ stockQuantity: number; movements: StockMovement[] }>(`/marketplace/products/${productId}/stock-movements`, { token });
 }

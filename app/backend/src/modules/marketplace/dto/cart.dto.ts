@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { ArrayMaxSize, IsArray, IsInt, IsUUID, Min, ValidateNested } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsInt, IsUUID, Max, Min, ValidateNested } from 'class-validator';
 
 export class AddToCartDto {
   @IsUUID()
@@ -7,6 +7,7 @@ export class AddToCartDto {
 
   @IsInt()
   @Min(1)
+  @Max(999)
   quantity!: number;
 }
 

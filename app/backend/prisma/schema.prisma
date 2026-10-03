@@ -647,10 +647,11 @@ model Product {
   createdAt     DateTime               @default(now())
   updatedAt     DateTime               @updatedAt
 
-  cartItems    CartItem[]
-  orderItems   OrderItem[]
-  reviews      ProductReview[]
-  wishlistedBy ProductWishlist[]
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+  reviews        ProductReview[]
+  wishlistedBy   ProductWishlist[]
+  stockMovements StockMovement[]
 
   @@index([categoryId])
   @@index([vendorId])
@@ -689,6 +690,33 @@ model Address {
   updatedAt      DateTime @updatedAt
 
   @@index([userId])
+}
+
+// Every change to a product's stock, with who/why and the balance afterwards — so the count on
+// the shelf can always be explained: opening balance, sales, cancellations, and manual adds,
+// reductions and stock-takes. The Product.stockQuantity column stays the live number.
+enum StockMovementType {
+  INITIAL // opening balance (product created, or history began)
+  SALE // an order took stock
+  CANCEL_RESTOCK // a cancelled order gave it back
+  ADD // stock received
+  REDUCE // stock removed (damaged, expired, given away...)
+  SET // stock-take: count corrected to what was actually counted
+}
+
+model StockMovement {
+  id             String            @id @default(uuid())
+  productId      String
+  product        Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type           StockMovementType
+  quantityChange Int // + added, - removed
+  balanceAfter   Int
+  reason         String?
+  orderId        String?
+  actorId        String?
+  createdAt      DateTime          @default(now())
+
+  @@index([productId, createdAt])
 }
 
 model CartItem {

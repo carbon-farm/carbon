@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
-import { getProduct, updateProduct, uploadProductImage, type Product } from '../api/marketplace';
-import { Bi, BiValue } from '../i18n/Bi';
+import { getProduct, listCategories, updateProduct, uploadProductImage, type Product, type ProductCategory } from '../api/marketplace';
+import { flattenWithPaths } from '../catalog/categoryTree';
+import { StockPanel } from '../components/StockPanel';
+import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 
@@ -17,12 +19,16 @@ export function ProductEditPage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [statusBusy, setStatusBusy] = useState(false);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
 
   const backTo = session?.role === 'ADMINISTRATOR' ? '/marketplace/manage/products' : '/marketplace/vendor';
 
   useEffect(() => {
     if (!session || !id) return;
     loadProduct();
+    listCategories(session.accessToken)
+      .then(setCategories)
+      .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, id]);
 
@@ -54,7 +60,8 @@ export function ProductEditPage() {
           description: String(data.get('description') ?? ''),
           price: Number(data.get('price') ?? 0),
           unit: String(data.get('unit') ?? ''),
-          stockQuantity: Number(data.get('stockQuantity') ?? 0),
+          // stock is changed in the Stock panel below (recorded), never by overwriting it here
+          ...(String(data.get('categoryId') ?? '') ? { categoryId: String(data.get('categoryId')) } : {}),
         }),
       );
     } catch (err) {
@@ -142,8 +149,15 @@ export function ProductEditPage() {
                 <input name="unit" defaultValue={product.unit} onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler} required />
               </label>
               <label>
-                <Bi id="productStockField" />
-                <input name="stockQuantity" type="number" step="1" min="0" defaultValue={product.stockQuantity} onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler} required />
+                <Bi id="categoryLabel" />
+                <select name="categoryId" defaultValue={product.categoryId ?? ''}>
+                  <option value="">{biInline('selectPlaceholder')}</option>
+                  {flattenWithPaths(categories).map(({ node: c, path }) => (
+                    <option key={c.id} value={c.id}>
+                      {path}
+                    </option>
+                  ))}
+                </select>
               </label>
               <button type="submit" disabled={saving}>
                 {saving ? <BiValue value={strings.saving} /> : <Bi id="saveChangesButton" />}
@@ -160,6 +174,8 @@ export function ProductEditPage() {
               )}
             </button>
           </div>
+
+          <StockPanel productId={product.id} onStockChanged={(stock) => setProduct((p) => (p ? { ...p, stockQuantity: stock } : p))} />
         </>
       )}
 

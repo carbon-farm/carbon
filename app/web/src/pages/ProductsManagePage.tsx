@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
-import { listAllProductsForAdmin, type Product } from '../api/marketplace';
+import { listAllProductsForAdmin, listCategories, type Product, type ProductCategory } from '../api/marketplace';
+import { ProductCreateForm } from '../components/ProductCreateForm';
 import { ProductThumb } from '../components/ProductThumb';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
@@ -17,6 +18,9 @@ export function ProductsManagePage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [vendorFilter, setVendorFilter] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('newest');
+  const [showAdd, setShowAdd] = useState(false);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!session) return;
@@ -30,6 +34,9 @@ export function ProductsManagePage() {
         setError(err instanceof ApiError ? err.message : `${strings.couldNotLoadProducts.en} / ${strings.couldNotLoadProducts.te}`);
       })
       .finally(() => setLoading(false));
+    listCategories(session.accessToken)
+      .then(setCategories)
+      .catch(() => {});
   }, [session, logout]);
 
   const vendors = useMemo(
@@ -57,10 +64,24 @@ export function ProductsManagePage() {
 
   return (
     <>
-      <div>
-        <Bi id="adminEyebrow" as="span" className="eyebrow" />
-        <Bi id="productsManageTitle" as="h1" />
+      <div className="top-bar">
+        <div>
+          <Bi id="adminEyebrow" as="span" className="eyebrow" />
+          <Bi id="productsManageTitle" as="h1" />
+        </div>
+        <button type="button" className={showAdd ? 'secondary' : ''} onClick={() => setShowAdd((v) => !v)}>
+          {showAdd ? <Bi id="cancelButton" /> : <Bi id="addNewProductButton" />}
+        </button>
       </div>
+
+      {showAdd && (
+        <ProductCreateForm
+          categories={categories}
+          note={`${strings.adminAddProductNote.en} / ${strings.adminAddProductNote.te}`}
+          // straight to the product's own screen, where its photos can be added
+          onCreated={(product) => navigate(`/marketplace/manage/products/${product.id}`)}
+        />
+      )}
 
       {error && <div className="error-banner">{error}</div>}
 

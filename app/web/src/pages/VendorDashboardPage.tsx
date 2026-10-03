@@ -6,13 +6,12 @@ import {
   getMyVendorProfile,
   submitVendorProfile,
   listMyProducts,
-  createProduct,
   listCategories,
   type VendorProfile,
   type Product,
   type ProductCategory,
 } from '../api/marketplace';
-import { flattenWithPaths } from '../catalog/categoryTree';
+import { ProductCreateForm } from '../components/ProductCreateForm';
 import { ProductThumb } from '../components/ProductThumb';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
@@ -21,7 +20,6 @@ import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation
 export function VendorDashboardPage() {
   const { session, logout } = useAuth();
   const formRef = useRef<HTMLFormElement>(null);
-  const productFormRef = useRef<HTMLFormElement>(null);
   const [profile, setProfile] = useState<VendorProfile | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
@@ -33,7 +31,6 @@ export function VendorDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [submittingProfile, setSubmittingProfile] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [creatingProduct, setCreatingProduct] = useState(false);
 
   useEffect(() => {
     if (!session) return;
@@ -76,31 +73,6 @@ export function VendorDashboardPage() {
       setError(err instanceof ApiError ? err.message : `${strings.couldNotSubmitVendorProfile.en} / ${strings.couldNotSubmitVendorProfile.te}`);
     } finally {
       setSubmittingProfile(false);
-    }
-  }
-
-  async function handleCreateProduct() {
-    const form = productFormRef.current;
-    if (!session || !form || !form.reportValidity()) return;
-    setCreatingProduct(true);
-    setError(null);
-    const data = new FormData(form);
-    try {
-      const created = await createProduct(session.accessToken, {
-        name: String(data.get('name') ?? ''),
-        description: String(data.get('description') ?? ''),
-        price: Number(data.get('price') ?? 0),
-        unit: String(data.get('unit') ?? ''),
-        stockQuantity: Number(data.get('stockQuantity') ?? 0),
-        categoryId: String(data.get('categoryId') ?? '') || undefined,
-      });
-      setProducts((prev) => [created, ...prev]);
-      form.reset();
-      setShowAddForm(false);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : `${strings.couldNotCreateProduct.en} / ${strings.couldNotCreateProduct.te}`);
-    } finally {
-      setCreatingProduct(false);
     }
   }
 
@@ -155,44 +127,14 @@ export function VendorDashboardPage() {
           </div>
 
           {showAddForm && (
-            <div className="card">
-              <form ref={productFormRef} onSubmit={(e) => e.preventDefault()}>
-                <label>
-                  <Bi id="productNameField" />
-                  <input name="name" onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler} minLength={3} required />
-                </label>
-                <label>
-                  <Bi id="productDescriptionField" />
-                  <textarea name="description" onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler} minLength={10} rows={3} required />
-                </label>
-                <label>
-                  <Bi id="productPriceField" />
-                  <input name="price" type="number" step="0.01" min="0" onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler} required />
-                </label>
-                <label>
-                  <Bi id="productUnitField" />
-                  <input name="unit" onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler} required />
-                </label>
-                <label>
-                  <Bi id="productStockField" />
-                  <input name="stockQuantity" type="number" step="1" min="0" onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler} required />
-                </label>
-                <label>
-                  <Bi id="categoryLabel" />
-                  <select name="categoryId" defaultValue="">
-                    <option value="">{biInline('selectPlaceholder')}</option>
-                    {flattenWithPaths(categories).map(({ node: c, path }) => (
-                      <option key={c.id} value={c.id}>
-                        {path}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <button type="button" onClick={handleCreateProduct} disabled={creatingProduct}>
-                  {creatingProduct ? <BiValue value={strings.creatingProduct} /> : <Bi id="createProductButton" />}
-                </button>
-              </form>
-            </div>
+            <ProductCreateForm
+              categories={categories}
+              onCreated={(created) => {
+                setProducts((prev) => [created, ...prev]);
+                setShowAddForm(false);
+              }}
+              onError={setError}
+            />
           )}
 
           {products.length > 1 && (

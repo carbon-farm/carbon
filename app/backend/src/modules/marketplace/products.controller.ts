@@ -3,7 +3,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Role } from '@prisma/client';
 import { MAX_FILE_SIZE_BYTES } from '../uploads/uploads.service';
 import { MarketplaceService } from './marketplace.service';
-import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
+import { AdjustStockDto, CreateProductDto, UpdateProductDto } from './dto/product.dto';
 import { SubmitReviewDto } from './dto/review.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -52,6 +52,19 @@ export class ProductsController {
   @Patch(':id')
   updateProduct(@Param('id') id: string, @Body() dto: UpdateProductDto, @CurrentUser() user: AuthenticatedUser) {
     return this.marketplaceService.updateProduct(id, { userId: user.userId, role: user.role as Role }, dto);
+  }
+
+  // Stock: add, reduce or set to a counted figure (always recorded), and the history.
+  @Roles(Role.VENDOR, Role.ADMINISTRATOR)
+  @Post(':id/stock')
+  adjustStock(@Param('id') id: string, @Body() dto: AdjustStockDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.marketplaceService.adjustStock(id, { userId: user.userId, role: user.role as Role }, dto);
+  }
+
+  @Roles(Role.VENDOR, Role.ADMINISTRATOR)
+  @Get(':id/stock-movements')
+  listStockMovements(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.marketplaceService.listStockMovements(id, { userId: user.userId, role: user.role as Role });
   }
 
   @Roles(Role.VENDOR, Role.ADMINISTRATOR)
