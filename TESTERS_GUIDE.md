@@ -15,7 +15,7 @@ Everything on screen is **English first, Telugu directly underneath**. If you ev
 
 | Role | Mobile | Password | Notes |
 |---|---|---|---|
-| Administrator | `9999999999` | `ChangeMe123!` | Seeded account. **Still the default password** — rotation is pending (see section 9). |
+| Administrator | `9999999999` | *(ask the project owner — not written here because this guide is in a public repository)* | The first account created when the system was set up. Its password must be replaced (see section 9). |
 | Moderator / Expert / Vendor / Support Agent | — | — | Create each under *Administrator → People → Staff accounts* with any temporary password you choose. |
 | Member | — | — | Self-register at `/register`. There is **one** account type for everyone — no role to choose. |
 
@@ -149,7 +149,7 @@ A review found two ways to take over any account without the password: asking fo
 2. As an Administrator: a "Password reset requested" notification appears (once per person per 30 minutes — repeat requests do not spam). Open *Members & free access*, tap **Temporary password** for that person → confirm → a 10-character one-time password appears with a **Copy** button. It is shown once; closing the window loses it.
 3. As that person: the old password no longer works. Log in with the temporary one → you land on **Account** with a banner saying you must choose your own password; every other screen redirects back until you do. Choose one (the same one is refused, under 8 characters is refused) → you are logged out → log in with the new password → normal.
 4. An Administrator cannot issue a temporary password for themselves (refused with a message). If the only Administrator is locked out, whoever runs the server uses `npm run admin:reset-password -- <mobile number>` in `app/backend`.
-5. The seeded Administrator password (`ChangeMe123!`) should be replaced this way — it is the single most important thing still pending.
+5. The Administrator password set when the system was first installed should be replaced this way — it is the single most important thing still pending, and the original value is visible in this public repository's history.
 
 ### Other protections
 - **Wrong passwords:** 8 wrong attempts for one number lock it for 15 minutes — even the right password is refused ("Too many wrong attempts"). The limit is per number, so it does not lock out other people.
@@ -255,7 +255,7 @@ Anything it cannot answer that you think it should: write the question you typed
 | Type-check backend / web | `npx tsc --noEmit` in `app/backend` and `app/web` | no output |
 | **Help, tour and FAQ assistant** | `cd app/web && npm run check:help` | `ALL OK` — 65 FAQs, 47 phrasing checks, 69 tour steps, 25 help sections: every FAQ has English and Telugu, every FAQ is found by its own question, typical phrasings and nonsense behave, and every tour step points at something that exists for that role |
 
-The two end-to-end scripts need a local database: `docker compose up -d postgres` in `app/`, then `npx prisma migrate deploy && npx prisma db seed` with `DATABASE_URL=postgresql://agriai:agriai_dev_password@localhost:7002/agriai?schema=public`, start the backend with the same URL on port 7000, and run them with that `DATABASE_URL` set. Run them a minute apart (they use the sign-up routes, which are rate-limited). The seeded local Administrator is `9999999999` / `ChangeMe123!`; `scripts/e2e/visual-fixture.js` adds a demo member and data for looking at the screens.
+The two end-to-end scripts need a local database: `docker compose up -d postgres` in `app/`, then `npx prisma migrate deploy && npx prisma db seed` with `DATABASE_URL=postgresql://agriai:agriai_dev_password@localhost:7002/agriai?schema=public`, start the backend with the same URL on port 7000, and run them with that `DATABASE_URL` set. Run them a minute apart (they use the sign-up routes, which are rate-limited). The seeded local Administrator is `9999999999` (password in `app/backend/prisma/seed.ts`); `scripts/e2e/visual-fixture.js` adds a demo member and data for looking at the screens.
 
 Run `npm run check:help` whenever you change a screen, a menu link, `help/content.ts`, `help/faq.ts` or `tour/steps.ts`.
 
@@ -272,7 +272,7 @@ Run `npm run check:help` whenever you change a screen, a menu link, `help/conten
 - Learning has no real course content yet — the structure works; courses need to be authored.
 - None of the 30 products has a photo yet; stock figures for older products were placeholders and need real counts.
 - The membership prices (₹499 monthly placeholder) and the UPI ID need the real values set by the owner, and the QR should be scanned once on a real phone.
-- **Security still pending (owner's action):** the seeded Administrator password (`9999999999` / `ChangeMe123!`) has not been replaced — do it with `npm run admin:reset-password` or have another Administrator issue a temporary one; the Supabase `service_role` key has not been rotated.
+- **Security still pending (owner's action):** the Administrator password set at installation (account `9999999999`) has not been replaced — do it with `npm run admin:reset-password` or have another Administrator issue a temporary one; the Supabase `service_role` key has not been rotated.
 - Leftover test data on the live site: "ZZ …" test products and members from earlier test rounds. Run `npm run cleanup:test-data` (dry run first) against the live database after checking `DATABASE_URL`.
 - The help assistant answers only from its FAQ list; it does not understand every possible question (that is expected — see section 5).
 

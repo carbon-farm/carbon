@@ -39,7 +39,7 @@ Plan when an account exists:
 The Speak button uses the browser's own speech recognition, which exists on Chrome for Android but not everywhere, and Telugu quality varies. If real users need better: record a short clip in the browser, send it to a server-side Telugu speech-to-text service (AI4Bharat's open Telugu model, or a paid API with Telugu support) and fill the box with the result. That needs a hosting/cost decision, so it was left out; the keyboard's own microphone is the fallback shown on screen.
 
 ### Owner-only housekeeping
-- **Replace the seeded Administrator password** (`ChangeMe123!`): `cd app/backend && npm run admin:reset-password -- 9999999999` against the live database, then log in and choose your own. Rotate the Supabase `service_role` key too.
+- **Replace the seeded Administrator password** (it is in `prisma/seed.ts` and in this public repository's history, so treat it as known to everyone): `cd app/backend && npm run admin:reset-password -- 9999999999` against the live database, then log in and choose your own. Rotate the Supabase `service_role` key too.
 - **Clean up test data** on the live site: `npm run cleanup:test-data` (dry run lists everything), then `-- --apply`. Check `DATABASE_URL` first. At the time of writing the live shop still listed test products named "ZZ Inv …" from earlier test runs.
 - Set real plan prices and the UPI ID; upload product photos; add real descriptions that name the crops and problems each product treats (this is what the article suggestions match on).
 
