@@ -57,3 +57,53 @@ describe('UsersService.setActive', () => {
     );
   });
 });
+
+describe('UsersService — temporary passwords', () => {
+  let prisma: {
+    user: { findUnique: jest.Mock; update: jest.Mock };
+    refreshToken: { updateMany: jest.Mock };
+  };
+  let audit: { log: jest.Mock };
+  let service: UsersService;
+
+  beforeEach(() => {
+    prisma = {
+      user: { findUnique: jest.fn(), update: jest.fn().mockResolvedValue({}) },
+      refreshToken: { updateMany: jest.fn().mockResolvedValue({}) },
+    };
+    audit = { log: jest.fn().mockResolvedValue(undefined) };
+    service = new UsersService(prisma as unknown as PrismaService, audit as unknown as AuditService);
+  });
+
+  const member = { id: 'm1', name: 'Asha', userCode: 'HHC-0001', isActive: true, role: Role.MEMBER };
+
+  it('issues a readable one-time password, forces a change, signs the person out and never audits the password', async () => {
+    prisma.user.findUnique.mockResolvedValue(member);
+    const res = await service.issueTemporaryPassword('m1', 'admin-1');
+    expect(res.temporaryPassword).toMatch(/^[a-zA-Z2-9]{10}$/);
+    expect(res.temporaryPassword).toMatch(/[a-zA-Z]/);
+    expect(res.temporaryPassword).toMatch(/\d/);
+    expect(res.temporaryPassword).not.toMatch(/[01OIl]/);
+    expect(prisma.user.update).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ mustChangePassword: true }) }));
+    expect(prisma.refreshToken.updateMany).toHaveBeenCalled();
+    expect(JSON.stringify(audit.log.mock.calls)).not.toContain(res.temporaryPassword);
+    expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ action: 'user.temporary_password_issued', entityId: 'm1' }));
+  });
+
+  it('gives different passwords each time', async () => {
+    prisma.user.findUnique.mockResolvedValue(member);
+    const a = await service.issueTemporaryPassword('m1', 'admin-1');
+    const b = await service.issueTemporaryPassword('m1', 'admin-1');
+    expect(a.temporaryPassword).not.toBe(b.temporaryPassword);
+  });
+
+  it('refuses your own account, an unknown account and an inactive account', async () => {
+    prisma.user.findUnique.mockResolvedValue(member);
+    await expect(service.issueTemporaryPassword('m1', 'm1')).rejects.toBeInstanceOf(BadRequestException);
+    prisma.user.findUnique.mockResolvedValue(null);
+    await expect(service.issueTemporaryPassword('nope', 'admin-1')).rejects.toThrow();
+    prisma.user.findUnique.mockResolvedValue({ ...member, isActive: false });
+    await expect(service.issueTemporaryPassword('m1', 'admin-1')).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.user.update).not.toHaveBeenCalled();
+  });
+});

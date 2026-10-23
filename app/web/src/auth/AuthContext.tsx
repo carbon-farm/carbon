@@ -9,6 +9,8 @@ interface Session {
   accessToken: string;
   refreshToken: string;
   role: string;
+  // Set while the person is on an Administrator-issued temporary password.
+  mustChangePassword?: boolean;
 }
 
 interface RegisterResult {
@@ -17,20 +19,14 @@ interface RegisterResult {
   devOtp?: string; // only ever present outside production — see backend AuthService.issueOtp
 }
 
-interface RequestOtpResult {
-  message: string;
-  devOtp?: string;
-}
-
 interface AuthContextValue {
   session: Session | null;
   register: (mobileNumber: string, password: string, name: string) => Promise<RegisterResult>;
   verifyRegistrationOtp: (mobileNumber: string, code: string) => Promise<{ role: string }>;
-  login: (mobileNumber: string, password: string) => Promise<{ role: string }>;
+  login: (mobileNumber: string, password: string) => Promise<{ role: string; mustChangePassword: boolean }>;
   logout: () => void;
-  requestPasswordResetOtp: (mobileNumber: string) => Promise<RequestOtpResult>;
-  verifyPasswordResetOtp: (mobileNumber: string, code: string) => Promise<string>;
-  resetPassword: (mobileNumber: string, newPassword: string, resetToken: string) => Promise<void>;
+  // Tells the store's Administrators that this person wants their password reset. Never returns a code.
+  requestPasswordReset: (mobileNumber: string) => Promise<void>;
 }
 
 const STORAGE_KEY = 'agriai.session';
@@ -98,35 +94,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (mobileNumber: string, password: string) => {
-    const result = await apiRequest<{ accessToken: string; refreshToken: string; role: string }>('/auth/login', {
+    const result = await apiRequest<{ accessToken: string; refreshToken: string; role: string; mustChangePassword?: boolean }>('/auth/login', {
       method: 'POST',
       body: { mobileNumber, password },
     });
     const role = normalizeRole(result.role);
-    await foldGuestCartIntoAccount(result.accessToken, role);
-    setSession({ accessToken: result.accessToken, refreshToken: result.refreshToken, role });
-    return { role };
+    const mustChangePassword = !!result.mustChangePassword;
+    if (!mustChangePassword) await foldGuestCartIntoAccount(result.accessToken, role);
+    setSession({ accessToken: result.accessToken, refreshToken: result.refreshToken, role, mustChangePassword });
+    return { role, mustChangePassword };
   }, []);
 
-  const requestPasswordResetOtp = useCallback((mobileNumber: string) => {
-    return apiRequest<RequestOtpResult>('/auth/otp/request', {
+  const requestPasswordReset = useCallback(async (mobileNumber: string) => {
+    await apiRequest('/auth/otp/request', {
       method: 'POST',
       body: { mobileNumber, purpose: 'PASSWORD_RESET' },
-    });
-  }, []);
-
-  const verifyPasswordResetOtp = useCallback(async (mobileNumber: string, code: string) => {
-    const result = await apiRequest<{ verified: boolean; resetToken: string }>('/auth/otp/verify', {
-      method: 'POST',
-      body: { mobileNumber, code, purpose: 'PASSWORD_RESET' },
-    });
-    return result.resetToken;
-  }, []);
-
-  const resetPassword = useCallback(async (mobileNumber: string, newPassword: string, resetToken: string) => {
-    await apiRequest('/auth/password/reset', {
-      method: 'POST',
-      body: { mobileNumber, newPassword, resetToken },
     });
   }, []);
 
@@ -147,20 +129,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       verifyRegistrationOtp,
       login,
       logout,
-      requestPasswordResetOtp,
-      verifyPasswordResetOtp,
-      resetPassword,
+      requestPasswordReset,
     }),
-    [
-      session,
-      register,
-      verifyRegistrationOtp,
-      login,
-      logout,
-      requestPasswordResetOtp,
-      verifyPasswordResetOtp,
-      resetPassword,
-    ],
+    [session, register, verifyRegistrationOtp, login, logout, requestPasswordReset],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

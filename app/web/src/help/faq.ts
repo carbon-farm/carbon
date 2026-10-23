@@ -78,8 +78,8 @@ export const FAQS: Faq[] = [
     q: { en: 'I did not get an SMS code', te: 'నాకు SMS కోడ్ రాలేదు' },
     a: [
       {
-        en: 'Sign-up and password-reset codes are not texted yet. The 6-digit code appears on the screen itself, under a red “Temporary” banner. Type that in.',
-        te: 'సైన్-అప్, పాస్‌వర్డ్ రీసెట్ కోడ్‌లు ఇంకా SMS ద్వారా రావు. 6 అంకెల కోడ్ ఎరుపు “తాత్కాలికం” బ్యానర్ కింద స్క్రీన్‌పైనే కనిపిస్తుంది. దాన్ని టైప్ చేయండి.',
+        en: 'Sign-up codes are not texted yet. The 6-digit code appears on the screen itself, under a red “Temporary” banner. Type that in. (Resetting a forgotten password does not use a code — see “I forgot my password”.)',
+        te: 'సైన్-అప్ కోడ్‌లు ఇంకా SMS ద్వారా రావు. 6 అంకెల కోడ్ ఎరుపు “తాత్కాలికం” బ్యానర్ కింద స్క్రీన్‌పైనే కనిపిస్తుంది. దాన్ని టైప్ చేయండి. (మర్చిపోయిన పాస్‌వర్డ్‌ను రీసెట్ చేయడానికి కోడ్ వాడరు — “నా పాస్‌వర్డ్ మర్చిపోయాను” చూడండి.)',
       },
     ],
     keywords: ['not received', 'did not get', 'didnt get', 'sms code', 'code not coming', 'sms', 'otp', 'code not', 'no code', 'verification code', 'six digit', '6 digit', 'code రాలేదు', 'కోడ్', 'ఓటీపీ', 'code radu', 'code ravatledu'],
@@ -91,12 +91,12 @@ export const FAQS: Faq[] = [
     q: { en: 'I forgot my password', te: 'నా పాస్‌వర్డ్ మర్చిపోయాను' },
     a: [
       {
-        en: 'On the log-in screen choose “Forgot password”. Enter your mobile number, type the 6-digit code shown on screen, then choose a new password.',
-        te: 'లాగిన్ స్క్రీన్‌లో “పాస్‌వర్డ్ మర్చిపోయారా” ఎంచుకోండి. మీ మొబైల్ నంబర్ నమోదు చేసి, స్క్రీన్‌పై కనిపించే 6 అంకెల కోడ్ టైప్ చేసి, కొత్త పాస్‌వర్డ్ ఎంచుకోండి.',
+        en: 'For your safety only the store can reset a password. On the log-in screen choose “Forgot password” and enter your mobile number — the store’s Administrators are told. Contact the store and quote your ID (like HHC-0042). An Administrator checks it is really you and gives you a temporary password. Log in with it and you will be asked to choose your own password straight away.',
+        te: 'మీ భద్రత కోసం పాస్‌వర్డ్‌ను స్టోర్ మాత్రమే రీసెట్ చేయగలదు. లాగిన్ స్క్రీన్‌లో “పాస్‌వర్డ్ మర్చిపోయారా” ఎంచుకుని మీ మొబైల్ నంబర్ నమోదు చేయండి — స్టోర్ అడ్మినిస్ట్రేటర్లకు తెలియజేయబడుతుంది. స్టోర్‌ను సంప్రదించి మీ ID (HHC-0042 లాగా) చెప్పండి. అది నిజంగా మీరేనని అడ్మినిస్ట్రేటర్ నిర్ధారించుకుని మీకు తాత్కాలిక పాస్‌వర్డ్ ఇస్తారు. దానితో లాగిన్ అయితే వెంటనే మీ స్వంత పాస్‌వర్డ్‌ను ఎంచుకోమని అడుగుతుంది.',
       },
     ],
     keywords: ['forgot password', 'forgot my password', 'reset password', 'lost password', 'cannot log in', 'cant login', "can't login", 'unable to login', 'పాస్‌వర్డ్ మర్చిపోయ', 'పాస్‌వర్డ్ మర్చి', 'password marchipoyanu', 'password marchipoya'],
-    link: { to: '/forgot-password', label: { en: 'Reset my password', te: 'నా పాస్‌వర్డ్ రీసెట్ చేయండి' } },
+    link: { to: '/forgot-password', label: { en: 'Ask the store to reset it', te: 'రీసెట్ చేయమని స్టోర్‌ను అడగండి' } },
   },
   {
     id: 'show-password',
@@ -116,8 +116,8 @@ export const FAQS: Faq[] = [
     q: { en: 'How do I change my password?', te: 'నా పాస్‌వర్డ్‌ను ఎలా మార్చాలి?' },
     a: [
       {
-        en: 'Open Account in the top bar, enter your current password and a new one. You will be logged out afterwards and sign in again with the new password.',
-        te: 'పై బార్‌లో ఖాతా తెరిచి, మీ ప్రస్తుత పాస్‌వర్డ్, కొత్తది నమోదు చేయండి. ఆ తర్వాత మీరు లాగ్ అవుట్ అవుతారు; కొత్త పాస్‌వర్డ్‌తో మళ్ళీ సైన్ ఇన్ అవ్వండి.',
+        en: 'Open Account in the top bar, enter your current password and a new one. You will be logged out afterwards and sign in again with the new password. If an Administrator gave you a temporary password, this screen opens by itself after you log in and nothing else works until you have chosen your own.',
+        te: 'పై బార్‌లో ఖాతా తెరిచి, మీ ప్రస్తుత పాస్‌వర్డ్, కొత్తది నమోదు చేయండి. ఆ తర్వాత మీరు లాగ్ అవుట్ అవుతారు; కొత్త పాస్‌వర్డ్‌తో మళ్ళీ సైన్ ఇన్ అవ్వండి. అడ్మినిస్ట్రేటర్ మీకు తాత్కాలిక పాస్‌వర్డ్ ఇచ్చి ఉంటే, లాగిన్ అయిన తర్వాత ఈ స్క్రీన్ దానంతట అదే తెరుచుకుంటుంది; మీ స్వంతదాన్ని ఎంచుకునే వరకు ఇంకేదీ పనిచేయదు.',
       },
     ],
     keywords: ['పాస్‌వర్డ్ మార్చ', 'పాస్‌వర్డ్‌ను మార్చ', 'change password', 'change my password', 'new password', 'update password', 'పాస్‌వర్డ్ మార్చ', 'password marchali'],
@@ -419,8 +419,8 @@ export const FAQS: Faq[] = [
     q: { en: 'How do I ask an expert about a problem in my field?', te: 'నా పొలంలోని సమస్య గురించి నిపుణుడిని ఎలా అడగాలి?' },
     a: [
       {
-        en: 'Open My cases → New case. Choose the category, add your crop, describe the problem and attach photos. A moderator passes it to the right expert. You get a bell notification when they answer, and you can reply if they need more detail.',
-        te: 'నా కేసులు → కొత్త కేసు తెరవండి. వర్గం ఎంచుకుని, మీ పంట జోడించి, సమస్యను వివరించి ఫోటోలు జోడించండి. మోడరేటర్ దాన్ని సరైన నిపుణుడికి పంపుతారు. వారు సమాధానం ఇచ్చినప్పుడు బెల్ నోటిఫికేషన్ వస్తుంది; మరిన్ని వివరాలు అడిగితే మీరు బదులివ్వవచ్చు.',
+        en: 'Open My cases → New case (or tap “Photo your problem” on the shop home). First take up to 6 photos, then tap the symptoms you see — or speak or type a few words — and choose your land, the category and the crop. A moderator passes it to the right expert. You get a bell notification when they answer, and you can reply if they need more detail.',
+        te: 'నా కేసులు → కొత్త కేసు తెరవండి (లేదా షాప్ హోమ్‌లో “సమస్య ఫోటో తీయండి” తాకండి). మొదట 6 వరకు ఫోటోలు తీయండి, తర్వాత మీకు కనిపించే లక్షణాలను తాకండి — లేదా కొన్ని మాటలు మాట్లాడండి లేదా టైప్ చేయండి — మీ భూమి, వర్గం, పంటను ఎంచుకోండి. మోడరేటర్ దాన్ని సరైన నిపుణుడికి పంపుతారు. వారు సమాధానం ఇచ్చినప్పుడు బెల్ నోటిఫికేషన్ వస్తుంది; మరిన్ని వివరాలు అడిగితే మీరు బదులివ్వవచ్చు.',
       },
     ],
     keywords: ['నిపుణుడిని ఎలా అడగాలి', 'పొలంలోని సమస్య', 'case', 'cases', 'ask expert', 'ask an expert', 'crop problem', 'disease', 'pest', 'problem in my field', 'advice', 'photo', 'కేసు', 'నిపుణుడు', 'పంట సమస్య', 'తెగులు', 'సలహా', 'samasya'],
@@ -464,6 +464,119 @@ export const FAQS: Faq[] = [
     ],
     keywords: ['soil', 'soil test', 'soil testing', 'sample', 'lab', 'report', 'నేల', 'నేల పరీక్ష', 'నమూనా', 'మట్టి', 'matti'],
     link: { to: '/soil-samples', label: { en: 'Open Soil Testing', te: 'నేల పరీక్ష తెరవండి' } },
+  },
+
+  {
+    id: 'case-photos',
+    audience: MEMBER,
+    q: { en: 'How do I add photos to my case?', te: 'నా కేసుకు ఫోటోలు ఎలా జోడించాలి?' },
+    a: [
+      {
+        en: 'On the New case screen, step 1 is photos: tap “Take a photo” to use the camera, or “Choose from gallery”. You can add up to 6. They are made smaller on your phone before sending, so they upload quickly even on a slow connection. A close photo of the worst part and one of the whole plant help the expert most.',
+        te: 'కొత్త కేసు స్క్రీన్‌లో 1వ దశ ఫోటోలు: కెమెరా వాడటానికి “ఫోటో తీయండి” తాకండి, లేదా “గ్యాలరీ నుండి ఎంచుకోండి”. 6 వరకు జోడించవచ్చు. పంపే ముందు అవి మీ ఫోన్‌లోనే చిన్నవిగా చేయబడతాయి, కాబట్టి నెమ్మదైన కనెక్షన్‌లో కూడా త్వరగా అప్‌లోడ్ అవుతాయి. ఎక్కువ దెబ్బతిన్న భాగం యొక్క దగ్గరి ఫోటో, మొత్తం మొక్క ఫోటో నిపుణుడికి ఎక్కువగా సహాయపడతాయి.',
+      },
+    ],
+    keywords: ['photo', 'photos', 'picture', 'camera', 'upload photo', 'add photo', 'add photos', 'take photo', 'ఫోటో', 'ఫోటోలు', 'కెమెరా', 'photo ela'],
+    link: { to: '/cases/new', label: { en: 'Start a new case', te: 'కొత్త కేసు ప్రారంభించండి' } },
+  },
+  {
+    id: 'voice',
+    audience: MEMBER,
+    q: { en: 'Can I speak instead of typing?', te: 'టైప్ చేయడానికి బదులు మాట్లాడవచ్చా?' },
+    a: [
+      {
+        en: 'Yes. On the New case screen tap “Speak” (choose తెలుగు or English first) and say your problem. Where your browser offers it, the words appear in the box. If you do not see the Speak button, tap the microphone on your phone keyboard instead — it also types what you say, in Telugu.',
+        te: 'అవును. కొత్త కేసు స్క్రీన్‌లో “మాట్లాడండి” తాకి (ముందు తెలుగు లేదా English ఎంచుకోండి) మీ సమస్య చెప్పండి. మీ బ్రౌజర్‌లో అది ఉంటే, మాటలు బాక్స్‌లో కనిపిస్తాయి. మాట్లాడండి బటన్ కనిపించకపోతే, మీ ఫోన్ కీబోర్డ్‌లోని మైక్రోఫోన్‌ను తాకండి — అది కూడా మీరు చెప్పినదాన్ని తెలుగులో టైప్ చేస్తుంది.',
+      },
+    ],
+    keywords: ['speak', 'voice', 'microphone', 'mic', 'talk', 'say', 'voice typing', 'dictate', 'మాట్లాడ', 'మైక్రోఫోన్', 'వాయిస్', 'matladali', 'matladochha'],
+  },
+  {
+    id: 'symptom-chips',
+    audience: MEMBER,
+    q: { en: 'I cannot type well — how else can I describe the problem?', te: 'నేను బాగా టైప్ చేయలేను — సమస్యను ఇంకెలా వివరించాలి?' },
+    a: [
+      {
+        en: 'Tap the symptom pictures on the New case screen (yellow leaves, spots, wilting, insects, and more). Everything you tap is written into your case in English and Telugu for you. Add photos, and speak a few words if you like.',
+        te: 'కొత్త కేసు స్క్రీన్‌లోని లక్షణాల చిత్రాలను తాకండి (పసుపు ఆకులు, మచ్చలు, వాడిపోవడం, పురుగులు, ఇంకా). మీరు తాకినవన్నీ మీ కోసం ఇంగ్లీష్, తెలుగులో మీ కేసులో రాయబడతాయి. ఫోటోలు జోడించండి, కావాలంటే కొన్ని మాటలు మాట్లాడండి.',
+      },
+    ],
+    keywords: ['cannot type', "can't type", 'cant type', 'not able to type', 'symptom', 'symptoms', 'describe problem', 'low literacy', 'టైప్ చేయలేను', 'లక్షణాలు', 'వివరించాలి'],
+  },
+  {
+    id: 'recommended',
+    audience: MEMBER,
+    q: { en: 'What are “Products that may help” under an article?', te: 'వ్యాసం కింద “ఇవి సహాయపడవచ్చు” అంటే ఏమిటి?' },
+    a: [
+      {
+        en: 'Under each advice article the shop suggests products whose names or descriptions mention the same problem or crop — for example magnesium sulphate under an article about magnesium deficiency. It is a convenience, not a prescription: if you are not sure what your own field needs, ask an expert in My cases.',
+        te: 'ప్రతి సలహా వ్యాసం కింద, అదే సమస్య లేదా పంటను పేర్కొనే పేర్లు లేదా వివరణలున్న ఉత్పత్తులను షాప్ సూచిస్తుంది — ఉదాహరణకు మెగ్నీషియం లోపం వ్యాసం కింద మెగ్నీషియం సల్ఫేట్. ఇది సౌకర్యం మాత్రమే, సూచన కాదు: మీ స్వంత పొలానికి ఏమి కావాలో ఖచ్చితంగా తెలియకపోతే, నా కేసులలో నిపుణుడిని అడగండి.',
+      },
+    ],
+    keywords: ['products that may help', 'recommended', 'recommendation', 'suggested products', 'what to buy', 'which product', 'సహాయపడవచ్చు', 'సూచించిన', 'ఏ ఉత్పత్తి'],
+    link: { to: '/knowledge', label: { en: 'Open Knowledge', te: 'జ్ఞానం తెరవండి' } },
+  },
+  {
+    id: 'back-in-stock',
+    audience: MEMBER,
+    q: { en: 'Can I be told when an out-of-stock product comes back?', te: 'స్టాక్ లేని ఉత్పత్తి తిరిగి వచ్చినప్పుడు నాకు చెప్పగలరా?' },
+    a: [
+      {
+        en: 'Yes. Open the product and tap “Tell me when it is back”. When stock returns you get a notification in the bell (and on WhatsApp if you chose that), and the request is then cleared. Tap again any time to cancel.',
+        te: 'అవును. ఉత్పత్తిని తెరిచి “మళ్ళీ వచ్చినప్పుడు నాకు చెప్పండి” తాకండి. స్టాక్ తిరిగి వచ్చినప్పుడు బెల్‌లో నోటిఫికేషన్ వస్తుంది (మీరు ఎంచుకుంటే WhatsApp లో కూడా), ఆ తర్వాత అభ్యర్థన తొలగించబడుతుంది. రద్దు చేయడానికి ఎప్పుడైనా మళ్ళీ తాకండి.',
+      },
+    ],
+    keywords: ['tell me when', 'back in stock', 'notify me', 'when available', 'when it is back', 'restock', 'out of stock notify', 'మళ్ళీ వచ్చినప్పుడు', 'స్టాక్ వచ్చినప్పుడు', 'తిరిగి వచ్చినప్పుడు'],
+  },
+  {
+    id: 'reorder',
+    audience: MEMBER,
+    q: { en: 'How do I order the same things again?', te: 'అవే వస్తువులను మళ్ళీ ఎలా ఆర్డర్ చేయాలి?' },
+    a: [
+      {
+        en: 'Open an earlier order in My orders and tap “Order again”. Everything still available goes into your cart (as much as is in stock) and the cart opens so you can check it. Anything out of stock is skipped and you are told.',
+        te: 'నా ఆర్డర్‌లలో ఇంతకు ముందటి ఆర్డర్‌ను తెరిచి “మళ్ళీ ఆర్డర్ చేయండి” తాకండి. ఇంకా అందుబాటులో ఉన్నవన్నీ (స్టాక్‌లో ఉన్నంత వరకు) మీ కార్ట్‌లోకి వెళ్తాయి, చూసుకోవడానికి కార్ట్ తెరుచుకుంటుంది. స్టాక్ లేనివి వదిలివేయబడతాయి, మీకు తెలియజేయబడుతుంది.',
+      },
+    ],
+    keywords: ['అవే వస్తువులను మళ్ళీ', 'మళ్ళీ ఆర్డర్ చేయాలి', 'అవే వస్తువులు', 'ఆర్డర్ చేయాలి అవే', 'order again', 'reorder', 're-order', 'repeat order', 'same order', 'buy again', 'order same', 'మళ్ళీ ఆర్డర్', 'అదే ఆర్డర్', 'మళ్ళీ కొనాలి'],
+    link: { to: '/marketplace/orders', label: { en: 'My orders', te: 'నా ఆర్డర్‌లు' } },
+  },
+  {
+    id: 'receipt',
+    audience: ['MEMBER', 'ADMINISTRATOR'],
+    q: { en: 'How do I get a receipt for an order?', te: 'ఆర్డర్‌కు రసీదు ఎలా పొందాలి?' },
+    a: [
+      {
+        en: 'Open the order and tap “Receipt”, then “Print / save as PDF”. It lists what was ordered, the address, how it was paid and the total, in English and Telugu. It is an order receipt, not a tax invoice.',
+        te: 'ఆర్డర్ తెరిచి “రసీదు” తాకి, తర్వాత “ప్రింట్ / PDF గా సేవ్ చేయండి” తాకండి. ఇది ఏమి ఆర్డర్ చేశారో, చిరునామా, ఎలా చెల్లించారో, మొత్తాన్ని ఇంగ్లీష్, తెలుగులో చూపిస్తుంది. ఇది ఆర్డర్ రసీదు, పన్ను ఇన్వాయిస్ కాదు.',
+      },
+    ],
+    keywords: ['receipt for my order', 'need a receipt', 'receipt for order', 'get a receipt', 'receipt', 'invoice', 'bill', 'print order', 'pdf', 'proof of purchase', 'రసీదు', 'బిల్లు', 'ఇన్వాయిస్'],
+  },
+  {
+    id: 'today',
+    audience: MEMBER,
+    q: { en: 'What is the “Today” section at the top of the shop?', te: 'షాప్ పైన ఉన్న “ఈ రోజు” భాగం ఏమిటి?' },
+    a: [
+      {
+        en: 'A quick summary just for you: how many days of membership are left, your open cases (highlighted when an expert has answered), your latest order, and a button to photograph a problem. Each card opens the screen where you can act on it.',
+        te: 'మీ కోసమే ఒక త్వరిత సారాంశం: సభ్యత్వం ఎన్ని రోజులు మిగిలింది, మీ ఓపెన్ కేసులు (నిపుణుడు సమాధానం ఇచ్చినప్పుడు హైలైట్ అవుతుంది), మీ తాజా ఆర్డర్, సమస్యను ఫోటో తీయడానికి బటన్. ప్రతి కార్డ్ మీరు చర్య తీసుకోగల స్క్రీన్‌ను తెరుస్తుంది.',
+      },
+    ],
+    keywords: ['today', 'home', 'summary', 'dashboard', 'days left', 'ఈ రోజు', 'సారాంశం'],
+  },
+  {
+    id: 'whatsapp',
+    audience: MEMBER,
+    q: { en: 'Can I get updates on WhatsApp?', te: 'అప్‌డేట్‌లు WhatsApp లో పొందవచ్చా?' },
+    a: [
+      {
+        en: 'When the store has switched WhatsApp on, Account shows a “WhatsApp updates” box. Tick it and your order, payment, membership and back-in-stock updates are also sent to your mobile number on WhatsApp. It is off until you tick it, you can untick it any time, and the same updates always appear under the bell in the app. If you do not see the box, WhatsApp is not switched on yet.',
+        te: 'స్టోర్ WhatsApp ను ఆన్ చేసినప్పుడు, ఖాతాలో “WhatsApp అప్‌డేట్‌లు” బాక్స్ కనిపిస్తుంది. దాన్ని టిక్ చేస్తే మీ ఆర్డర్, చెల్లింపు, సభ్యత్వం, స్టాక్ తిరిగి వచ్చిన అప్‌డేట్‌లు మీ మొబైల్ నంబర్‌కు WhatsApp లో కూడా వస్తాయి. మీరు టిక్ చేసే వరకు ఇది ఆఫ్‌లో ఉంటుంది, ఎప్పుడైనా టిక్ తీసివేయవచ్చు, అవే అప్‌డేట్‌లు యాప్‌లోని గంట కింద ఎల్లప్పుడూ కనిపిస్తాయి. బాక్స్ కనిపించకపోతే, WhatsApp ఇంకా ఆన్ కాలేదు.',
+      },
+    ],
+    keywords: ['whatsapp', 'whats app', 'wa updates', 'message me', 'వాట్సాప్', 'వాట్సప్', 'whatsapp lo'],
+    link: { to: '/account/password', label: { en: 'Open Account', te: 'ఖాతా తెరవండి' } },
   },
 
   // ------------------------------------------------------------ administrator
@@ -648,6 +761,59 @@ export const FAQS: Faq[] = [
     ],
     keywords: ['credential', 'credentials', 'qualification', 'qualifications', 'verify expert', 'అర్హత', 'అర్హతలు'],
     link: { to: '/admin/credentials', label: { en: 'Expert credentials', te: 'నిపుణుల ధృవపత్రాలు' } },
+  },
+
+  {
+    id: 'admin-temp-password',
+    audience: ADMIN,
+    popular: true,
+    q: { en: 'Someone forgot their password — what do I do?', te: 'ఎవరో పాస్‌వర్డ్ మర్చిపోయారు — నేనేం చేయాలి?' },
+    a: [
+      {
+        en: 'You get a bell notification “Password reset requested” when someone asks. Check it really is them (for example call the number on their account, or confirm their ID and recent order). Then People → Members & free access (or Staff accounts) → “Temporary password” → Issue password. Read the one-time password out to them; it is shown only once. Their old password stops working and they choose their own at the next log in. Every use is recorded in the audit log (never the password itself).',
+        te: 'ఎవరైనా అడిగినప్పుడు మీకు బెల్ నోటిఫికేషన్ “పాస్‌వర్డ్ రీసెట్ అభ్యర్థన” వస్తుంది. నిజంగా వారేనని నిర్ధారించుకోండి (ఉదాహరణకు వారి ఖాతాలోని నంబర్‌కు ఫోన్ చేయండి, లేదా వారి ID, ఇటీవలి ఆర్డర్‌ను నిర్ధారించుకోండి). తర్వాత వ్యక్తులు → సభ్యులు & ఉచిత ప్రాప్యత (లేదా సిబ్బంది ఖాతాలు) → “తాత్కాలిక పాస్‌వర్డ్” → పాస్‌వర్డ్ ఇవ్వండి. ఒక్కసారి వాడే పాస్‌వర్డ్‌ను వారికి చదివి చెప్పండి; అది ఒక్కసారి మాత్రమే కనిపిస్తుంది. వారి పాత పాస్‌వర్డ్ పనిచేయదు, తదుపరి లాగిన్‌లో వారు తమ స్వంతదాన్ని ఎంచుకుంటారు. ప్రతి వినియోగం ఆడిట్ లాగ్‌లో నమోదవుతుంది (పాస్‌వర్డ్ మాత్రం కాదు).',
+      },
+    ],
+    keywords: ['someone forgot', 'forgot their password', 'member forgot password', 'someone forgot their password', 'ఎవరో పాస్‌వర్డ్ మర్చి', 'పాస్‌వర్డ్ మర్చిపోయారు', 'ఎవరో పాస్‌వర్డ్', 'forgot password', 'reset password', 'member forgot', 'temporary password', 'temp password', 'password reset requested', 'issue password', 'unlock account', 'పాస్‌వర్డ్ మర్చి', 'తాత్కాలిక పాస్‌వర్డ్'],
+    link: { to: '/admin/members', label: { en: 'Open Members', te: 'సభ్యులు తెరవండి' } },
+  },
+  {
+    id: 'admin-lost-admin-password',
+    audience: ADMIN,
+    q: { en: 'I am the only administrator and I lost my password', te: 'నేనే ఏకైక అడ్మినిస్ట్రేటర్‌ని, నా పాస్‌వర్డ్ పోయింది' },
+    a: [
+      {
+        en: 'Another administrator can issue you a temporary password. If you are the only one, whoever manages the server runs one command in app/backend: npm run admin:reset-password -- <your mobile number>. It prints a temporary password and you choose your own at the next log in. It is also the way to replace the seeded first password.',
+        te: 'మరో అడ్మినిస్ట్రేటర్ మీకు తాత్కాలిక పాస్‌వర్డ్ ఇవ్వగలరు. మీరు ఒక్కరే అయితే, సర్వర్‌ను నిర్వహించే వ్యక్తి app/backend లో ఒక కమాండ్ నడపాలి: npm run admin:reset-password -- <మీ మొబైల్ నంబర్>. అది తాత్కాలిక పాస్‌వర్డ్ ఇస్తుంది, తదుపరి లాగిన్‌లో మీరు మీ స్వంతదాన్ని ఎంచుకుంటారు. మొదటి సీడ్ పాస్‌వర్డ్‌ను మార్చడానికి కూడా ఇదే మార్గం.',
+      },
+    ],
+    keywords: ['only administrator', 'lost admin password', 'admin locked out', 'cannot log in as admin', 'reset admin password', 'command line', 'అడ్మిన్ పాస్‌వర్డ్', 'ఏకైక అడ్మినిస్ట్రేటర్'],
+  },
+  {
+    id: 'admin-usage',
+    audience: ADMIN,
+    q: { en: 'How do I see what people use and what the assistant could not answer?', te: 'ప్రజలు ఏమి వాడుతున్నారో, అసిస్టెంట్ ఏది సమాధానం ఇవ్వలేకపోయిందో ఎలా చూడాలి?' },
+    a: [
+      {
+        en: 'Insights & setup → Usage & questions. It shows, for the last 7–90 days, the most opened screens, the help-assistant questions it could not answer (each is a missing FAQ answer — add it in help/faq.ts), the answers it gave, how the guided tour ended, and errors people hit. Only counts are kept — no names, numbers or passwords — for 90 days.',
+        te: 'నివేదికలు & సెటప్ → వినియోగం & ప్రశ్నలు. గత 7–90 రోజులకు ఎక్కువగా తెరిచిన స్క్రీన్‌లు, సహాయ అసిస్టెంట్ సమాధానం ఇవ్వలేకపోయిన ప్రశ్నలు (ప్రతి ఒక్కటి లేని FAQ సమాధానం — help/faq.ts లో చేర్చండి), అది ఇచ్చిన సమాధానాలు, గైడెడ్ టూర్ ఎలా ముగిసింది, ప్రజలు ఎదుర్కొన్న లోపాలు చూపిస్తుంది. లెక్కలు మాత్రమే — పేర్లు, నంబర్లు, పాస్‌వర్డ్‌లు కాదు — 90 రోజులు ఉంచబడతాయి.',
+      },
+    ],
+    keywords: ['what people use', 'what the assistant could not answer', 'ప్రజలు ఏమి వాడుతున్నారో', 'అసిస్టెంట్ ఏది సమాధానం', 'సమాధానం ఇవ్వలేకపోయింది', 'ఎలా చూడాలి వాడుతున్నారో', 'usage', 'statistics', 'analytics', 'unanswered', 'what do people use', 'errors reported', 'most visited', 'page views', 'వినియోగం', 'గణాంకాలు', 'సమాధానం ఇవ్వలేని'],
+    link: { to: '/admin/usage', label: { en: 'Open Usage', te: 'వినియోగం తెరవండి' } },
+  },
+  {
+    id: 'admin-low-stock',
+    audience: ['ADMINISTRATOR', 'VENDOR'],
+    q: { en: 'How will I know when stock is running low?', te: 'స్టాక్ తక్కువైనప్పుడు నాకు ఎలా తెలుస్తుంది?' },
+    a: [
+      {
+        en: 'When a sale takes a product down to 5 or fewer, the administrators (and the selling vendor) get a bell notification “Running low on stock”, and another when it reaches zero. Each is sent once, when the line is crossed. In Manage products use the Stock filter (Low or Out of stock) to see them all. Members who asked to be told when it returns are notified the moment you add stock.',
+        te: 'అమ్మకం వల్ల ఉత్పత్తి 5 లేదా అంతకంటే తక్కువకు వచ్చినప్పుడు, అడ్మినిస్ట్రేటర్లకు (మరియు అమ్మే విక్రేతకు) బెల్ నోటిఫికేషన్ “స్టాక్ తక్కువగా ఉంది” వస్తుంది, సున్నాకు చేరినప్పుడు మరొకటి. ప్రతి ఒక్కటి ఆ గీతను దాటినప్పుడు ఒక్కసారి పంపబడుతుంది. ఉత్పత్తులను నిర్వహించండిలో స్టాక్ ఫిల్టర్ (తక్కువ లేదా స్టాక్ లేదు) వాడి అన్నింటినీ చూడండి. తిరిగి వచ్చినప్పుడు చెప్పమని అడిగిన సభ్యులకు మీరు స్టాక్ జోడించిన క్షణంలోనే తెలియజేయబడుతుంది.',
+      },
+    ],
+    keywords: ['low stock', 'running low', 'stock alert', 'stock low', 'out of stock alert', 'reorder level', 'స్టాక్ తక్కువ', 'స్టాక్ అలర్ట్'],
+    link: { to: '/marketplace/manage/products', label: { en: 'Manage products', te: 'ఉత్పత్తులను నిర్వహించండి' } },
   },
 
   // ------------------------------------------------------- other staff roles

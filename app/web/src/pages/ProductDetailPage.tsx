@@ -18,6 +18,7 @@ import { setGuestCartItem } from '../cart/guestCart';
 import { readGuestWishlist, toggleGuestWishlist } from '../cart/guestWishlist';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
+import { StockWatchButton } from '../components/StockWatchButton';
 
 export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -158,7 +159,10 @@ export function ProductDetailPage() {
             <div className="meta">{product.vendor?.businessName ?? strings.platformSoldOption.en}</div>
 
             {!canShop ? null : product.stockQuantity === 0 ? (
-              <BiValue value={strings.outOfStockNotice} as="p" className="hint" />
+              <>
+                <BiValue value={strings.outOfStockNotice} as="p" className="hint" />
+                {session?.role === 'MEMBER' && <StockWatchButton productId={product.id} />}
+              </>
             ) : (
               <>
                 <label>

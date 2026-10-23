@@ -5,6 +5,7 @@ import { changeMyPassword, getMe, type AdminUser } from '../api/admin';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 import { PasswordInput } from '../components/PasswordInput';
+import { WhatsAppOptIn } from '../components/WhatsAppOptIn';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 
 // Open to every role. Changing the password revokes all refresh tokens on
@@ -65,6 +66,16 @@ export function ChangePasswordPage() {
             <Bi id="mobileNumberLabel" />
           </div>
           <div>{me.mobileNumber}</div>
+        </div>
+      )}
+
+      {me?.whatsappAvailable && session?.role === 'MEMBER' && !session.mustChangePassword && (
+        <WhatsAppOptIn initial={!!me.whatsappOptIn} mobileNumber={me.mobileNumber} />
+      )}
+
+      {session?.mustChangePassword && !done && (
+        <div className="payment-strip alert" role="status">
+          <BiValue value={strings.tempPasswordMustChange} />
         </div>
       )}
 

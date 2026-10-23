@@ -125,6 +125,11 @@ model User {
   name              String
   preferredLanguage String    @default("te") // Telugu, per 01-Product/05-Target-Users.md
   isActive          Boolean   @default(true)
+  // Set when an Administrator issues a temporary password; the person must choose their own
+  // before anything else works (see JwtAuthGuard). Cleared when they change it.
+  mustChangePassword Boolean  @default(false)
+  // The member ticked "send my updates on WhatsApp" (see notifications/whatsapp.service.ts).
+  whatsappOptIn      Boolean  @default(false)
   // Set when an Administrator deactivates the account, so it is never mistaken
   // for a never-activated pending registration (which register() will resend).
   deactivatedAt     DateTime?
@@ -929,4 +934,32 @@ model HariharaaSettings {
   updatedBy            User?          @relation("HariharaaSettingsUpdater", fields: [updatedByUserId], references: [id])
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
+}
+
+// Privacy-light usage statistics and error reports, kept on our own database (no third party).
+// Deliberately holds no user id or phone number — only the kind of person (role), what happened
+// and where. `kind` is one of: page, chat_answer, chat_unanswered, tour, error. Rows older than
+// 90 days are deleted by a nightly sweep.
+model UsageEvent {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  kind      String
+  name      String
+  detail    String?
+  role      String?
+
+  @@index([kind, createdAt])
+  @@index([createdAt])
+}
+
+// "Tell me when it is back": a member asks to be told when an out-of-stock product returns. One
+// row per member and product; deleted once the notice has been sent.
+model StockWatch {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([productId])
 }

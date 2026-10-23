@@ -58,6 +58,20 @@ export interface Product {
   updatedAt: string;
 }
 
+// Shop products whose names/descriptions share the article's problem and crop words.
+export function getRecommendedForArticle(token: string, articleId: string) {
+  return apiRequest<Product[]>(`/marketplace/recommendations/article/${articleId}`, { token });
+}
+
+// "Tell me when it is back in stock" (members).
+export function listMyStockWatches(token: string) {
+  return apiRequest<string[]>('/marketplace/stock-watch/mine', { token });
+}
+
+export function toggleStockWatch(token: string, productId: string) {
+  return apiRequest<{ watching: boolean }>(`/marketplace/stock-watch/${productId}`, { method: 'POST', token });
+}
+
 export interface CartItem {
   id: string;
   productId: string;

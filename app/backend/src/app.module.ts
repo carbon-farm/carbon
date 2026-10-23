@@ -18,12 +18,19 @@ import { MarketplaceModule } from './modules/marketplace/marketplace.module';
 import { MediaModule } from './modules/media/media.module';
 import { HariharaaModule } from './modules/hariharaa/hariharaa.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
+import { TelemetryModule } from './modules/telemetry/telemetry.module';
 import { HealthController } from './health/health.controller';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
+    // A generous per-visitor ceiling for everything (phones on one mobile network often share a
+    // single address, so it is deliberately high); the log-in and sign-up routes set tighter
+    // limits of their own (see AuthController), and a wrong-password lock per number backs them up.
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 600 }]),
     PrismaModule,
     AuditModule,
     NotificationsModule,
@@ -41,7 +48,9 @@ import { HealthController } from './health/health.controller';
     HariharaaModule,
     AddressesModule,
     MediaModule,
+    TelemetryModule,
   ],
   controllers: [HealthController],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

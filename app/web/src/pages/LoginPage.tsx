@@ -23,7 +23,11 @@ export function LoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      const { role } = await login(mobileNumber, password);
+      const { role, mustChangePassword } = await login(mobileNumber, password);
+      if (mustChangePassword) {
+        navigate('/account/password');
+        return;
+      }
       // ?next=/marketplace/cart brings a visitor back to where they were (same-site paths only).
       const next = searchParams.get('next');
       navigate(next && /^\/(?!\/)/.test(next) ? next : roleHomePath(role));

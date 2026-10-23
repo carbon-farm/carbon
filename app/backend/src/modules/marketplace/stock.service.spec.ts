@@ -32,7 +32,7 @@ describe('MarketplaceService.adjustStock', () => {
       $transaction: jest.fn((cb: (t: unknown) => unknown) => cb(tx)),
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
-    service = new MarketplaceService(prisma, audit as any, {} as any, {} as any, {} as any, {} as any);
+    service = new MarketplaceService(prisma, audit as any, {} as any, {} as any, {} as any, {} as any, { afterStockGiven: jest.fn(), afterStockTaken: jest.fn() } as any);
   });
 
   it('ADD gives stock back atomically and writes a ledger line with the balance', async () => {

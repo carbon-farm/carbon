@@ -11,6 +11,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      includeAssets: ['favicon.svg', 'favicon-32.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'Organic Carbon Farming / ఆర్గానిక్ కార్బన్ ఫార్మింగ్',
         short_name: 'Carbon Farming',
@@ -19,11 +20,35 @@ export default defineConfig({
         background_color: '#EFF1E6',
         display: 'standalone',
         start_url: '/',
-        icons: [],
+        scope: '/',
+        lang: 'te',
+        categories: ['agriculture', 'shopping', 'education'],
+        icons: [
+          { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          // Full-bleed artwork with the leaf inside the safe zone, so Android can crop it round or square.
+          { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
+        shortcuts: [
+          { name: 'Marketplace / మార్కెట్‌ప్లేస్', url: '/marketplace', icons: [{ src: '/icon-192.png', sizes: '192x192' }] },
+          { name: 'Help / సహాయం', url: '/help', icons: [{ src: '/icon-192.png', sizes: '192x192' }] },
+        ],
       },
     }),
   ],
   server: {
     port: 7001,
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        // Libraries change rarely; keeping them in their own files lets a phone reuse them from its
+        // cache when only the app's own code changes.
+        manualChunks: {
+          react: ['react', 'react-dom', 'react-router-dom'],
+          qr: ['react-qr-code'],
+        },
+      },
+    },
   },
 });

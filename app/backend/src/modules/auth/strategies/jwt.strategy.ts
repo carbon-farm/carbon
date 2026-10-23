@@ -31,11 +31,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   // Administrator deactivating an account takes effect immediately instead
   // of after the 15-minute access token expires.
   async validate(payload: JwtPayload): Promise<AuthenticatedUser> {
-    const user = await this.prisma.user.findUnique({ where: { id: payload.sub }, select: { isActive: true } });
+    const user = await this.prisma.user.findUnique({ where: { id: payload.sub }, select: { isActive: true, mustChangePassword: true } });
     if (!user?.isActive) {
       throw new UnauthorizedException(bi('This account is deactivated', 'ఈ ఖాతా నిష్క్రియం చేయబడింది'));
     }
     // A token issued before the FARMER/CUSTOMER -> MEMBER merge still carries the old role.
-    return { userId: payload.sub, role: normalizeRole(payload.role), mobileNumber: payload.mobileNumber };
+    return {
+      userId: payload.sub,
+      role: normalizeRole(payload.role),
+      mobileNumber: payload.mobileNumber,
+      mustChangePassword: user.mustChangePassword,
+    };
   }
 }

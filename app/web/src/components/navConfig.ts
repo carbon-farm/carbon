@@ -118,6 +118,7 @@ export const NAV: Record<string, NavEntry[]> = {
       labelKey: 'navGroupInsights',
       items: [
         { to: '/admin/reports', labelKey: 'reportsLinkTitle' },
+        { to: '/admin/usage', labelKey: 'usageNavTitle' },
         { to: '/admin/audit', labelKey: 'auditLogLinkTitle' },
         { to: '/admin/taxonomy', labelKey: 'taxonomyLinkTitle' },
       ],

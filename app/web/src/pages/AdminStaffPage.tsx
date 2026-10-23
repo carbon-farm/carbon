@@ -6,6 +6,7 @@ import { listUsers, createStaffUser, setUserActive, type AdminUser } from '../ap
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, type StringKey } from '../i18n/strings';
 import { PasswordInput } from '../components/PasswordInput';
+import { TemporaryPasswordButton } from '../components/TemporaryPasswordButton';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 
 const ROLES = [
@@ -234,7 +235,8 @@ export function AdminStaffPage() {
                   active Administrator, and its message is shown above. */}
               <button type="button" className="secondary" onClick={() => handleToggleActive(u)} disabled={busyUserId === u.id}>
                 {u.isActive ? <Bi id="deactivateAccountButton" /> : <Bi id="reactivateAccountButton" />}
-              </button>
+              </button>{' '}
+              {u.isActive && <TemporaryPasswordButton userId={u.id} name={u.name} userCode={u.userCode} />}
             </div>
           ))
         )}

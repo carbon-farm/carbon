@@ -13,6 +13,7 @@ import {
 } from '../api/knowledge';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings, caseCategoryLabel } from '../i18n/strings';
+import { RecommendedProducts } from '../components/RecommendedProducts';
 
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
 function isImageUrl(url: string): boolean {
@@ -173,6 +174,8 @@ export function ArticleViewPage() {
           )}
         </div>
       )}
+
+      {article && id && <RecommendedProducts articleId={id} />}
 
       {article && (
         <div className="card">

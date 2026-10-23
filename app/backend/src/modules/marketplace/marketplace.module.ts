@@ -5,6 +5,9 @@ import { ProductsController } from './products.controller';
 import { CartController } from './cart.controller';
 import { OrdersController } from './orders.controller';
 import { CatalogController } from './catalog.controller';
+import { RecommendationsController } from './recommendations.controller';
+import { WatchesController } from './watches.controller';
+import { StockAlertsService } from './stock-alerts.service';
 import { OrderPaymentsService } from './order-payments.service';
 import { AddressesModule } from '../addresses/addresses.module';
 import { WishlistController } from './wishlist.controller';
@@ -13,7 +16,7 @@ import { HariharaaModule } from '../hariharaa/hariharaa.module';
 
 @Module({
   imports: [UploadsModule, HariharaaModule, AddressesModule],
-  controllers: [MarketplaceController, ProductsController, CartController, OrdersController, WishlistController, CatalogController],
-  providers: [MarketplaceService, OrderPaymentsService],
+  controllers: [MarketplaceController, ProductsController, CartController, OrdersController, WishlistController, CatalogController, RecommendationsController, WatchesController],
+  providers: [MarketplaceService, OrderPaymentsService, StockAlertsService],
 })
 export class MarketplaceModule {}

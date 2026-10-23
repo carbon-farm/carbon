@@ -5,6 +5,7 @@ import { ApiError } from '../../api/client';
 import { grantFreeAccess, listMembers, revokeFreeAccess, type Member, type MemberLabel } from '../../api/hariharaa';
 import { Bi, BiValue, biInline } from '../../i18n/Bi';
 import { strings, type StringKey } from '../../i18n/strings';
+import { TemporaryPasswordButton } from '../../components/TemporaryPasswordButton';
 
 type SortKey = 'userCode' | 'name' | 'mobileNumber' | 'label' | 'until' | 'createdAt';
 type SortDir = 'asc' | 'desc';
@@ -241,7 +242,8 @@ export function AdminMembersPage() {
                         <button type="button" className="secondary" onClick={() => handleRevoke(m)} disabled={busyId === m.id}>
                           <Bi id="memberRevokeFreeButton" />
                         </button>
-                      )}
+                      )}{' '}
+                      {m.isActive && <TemporaryPasswordButton userId={m.id} name={m.name} userCode={m.userCode} />}
                     </td>
                   </tr>
                 );

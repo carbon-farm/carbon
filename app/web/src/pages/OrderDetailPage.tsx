@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import {
@@ -9,6 +9,7 @@ import {
   deliverOrder,
   cancelOrder,
   setItemDispatchStatus,
+  setCartItem,
   startOrderPayment,
   claimOrderPayment,
   reviewOrderPayment,
@@ -32,6 +33,9 @@ export function OrderDetailPage() {
   const [payLink, setPayLink] = useState<OrderPaymentLink | null>(null);
   const [paying, setPaying] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+  const navigate = useNavigate();
+  const [reordering, setReordering] = useState(false);
+
 
   const isStaff = session?.role === 'ADMINISTRATOR';
   const isOwner = session?.role === 'MEMBER';
@@ -51,6 +55,38 @@ export function OrderDetailPage() {
     loadOrder();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, id]);
+
+  // "Order again": puts what this order contained back in the cart (as much as is in stock) and
+  // opens the cart, so the member can check it and go to checkout.
+  async function handleReorder() {
+    if (!session || !order) return;
+    setReordering(true);
+    setError(null);
+    let skipped = 0;
+    for (const item of order.items) {
+      try {
+        await setCartItem(session.accessToken, item.productId, item.quantity);
+      } catch {
+        skipped += 1;
+      }
+    }
+    setReordering(false);
+    if (skipped === order.items.length) {
+      setError(`${strings.reorderNothingAvailable.en} / ${strings.reorderNothingAvailable.te}`);
+      return;
+    }
+    if (skipped > 0) {
+      try {
+        sessionStorage.setItem(
+          'agriai.cartNotice',
+          `${strings.reorderSomeSkipped.en.replace('{n}', String(skipped))} / ${strings.reorderSomeSkipped.te.replace('{n}', String(skipped))}`,
+        );
+      } catch {
+        // the cart still opens; the note is only a courtesy
+      }
+    }
+    navigate('/marketplace/cart');
+  }
 
   function loadOrder() {
     if (!session || !id) return;
@@ -255,6 +291,20 @@ export function OrderDetailPage() {
               </div>
             );
           })}
+          {(isOwner || isStaff) && (
+            <div className="stat-row no-print">
+              {isOwner && (
+                <button type="button" onClick={handleReorder} disabled={reordering}>
+                  {reordering ? <BiValue value={strings.addingToCart} /> : <Bi id="reorderButton" />}
+                </button>
+              )}
+              <Link to={`/marketplace/orders/${order.id}/receipt`}>
+                <button type="button" className="secondary">
+                  <Bi id="receiptButton" />
+                </button>
+              </Link>
+            </div>
+          )}
           <div className="stat-row">
             <div className="stat-tile">
               <div className="value">₹{order.totalAmount.toFixed(2)}</div>

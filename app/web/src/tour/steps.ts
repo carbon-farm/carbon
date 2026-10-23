@@ -70,6 +70,11 @@ export const TOURS: Record<Audience, TourStep[]> = {
       te: 'మీ పేరు, వ్యక్తిగత ID (HHC-0042 లాగా) ఎల్లప్పుడూ ఇక్కడ ఉంటాయి. మమ్మల్ని సంప్రదించినప్పుడు లేదా చెల్లించినప్పుడు ఈ ID చెప్పండి.',
     },
     {
+      target: 'today',
+      en: 'Today: days of membership left, your open cases, your latest order, and a button to photograph a problem — all one tap from here.',
+      te: 'ఈ రోజు: సభ్యత్వ రోజులు మిగిలినవి, మీ ఓపెన్ కేసులు, మీ తాజా ఆర్డర్, సమస్యను ఫోటో తీయడానికి బటన్ — అన్నీ ఇక్కడి నుండి ఒక్క తాకుతో.',
+    },
+    {
       target: 'payment-strip',
       en: 'This strip means your membership payment is not confirmed yet. It disappears by itself once we verify your payment.',
       te: 'ఈ స్ట్రిప్ అంటే మీ సభ్యత్వ చెల్లింపు ఇంకా నిర్ధారణ కాలేదు. మేము మీ చెల్లింపును ధృవీకరించగానే అది దానంతట అదే మాయమవుతుంది.',
@@ -101,13 +106,13 @@ export const TOURS: Record<Audience, TourStep[]> = {
     },
     {
       target: '/cases',
-      en: 'My cases: describe a problem in your field with photos, and an expert will answer. Members only.',
-      te: 'నా కేసులు: మీ పొలంలోని సమస్యను ఫోటోలతో వివరించండి, నిపుణుడు సమాధానం ఇస్తారు. సభ్యులకు మాత్రమే.',
+      en: 'My cases: take photos of a problem in your field, tap the symptoms or speak, and an expert will answer. Members only.',
+      te: 'నా కేసులు: మీ పొలంలోని సమస్య ఫోటోలు తీయండి, లక్షణాలను తాకండి లేదా మాట్లాడండి, నిపుణుడు సమాధానం ఇస్తారు. సభ్యులకు మాత్రమే.',
     },
     {
       target: '/knowledge',
-      en: 'Knowledge: advice articles written from real, solved cases. Bookmark the ones you like.',
-      te: 'జ్ఞానం: నిజమైన, పరిష్కరించిన కేసుల నుండి రాసిన సలహా వ్యాసాలు. మీకు నచ్చినవాటిని బుక్‌మార్క్ చేయండి.',
+      en: 'Knowledge: advice articles written from real, solved cases, with shop products that may help under each. Bookmark the ones you like.',
+      te: 'జ్ఞానం: నిజమైన, పరిష్కరించిన కేసుల నుండి రాసిన సలహా వ్యాసాలు, ప్రతిదాని కింద సహాయపడే షాప్ ఉత్పత్తులు. మీకు నచ్చినవాటిని బుక్‌మార్క్ చేయండి.',
     },
     {
       target: '/courses',
@@ -136,7 +141,7 @@ export const TOURS: Record<Audience, TourStep[]> = {
     },
     { target: '/admin', en: 'The Admin hub: a one-page summary of what is waiting for you.', te: 'అడ్మిన్ హబ్: మీ కోసం వేచి ఉన్నవాటి ఒక పేజీ సారాంశం.' },
     { target: '/admin/staff', en: 'Staff accounts: create experts, moderators, vendors, support agents and administrators; switch accounts off or on.', te: 'సిబ్బంది ఖాతాలు: నిపుణులు, మోడరేటర్లు, విక్రేతలు, సపోర్ట్ ఏజెంట్లు, అడ్మినిస్ట్రేటర్లను సృష్టించండి; ఖాతాలను ఆఫ్ లేదా ఆన్ చేయండి.' },
-    { target: '/admin/members', en: 'Members: everyone who signed up, labelled Paid, Free, Waiting, Unpaid or Expired. Give free access until a date here, for testing or friends of the store.', te: 'సభ్యులు: సైన్ అప్ అయిన అందరూ, చెల్లించారు, ఉచితం, వేచి ఉంది, చెల్లించలేదు లేదా గడువు ముగిసింది అని లేబుల్‌తో. పరీక్ష లేదా స్టోర్ మిత్రుల కోసం ఇక్కడ తేదీ వరకు ఉచిత ప్రాప్యత ఇవ్వండి.' },
+    { target: '/admin/members', en: 'Members: everyone who signed up, labelled Paid, Free, Waiting, Unpaid or Expired. Give free access until a date here — and when someone forgets their password, check it is really them and issue a “Temporary password” from this list.', te: 'సభ్యులు: సైన్ అప్ అయిన అందరూ, చెల్లించారు, ఉచితం, వేచి ఉంది, చెల్లించలేదు లేదా గడువు ముగిసింది అని లేబుల్‌తో. ఇక్కడ తేదీ వరకు ఉచిత ప్రాప్యత ఇవ్వండి — ఎవరైనా పాస్‌వర్డ్ మర్చిపోతే, నిజంగా వారేనని నిర్ధారించుకుని ఈ జాబితా నుండి “తాత్కాలిక పాస్‌వర్డ్” ఇవ్వండి.' },
     { target: '/admin/hariharaa-subscriptions', en: 'Membership payments waiting for you: check the UTR in the bank, then approve or reject with a reason.', te: 'మీ కోసం వేచి ఉన్న సభ్యత్వ చెల్లింపులు: బ్యాంకులో UTR తనిఖీ చేసి, ఆమోదించండి లేదా కారణంతో తిరస్కరించండి.' },
     { target: '/marketplace/manage/orders', en: 'The order queue. UPI orders must have their payment verified here before they can be confirmed and packed.', te: 'ఆర్డర్ క్యూ. UPI ఆర్డర్లను నిర్ధారించి ప్యాక్ చేసే ముందు ఇక్కడ చెల్లింపును ధృవీకరించాలి.' },
     { target: '/marketplace/manage/products', en: 'All products from every seller. Use “Add new product” here, and open a product to add or reduce its stock and read its Stock history — every sale, return and correction is recorded.', te: 'అన్ని విక్రేతల ఉత్పత్తులు. ఇక్కడ “కొత్త ఉత్పత్తిని జోడించండి” వాడండి; ఉత్పత్తిని తెరిచి దాని స్టాక్ జోడించండి లేదా తగ్గించండి, స్టాక్ చరిత్ర చదవండి — ప్రతి అమ్మకం, తిరిగి వచ్చినవి, సవరణ నమోదవుతాయి.' },
@@ -146,6 +151,7 @@ export const TOURS: Record<Audience, TourStep[]> = {
     { target: '/admin/taxonomy', en: 'Taxonomy: crops, regions and the shop’s Department → Category → Sub-category tree.', te: 'వర్గీకరణ: పంటలు, ప్రాంతాలు, షాప్ విభాగం → వర్గం → ఉప-వర్గం చెట్టు.' },
     { target: '/admin/membership-plans', en: 'Membership plans: set prices, add plans of different lengths (monthly, yearly…), switch each on or off, and turn the membership requirement off or on for everyone.', te: 'సభ్యత్వ ప్లాన్లు: ధరలు నిర్ణయించండి, వేర్వేరు వ్యవధుల ప్లాన్లను (నెలవారీ, వార్షిక…) చేర్చండి, ప్రతిదాన్ని ఆన్ లేదా ఆఫ్ చేయండి, అందరికీ సభ్యత్వ అవసరాన్ని ఆఫ్ లేదా ఆన్ చేయండి.' },
     { target: '/admin/hariharaa-settings', en: 'Settings: the UPI ID customers pay to (change it any time), the merchant ID and payee name.', te: 'సెట్టింగ్‌లు: కస్టమర్లు చెల్లించే UPI ID (ఎప్పుడైనా మార్చవచ్చు), మర్చంట్ ID, చెల్లింపు పొందేవారి పేరు.' },
+    { target: '/admin/usage', en: 'Usage & questions: the most opened screens, what people asked the help assistant that it could not answer, and errors they hit. Counts only — no names or numbers.', te: 'వినియోగం & ప్రశ్నలు: ఎక్కువగా తెరిచిన స్క్రీన్‌లు, సహాయ అసిస్టెంట్‌ను ప్రజలు అడిగిన, అది సమాధానం ఇవ్వలేని ప్రశ్నలు, వారు ఎదుర్కొన్న లోపాలు. లెక్కలు మాత్రమే — పేర్లు, నంబర్లు కాదు.' },
     { target: '/admin/reports', en: 'Reports show what is happening across the platform.', te: 'నివేదికలు ప్లాట్‌ఫామ్ అంతటా ఏం జరుగుతోందో చూపిస్తాయి.' },
     { target: '/admin/audit', en: 'The audit log records every important action — prices, UPI ID changes, approvals, stock changes — and who did it.', te: 'ఆడిట్ లాగ్ ప్రతి ముఖ్యమైన చర్యను — ధరలు, UPI ID మార్పులు, ఆమోదాలు, స్టాక్ మార్పులు — ఎవరు చేశారో సహా నమోదు చేస్తుంది.' },
     BELL,
@@ -198,5 +204,5 @@ export function audienceFor(role: string | undefined): Audience {
 }
 
 // Bump the version to show the tour again to everyone after a big change to the app.
-export const TOUR_VERSION = 2;
+export const TOUR_VERSION = 3;
 export const tourStorageKey = (audience: Audience, userId?: string | null) => `agriai.tour.v${TOUR_VERSION}.${audience}${userId ? `.${userId}` : ''}`;

@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import { MembershipProvider } from './auth/MembershipContext';
@@ -5,65 +6,85 @@ import { OpenRoute, ProtectedRoute } from './components/ProtectedRoute';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
-import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { CasesPage } from './pages/CasesPage';
-import { NewCasePage } from './pages/NewCasePage';
-import { CaseDetailPage } from './pages/CaseDetailPage';
-import { ModeratorQueuePage } from './pages/ModeratorQueuePage';
-import { ExpertCasesPage } from './pages/ExpertCasesPage';
-import { ExpertCredentialsPage } from './pages/ExpertCredentialsPage';
-import { ExpertCaseDetailPage } from './pages/ExpertCaseDetailPage';
-import { AdminHomePage } from './pages/AdminHomePage';
-import { AdminStaffPage } from './pages/AdminStaffPage';
-import { AdminCredentialsPage } from './pages/AdminCredentialsPage';
-import { AdminTaxonomyPage } from './pages/AdminTaxonomyPage';
-import { AdminAuditPage } from './pages/AdminAuditPage';
-import { AdminReportingPage } from './pages/AdminReportingPage';
-import { ExpertArticlesPage } from './pages/ExpertArticlesPage';
-import { ArticleEditPage } from './pages/ArticleEditPage';
-import { ModeratorArticlesPage } from './pages/ModeratorArticlesPage';
-import { KnowledgeBrowsePage } from './pages/KnowledgeBrowsePage';
-import { ArticleViewPage } from './pages/ArticleViewPage';
-import { NoPortalPage } from './pages/NoPortalPage';
-import { NotificationsPage } from './pages/NotificationsPage';
-import { CoursesBrowsePage } from './pages/CoursesBrowsePage';
-import { CourseDetailPage } from './pages/CourseDetailPage';
-import { LessonViewPage } from './pages/LessonViewPage';
-import { CoursesManagePage } from './pages/CoursesManagePage';
-import { CourseEditPage } from './pages/CourseEditPage';
-import { SoilSamplesPage } from './pages/SoilSamplesPage';
-import { SoilSampleDetailPage } from './pages/SoilSampleDetailPage';
-import { SoilLabQueuePage } from './pages/SoilLabQueuePage';
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })));
+const DashboardPage = lazy(() => import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage })));
+const CasesPage = lazy(() => import('./pages/CasesPage').then((m) => ({ default: m.CasesPage })));
+const NewCasePage = lazy(() => import('./pages/NewCasePage').then((m) => ({ default: m.NewCasePage })));
+const CaseDetailPage = lazy(() => import('./pages/CaseDetailPage').then((m) => ({ default: m.CaseDetailPage })));
+const ModeratorQueuePage = lazy(() => import('./pages/ModeratorQueuePage').then((m) => ({ default: m.ModeratorQueuePage })));
+const ExpertCasesPage = lazy(() => import('./pages/ExpertCasesPage').then((m) => ({ default: m.ExpertCasesPage })));
+const ExpertCredentialsPage = lazy(() => import('./pages/ExpertCredentialsPage').then((m) => ({ default: m.ExpertCredentialsPage })));
+const ExpertCaseDetailPage = lazy(() => import('./pages/ExpertCaseDetailPage').then((m) => ({ default: m.ExpertCaseDetailPage })));
+const AdminHomePage = lazy(() => import('./pages/AdminHomePage').then((m) => ({ default: m.AdminHomePage })));
+const AdminStaffPage = lazy(() => import('./pages/AdminStaffPage').then((m) => ({ default: m.AdminStaffPage })));
+const AdminCredentialsPage = lazy(() => import('./pages/AdminCredentialsPage').then((m) => ({ default: m.AdminCredentialsPage })));
+const AdminTaxonomyPage = lazy(() => import('./pages/AdminTaxonomyPage').then((m) => ({ default: m.AdminTaxonomyPage })));
+const AdminAuditPage = lazy(() => import('./pages/AdminAuditPage').then((m) => ({ default: m.AdminAuditPage })));
+const AdminReportingPage = lazy(() => import('./pages/AdminReportingPage').then((m) => ({ default: m.AdminReportingPage })));
+const ExpertArticlesPage = lazy(() => import('./pages/ExpertArticlesPage').then((m) => ({ default: m.ExpertArticlesPage })));
+const ArticleEditPage = lazy(() => import('./pages/ArticleEditPage').then((m) => ({ default: m.ArticleEditPage })));
+const ModeratorArticlesPage = lazy(() => import('./pages/ModeratorArticlesPage').then((m) => ({ default: m.ModeratorArticlesPage })));
+const KnowledgeBrowsePage = lazy(() => import('./pages/KnowledgeBrowsePage').then((m) => ({ default: m.KnowledgeBrowsePage })));
+const ArticleViewPage = lazy(() => import('./pages/ArticleViewPage').then((m) => ({ default: m.ArticleViewPage })));
+const NoPortalPage = lazy(() => import('./pages/NoPortalPage').then((m) => ({ default: m.NoPortalPage })));
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage').then((m) => ({ default: m.NotificationsPage })));
+const CoursesBrowsePage = lazy(() => import('./pages/CoursesBrowsePage').then((m) => ({ default: m.CoursesBrowsePage })));
+const CourseDetailPage = lazy(() => import('./pages/CourseDetailPage').then((m) => ({ default: m.CourseDetailPage })));
+const LessonViewPage = lazy(() => import('./pages/LessonViewPage').then((m) => ({ default: m.LessonViewPage })));
+const CoursesManagePage = lazy(() => import('./pages/CoursesManagePage').then((m) => ({ default: m.CoursesManagePage })));
+const CourseEditPage = lazy(() => import('./pages/CourseEditPage').then((m) => ({ default: m.CourseEditPage })));
+const SoilSamplesPage = lazy(() => import('./pages/SoilSamplesPage').then((m) => ({ default: m.SoilSamplesPage })));
+const SoilSampleDetailPage = lazy(() => import('./pages/SoilSampleDetailPage').then((m) => ({ default: m.SoilSampleDetailPage })));
+const SoilLabQueuePage = lazy(() => import('./pages/SoilLabQueuePage').then((m) => ({ default: m.SoilLabQueuePage })));
 import { MarketplacePage } from './pages/MarketplacePage';
-import { ProductDetailPage } from './pages/ProductDetailPage';
-import { CartPage } from './pages/CartPage';
-import { CheckoutPage } from './pages/CheckoutPage';
-import { AddressesPage } from './pages/AddressesPage';
-import { HelpPage } from './pages/HelpPage';
-import { OrdersPage } from './pages/OrdersPage';
-import { OrderDetailPage } from './pages/OrderDetailPage';
-import { VendorDashboardPage } from './pages/VendorDashboardPage';
-import { ProductEditPage } from './pages/ProductEditPage';
-import { VendorApprovalsPage } from './pages/VendorApprovalsPage';
-import { ProductsManagePage } from './pages/ProductsManagePage';
-import { OrdersManagePage } from './pages/OrdersManagePage';
-import { HariharaaLandingPage } from './pages/hariharaa/HariharaaLandingPage';
-import { HariharaaSubscriptionPage } from './pages/hariharaa/HariharaaSubscriptionPage';
-import { AdminHariharaaSubscriptionsPage } from './pages/hariharaa/AdminHariharaaSubscriptionsPage';
-import { AdminMembersPage } from './pages/hariharaa/AdminMembersPage';
-import { AdminMembershipPlansPage } from './pages/hariharaa/AdminMembershipPlansPage';
-import { AdminHariharaaSettingsPage } from './pages/hariharaa/AdminHariharaaSettingsPage';
-import { ChangePasswordPage } from './pages/ChangePasswordPage';
-import { MediaLibraryPage } from './pages/MediaLibraryPage';
-import { DispatchQueuePage } from './pages/hariharaa/DispatchQueuePage';
-import { HelpChat } from './components/HelpChat';
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage').then((m) => ({ default: m.ProductDetailPage })));
+const CartPage = lazy(() => import('./pages/CartPage').then((m) => ({ default: m.CartPage })));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage').then((m) => ({ default: m.CheckoutPage })));
+const AddressesPage = lazy(() => import('./pages/AddressesPage').then((m) => ({ default: m.AddressesPage })));
+const HelpPage = lazy(() => import('./pages/HelpPage').then((m) => ({ default: m.HelpPage })));
+const OrdersPage = lazy(() => import('./pages/OrdersPage').then((m) => ({ default: m.OrdersPage })));
+const OrderDetailPage = lazy(() => import('./pages/OrderDetailPage').then((m) => ({ default: m.OrderDetailPage })));
+const VendorDashboardPage = lazy(() => import('./pages/VendorDashboardPage').then((m) => ({ default: m.VendorDashboardPage })));
+const ProductEditPage = lazy(() => import('./pages/ProductEditPage').then((m) => ({ default: m.ProductEditPage })));
+const VendorApprovalsPage = lazy(() => import('./pages/VendorApprovalsPage').then((m) => ({ default: m.VendorApprovalsPage })));
+const ProductsManagePage = lazy(() => import('./pages/ProductsManagePage').then((m) => ({ default: m.ProductsManagePage })));
+const OrdersManagePage = lazy(() => import('./pages/OrdersManagePage').then((m) => ({ default: m.OrdersManagePage })));
+const HariharaaLandingPage = lazy(() => import('./pages/hariharaa/HariharaaLandingPage').then((m) => ({ default: m.HariharaaLandingPage })));
+const HariharaaSubscriptionPage = lazy(() => import('./pages/hariharaa/HariharaaSubscriptionPage').then((m) => ({ default: m.HariharaaSubscriptionPage })));
+const AdminHariharaaSubscriptionsPage = lazy(() => import('./pages/hariharaa/AdminHariharaaSubscriptionsPage').then((m) => ({ default: m.AdminHariharaaSubscriptionsPage })));
+const AdminMembersPage = lazy(() => import('./pages/hariharaa/AdminMembersPage').then((m) => ({ default: m.AdminMembersPage })));
+const AdminMembershipPlansPage = lazy(() => import('./pages/hariharaa/AdminMembershipPlansPage').then((m) => ({ default: m.AdminMembershipPlansPage })));
+const OrderReceiptPage = lazy(() => import('./pages/OrderReceiptPage').then((m) => ({ default: m.OrderReceiptPage })));
+const AdminUsagePage = lazy(() => import('./pages/AdminUsagePage').then((m) => ({ default: m.AdminUsagePage })));
+const AdminHariharaaSettingsPage = lazy(() => import('./pages/hariharaa/AdminHariharaaSettingsPage').then((m) => ({ default: m.AdminHariharaaSettingsPage })));
+const ChangePasswordPage = lazy(() => import('./pages/ChangePasswordPage').then((m) => ({ default: m.ChangePasswordPage })));
+const MediaLibraryPage = lazy(() => import('./pages/MediaLibraryPage').then((m) => ({ default: m.MediaLibraryPage })));
+const DispatchQueuePage = lazy(() => import('./pages/hariharaa/DispatchQueuePage').then((m) => ({ default: m.DispatchQueuePage })));
+const HelpChat = lazy(() => import('./components/HelpChat').then((m) => ({ default: m.HelpChat })));
+import { strings } from './i18n/strings';
+import { ErrorBoundary } from './telemetry/ErrorBoundary';
+import { PageTracker } from './telemetry/PageTracker';
+
+// Every screen except the first ones a visitor sees is fetched only when it is opened, so a phone
+// on a slow connection downloads the shop and log in first and the rest on demand.
+function RouteFallback() {
+  return (
+    <div className="screen">
+      <p className="hint route-loading" role="status">
+        {strings.loading.en} / {strings.loading.te}
+      </p>
+    </div>
+  );
+}
 
 export function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <MembershipProvider>
+        <PageTracker />
+        <ErrorBoundary>
+        <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -234,6 +255,14 @@ export function App() {
             }
           />
           <Route
+            path="/admin/usage"
+            element={
+              <ProtectedRoute roles={['ADMINISTRATOR']}>
+                <AdminUsagePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/admin/reports"
             element={
               <ProtectedRoute roles={['ADMINISTRATOR']}>
@@ -365,6 +394,14 @@ export function App() {
             }
           />
           <Route
+            path="/marketplace/orders/:id/receipt"
+            element={
+              <ProtectedRoute>
+                <OrderReceiptPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/marketplace/vendor"
             element={
               <ProtectedRoute roles={['VENDOR']}>
@@ -489,8 +526,12 @@ export function App() {
             }
           />
         </Routes>
+        </Suspense>
+        </ErrorBoundary>
         {/* The help assistant: one round button on every screen, including log in and register. */}
-        <HelpChat />
+        <Suspense fallback={null}>
+          <HelpChat />
+        </Suspense>
         </MembershipProvider>
       </BrowserRouter>
     </AuthProvider>

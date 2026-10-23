@@ -112,7 +112,7 @@ export function AppShell({ children, wide = false }: { children: ReactNode; wide
       </header>
 
       <PaymentStrip />
-      <Tour audience={audienceFor(session?.role)} userId={session ? me?.id : null} ready={!session || !!me} />
+      <Tour audience={audienceFor(session?.role)} userId={session ? me?.id : null} ready={!session || (!!me && !session.mustChangePassword)} />
 
       <MainNav role={session ? session.role : 'GUEST'} />
 

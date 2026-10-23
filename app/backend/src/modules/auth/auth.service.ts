@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { NotificationsService } from '../notifications/notifications.service';
 import { JwtService } from '@nestjs/jwt';
 import { OtpPurpose, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -23,6 +24,15 @@ const OTP_TTL_MINUTES = 10;
 const OTP_MAX_ATTEMPTS = 5;
 const RESET_TOKEN_TTL_MINUTES = 15;
 
+// Brute-force guard: after this many wrong passwords for one mobile number within the window,
+// further attempts are refused for the rest of the window (even with the right password), so
+// guessing is pointless. In memory is enough for a single server; the per-IP limit in the
+// throttler is the second layer.
+const LOGIN_MAX_FAILURES = 8;
+const LOGIN_WINDOW_MS = 15 * 60_000;
+// Admins are told about a password-reset request at most this often per number.
+const RESET_NOTICE_COOLDOWN_MS = 30 * 60_000;
+
 export interface TokenPair {
   accessToken: string;
   refreshToken: string;
@@ -35,7 +45,30 @@ export class AuthService {
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
     private readonly audit: AuditService,
+    private readonly notifications: NotificationsService,
   ) {}
+
+  private readonly loginFailures = new Map<string, { count: number; first: number }>();
+
+  private loginLocked(mobileNumber: string): boolean {
+    const f = this.loginFailures.get(mobileNumber);
+    if (!f) return false;
+    if (Date.now() - f.first > LOGIN_WINDOW_MS) {
+      this.loginFailures.delete(mobileNumber);
+      return false;
+    }
+    return f.count >= LOGIN_MAX_FAILURES;
+  }
+
+  private noteLoginFailure(mobileNumber: string) {
+    const f = this.loginFailures.get(mobileNumber);
+    if (!f || Date.now() - f.first > LOGIN_WINDOW_MS) this.loginFailures.set(mobileNumber, { count: 1, first: Date.now() });
+    else f.count += 1;
+    // Keep the map small: forget anything that has aged out.
+    if (this.loginFailures.size > 5000) {
+      for (const [k, v] of this.loginFailures) if (Date.now() - v.first > LOGIN_WINDOW_MS) this.loginFailures.delete(k);
+    }
+  }
 
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({
@@ -92,13 +125,20 @@ export class AuthService {
     };
   }
 
-  async login(dto: LoginDto): Promise<TokenPair & { role: Role }> {
+  async login(dto: LoginDto): Promise<TokenPair & { role: Role; mustChangePassword: boolean }> {
+    if (this.loginLocked(dto.mobileNumber)) {
+      throw new UnauthorizedException(
+        bi('Too many wrong attempts — wait 15 minutes and try again', 'చాలా తప్పు ప్రయత్నాలు — 15 నిమిషాలు ఆగి మళ్ళీ ప్రయత్నించండి'),
+      );
+    }
     const user = await this.prisma.user.findUnique({
       where: { mobileNumber: dto.mobileNumber },
     });
     if (!user || !(await bcrypt.compare(dto.password, user.passwordHash))) {
+      this.noteLoginFailure(dto.mobileNumber);
       throw new UnauthorizedException(bi('Invalid mobile number or password', 'తప్పు మొబైల్ నంబర్ లేదా పాస్‌వర్డ్'));
     }
+    this.loginFailures.delete(dto.mobileNumber);
     if (!user.isActive) {
       throw new UnauthorizedException(
         user.deactivatedAt
@@ -115,22 +155,59 @@ export class AuthService {
     });
 
     const tokens = await this.issueTokenPair(user.id, user.role, user.mobileNumber);
-    return { ...tokens, role: normalizeRole(user.role) as Role };
+    return { ...tokens, role: normalizeRole(user.role) as Role, mustChangePassword: user.mustChangePassword };
   }
+
+  // The same answer whoever asks and whatever the number, so this cannot be used to find out
+  // which numbers are registered.
+  private readonly genericResetMessage = bi(
+    'If this number is registered, the store has been told. An Administrator will give you a temporary password — contact the store and quote your ID.',
+    'ఈ నంబర్ నమోదు అయి ఉంటే, స్టోర్‌కు తెలియజేయబడింది. అడ్మినిస్ట్రేటర్ మీకు తాత్కాలిక పాస్‌వర్డ్ ఇస్తారు — స్టోర్‌ను సంప్రదించి మీ IDని చెప్పండి.',
+  );
 
   async requestOtp(dto: RequestOtpDto) {
     const user = await this.prisma.user.findUnique({
       where: { mobileNumber: dto.mobileNumber },
     });
-    if (dto.purpose === OtpPurpose.PASSWORD_RESET && !user) {
-      // Do not reveal whether a mobile number is registered.
-      return { message: bi('If this number is registered, a code is ready.', 'ఈ నంబర్ నమోదు అయి ఉంటే, కోడ్ సిద్ధంగా ఉంది.') };
+
+    if (dto.purpose === OtpPurpose.PASSWORD_RESET) {
+      // There is no SMS/WhatsApp channel, so a code can never prove the asker owns the number —
+      // handing it back on screen let anyone reset anyone's password. Instead: tell the
+      // Administrators, who give the person a temporary password after checking who they are.
+      if (user?.isActive) await this.notifyAdminsOfResetRequest(user.id, user.name, user.userCode, user.mobileNumber);
+      return { message: this.genericResetMessage };
+    }
+
+    // REGISTRATION codes only exist for a sign-up that is still waiting to be activated. For
+    // anyone else (an active account, a deactivated one, an unknown number) answer the same way
+    // and issue nothing — otherwise a registration code could be used to log in as that person.
+    if (!user || user.isActive || user.deactivatedAt) {
+      return { message: bi('Verification code ready.', 'ధృవీకరణ కోడ్ సిద్ధంగా ఉంది.') };
     }
     const otp = await this.issueOtp(dto.mobileNumber, dto.purpose);
     return {
       message: bi('Verification code ready.', 'ధృవీకరణ కోడ్ సిద్ధంగా ఉంది.'),
       ...(otp.devCode ? { devOtp: otp.devCode } : {}),
     };
+  }
+
+  private async notifyAdminsOfResetRequest(userId: string, name: string, userCode: string, mobileNumber: string) {
+    const since = new Date(Date.now() - RESET_NOTICE_COOLDOWN_MS);
+    const recent = await this.prisma.auditLog.count({
+      where: { action: 'user.password_reset_requested', entityId: userId, createdAt: { gte: since } },
+    });
+    if (recent > 0) return;
+    await this.audit.log({ actorId: userId, action: 'user.password_reset_requested', entityType: 'User', entityId: userId });
+    await this.notifications.notifyRole(
+      Role.ADMINISTRATOR,
+      'auth.password_reset_requested',
+      bi('Password reset requested', 'పాస్‌వర్డ్ రీసెట్ అభ్యర్థన'),
+      bi(
+        `${name} (${userCode}, ${mobileNumber}) asked to reset their password. Check it is really them, then issue a temporary password.`,
+        `${name} (${userCode}, ${mobileNumber}) తమ పాస్‌వర్డ్ రీసెట్ చేయమని అడిగారు. నిజంగా వారేనని నిర్ధారించుకుని, తాత్కాలిక పాస్‌వర్డ్ ఇవ్వండి.`,
+      ),
+      '/admin/members',
+    );
   }
 
   async verifyOtp(dto: VerifyOtpDto) {
@@ -167,6 +244,14 @@ export class AuthService {
     });
 
     if (dto.purpose === OtpPurpose.REGISTRATION) {
+      const pending = await this.prisma.user.findUnique({ where: { mobileNumber: dto.mobileNumber } });
+      // Only a sign-up still waiting to be activated can be completed this way. Never an active
+      // account (that would be a password-free login) and never a deactivated one.
+      if (!pending || pending.isActive || pending.deactivatedAt) {
+        throw new UnauthorizedException(
+          bi('OTP expired or not found — request a new one', 'OTP గడువు ముగిసింది లేదా కనుగొనబడలేదు — కొత్తదాన్ని అభ్యర్థించండి'),
+        );
+      }
       const user = await this.prisma.user.update({
         where: { mobileNumber: dto.mobileNumber },
         data: { isActive: true },
@@ -218,7 +303,7 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(dto.newPassword, 12);
     const user = await this.prisma.user.update({
       where: { mobileNumber: dto.mobileNumber },
-      data: { passwordHash },
+      data: { passwordHash, mustChangePassword: false },
     });
 
     // Revoke all existing refresh tokens on password reset.
@@ -285,7 +370,7 @@ export class AuthService {
   }
 
   private async issueOtp(mobileNumber: string, purpose: OtpPurpose) {
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = crypto.randomInt(100000, 1_000_000).toString();
     await this.prisma.otpVerification.create({
       data: {
         mobileNumber,

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
+import { shrinkImage } from '../lib/image';
 import { getCase, submitCase, respondToFollowUp, confirmCase, disputeCase, uploadCaseEvidence, type Case } from '../api/cases';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings, caseCategoryLabel, caseStatusLabel } from '../i18n/strings';
@@ -107,7 +108,7 @@ export function CaseDetailPage() {
     setUploading(true);
     setError(null);
     try {
-      setCase(await uploadCaseEvidence(session.accessToken, theCase.id, file));
+      setCase(await uploadCaseEvidence(session.accessToken, theCase.id, await shrinkImage(file)));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.couldNotUploadEvidence.en} / ${strings.couldNotUploadEvidence.te}`);
     } finally {

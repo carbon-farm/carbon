@@ -7,6 +7,7 @@ import { startTour } from '../tour/Tour';
 import { FAQS, type Faq } from '../help/faq';
 import { answer, popularFor } from '../help/faqMatch';
 import { Bi, biInline } from '../i18n/Bi';
+import { track } from '../telemetry/track';
 
 type Message =
   | { kind: 'user'; text: string }
@@ -87,10 +88,14 @@ export function HelpChat() {
     const q = text.trim();
     if (!q) return;
     if (forced) {
+      track('chat_answer', forced.id);
       setMessages((m) => [...m, { kind: 'user', text: q }, { kind: 'bot', faqId: forced.id, other: false, related: [] }]);
       return;
     }
     const result = answer(q, audience);
+    // Questions it could not answer are the most useful thing to learn from (see Usage screen).
+    if (result.best) track('chat_answer', result.best.faq.id);
+    else track('chat_unanswered', q);
     setMessages((m) => [
       ...m,
       { kind: 'user', text: q },

@@ -14,6 +14,8 @@ import { addressSnapshot, formatAddress } from '../addresses/address-format';
 import { MAX_CATEGORY_LEVEL, levelOf, resolveCategoryIds } from './category-tree';
 import { AdjustStockDto, CreateProductDto, UpdateProductDto } from './dto/product.dto';
 import { giveStock, recordMovement, roundMoney, takeStock } from './stock-ledger';
+import { recommend } from './recommend';
+import { StockAlertsService } from './stock-alerts.service';
 import { AddToCartDto, GuestCartDto } from './dto/cart.dto';
 import { CheckoutDto } from './dto/checkout.dto';
 import { SubmitReviewDto } from './dto/review.dto';
@@ -42,6 +44,7 @@ export class MarketplaceService {
     private readonly uploads: UploadsService,
     private readonly hariharaa: HariharaaService,
     private readonly addresses: AddressesService,
+    private readonly stockAlerts: StockAlertsService,
   ) {}
 
   // One catalog, one cart: anyone can browse and fill a cart. What membership unlocks in
@@ -335,6 +338,8 @@ export class MarketplaceService {
       throw new BadRequestException(bi('Stock is changing right now — try again', 'స్టాక్ ఇప్పుడు మారుతోంది — మళ్ళీ ప్రయత్నించండి'));
     });
 
+    if (result.change > 0) await this.stockAlerts.afterStockGiven(productId, result.balance - result.change, result.balance);
+    if (result.change < 0) await this.stockAlerts.afterStockTaken(productId, result.balance - result.change, result.balance);
     if (result.change !== 0) {
       await this.audit.log({
         actorId: requester.userId,
@@ -358,6 +363,27 @@ export class MarketplaceService {
       : [];
     const nameOf = new Map(actors.map((a) => [a.id, a.name]));
     return { stockQuantity: existing.stockQuantity, movements: movements.map((m) => ({ ...m, actorName: m.actorId ? nameOf.get(m.actorId) ?? null : null })) };
+  }
+
+  // "Products that may help" on an advice article: the shop's own products whose names or
+  // descriptions share the article's problem and crop words. Only products a visitor could buy
+  // (active, in stock, platform-sold or approved vendor).
+  async recommendForArticle(articleId: string) {
+    const article = await this.prisma.knowledgeArticle.findFirst({
+      where: { id: articleId, status: 'PUBLISHED' },
+      include: { crop: true, category: true, tags: true },
+    });
+    if (!article) return [];
+    const products = await this.prisma.product.findMany({
+      where: { isActive: true, stockQuantity: { gt: 0 }, OR: [{ vendorId: null }, { vendor: { isApproved: true } }] },
+      include: PRODUCT_INCLUDE,
+    });
+    const text = [article.title, article.symptoms, article.problemDescription, article.expertSolution, article.category?.name, ...article.tags.map((t) => t.name)]
+      .filter(Boolean)
+      .join(' ');
+    const ranked = recommend({ text, cropNames: article.crop ? [article.crop.name] : [] }, products.map((p) => ({ id: p.id, name: p.name, description: p.description })));
+    const byId = new Map(products.map((p) => [p.id, p]));
+    return ranked.map((r) => byId.get(r.id)!).filter(Boolean);
   }
 
   // Public catalog — only active products from the platform itself
@@ -561,6 +587,8 @@ export class MarketplaceService {
 
     const lines = cart.map((item) => ({ item, lineTotal: roundMoney(item.quantity * item.product.price) }));
     const totalAmount = roundMoney(lines.reduce((sum, l) => sum + l.lineTotal, 0));
+    // Stock left per product after this order, for the low-stock alerts sent once it is committed.
+    const balancesAfter = new Map<string, number>();
     const order = await this.prisma.$transaction(async (tx) => {
       // Take the stock FIRST, one atomic statement per line that only succeeds while enough is
       // there. The earlier check above is just for a friendly message; this is the one that
@@ -574,6 +602,7 @@ export class MarketplaceService {
           );
         }
         balances.set(item.productId, balance);
+        balancesAfter.set(item.productId, balance);
       }
       const created = await tx.order.create({
         data: {
@@ -618,6 +647,10 @@ export class MarketplaceService {
       entityId: order.id,
       metadata: { orderNumber: order.orderNumber, totalAmount, paymentMethod },
     });
+    for (const { item } of lines) {
+      const after = balancesAfter.get(item.productId);
+      if (after !== undefined) await this.stockAlerts.afterStockTaken(item.productId, after + item.quantity, after);
+    }
     await this.notifications.notifyRole(
       Role.ADMINISTRATOR,
       'order.placed',
@@ -718,6 +751,7 @@ export class MarketplaceService {
       );
     }
     const items = await this.prisma.orderItem.findMany({ where: { orderId } });
+    const restocked: { productId: string; before: number; after: number }[] = [];
     const updated = await this.prisma.$transaction(async (tx) => {
       // Only one caller can win this switch, so a double click or two administrators cannot
       // put the same units back on the shelf twice.
@@ -730,6 +764,7 @@ export class MarketplaceService {
       }
       for (const item of items) {
         const balance = await giveStock(tx, item.productId, item.quantity);
+        restocked.push({ productId: item.productId, before: balance - item.quantity, after: balance });
         await recordMovement(tx, {
           productId: item.productId,
           type: StockMovementType.CANCEL_RESTOCK,
@@ -743,6 +778,7 @@ export class MarketplaceService {
       return tx.order.findUniqueOrThrow({ where: { id: orderId }, include: { items: true } });
     }, TX_OPTIONS);
     await this.audit.log({ actorId: adminId, action: 'order.cancel', entityType: 'Order', entityId: orderId });
+    for (const r of restocked) await this.stockAlerts.afterStockGiven(r.productId, r.before, r.after);
     await this.notifications.create(
       updated.farmerId,
       'order.cancelled',

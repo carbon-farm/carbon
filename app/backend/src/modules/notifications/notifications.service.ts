@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { WhatsAppService } from './whatsapp.service';
 
 // Module 12 — Notification, in-app channel. SMS/WhatsApp/email/push are
 // deliberately not attempted here — they need a vendor decision (who, who
@@ -10,10 +11,22 @@ import { PrismaService } from '../../prisma/prisma.service';
 // a message bus would be unused ceremony, not resilience.
 @Injectable()
 export class NotificationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly whatsapp: WhatsAppService,
+  ) {}
 
   async create(userId: string, type: string, title: string, body: string, linkPath?: string): Promise<void> {
     await this.prisma.notification.create({ data: { userId, type, title, body, linkPath } });
+    // Also on WhatsApp for members who asked for it (does nothing while WHATSAPP_MODE is off).
+    void this.whatsapp.sendNotice(userId, type, title, body);
+  }
+
+  // The same notice to several people at once (for example everyone waiting for a product).
+  async createForUsers(userIds: string[], type: string, title: string, body: string, linkPath?: string): Promise<void> {
+    if (userIds.length === 0) return;
+    await this.prisma.notification.createMany({ data: userIds.map((userId) => ({ userId, type, title, body, linkPath })) });
+    for (const userId of userIds) void this.whatsapp.sendNotice(userId, type, title, body);
   }
 
   // Fans out to every active user holding a role — used for queue-style

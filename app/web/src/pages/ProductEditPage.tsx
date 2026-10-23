@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
+import { shrinkImage } from '../lib/image';
 import { getProduct, listCategories, updateProduct, uploadProductImage, type Product, type ProductCategory } from '../api/marketplace';
 import { flattenWithPaths } from '../catalog/categoryTree';
 import { StockPanel } from '../components/StockPanel';
@@ -77,7 +78,7 @@ export function ProductEditPage() {
     setUploading(true);
     setError(null);
     try {
-      setProduct(await uploadProductImage(session.accessToken, id, file));
+      setProduct(await uploadProductImage(session.accessToken, id, await shrinkImage(file)));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.couldNotUploadImage.en} / ${strings.couldNotUploadImage.te}`);
     } finally {

@@ -12,6 +12,7 @@ import {
 } from '../api/marketplace';
 import { readGuestWishlist, toggleGuestWishlist } from '../cart/guestWishlist';
 import { ProductThumb } from '../components/ProductThumb';
+import { TodayPanel } from '../components/TodayPanel';
 import { buildCategoryTree, categoryName } from '../catalog/categoryTree';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
@@ -152,6 +153,7 @@ export function MarketplacePage() {
         </Link>
       </div>
 
+      {session?.role === 'MEMBER' && <TodayPanel />}
       {!session && <BiValue value={strings.guestBrowseHint} as="p" className="hint" />}
       {error && <div className="error-banner">{error}</div>}
 

@@ -97,6 +97,16 @@ const cases = [
   ['SUPPORT_AGENT', 'how to dispatch an order', 'support-dispatch'],
   ['MODERATOR', 'assign case to expert', 'moderator-start'],
   ['EXPERT', 'how to answer cases', 'expert-start'],
+  ['MEMBER', 'how do I add photos to my case', 'case-photos'],
+  ['MEMBER', 'can I speak instead of typing', 'voice'],
+  ['MEMBER', 'order the same things again', 'reorder'],
+  ['MEMBER', 'I need a receipt for my order', 'receipt'],
+  ['MEMBER', 'tell me when it is back in stock', 'back-in-stock'],
+  ['MEMBER', 'can I get updates on whatsapp', 'whatsapp'],
+  ['MEMBER', 'I forgot my password', 'forgot-password'],
+  ['ADMINISTRATOR', 'a member forgot their password what do I do', 'admin-temp-password'],
+  ['ADMINISTRATOR', 'how will I know when stock is low', 'admin-low-stock'],
+  ['ADMINISTRATOR', 'what questions could the assistant not answer', 'admin-usage'],
 ];
 for (const [aud, q, want] of cases) {
   const got = answer(q, aud).best?.faq.id ?? null;
@@ -108,7 +118,7 @@ for (const q of ['asdfgh qwerty', 'hello', 'what is the weather', '']) {
 }
 
 // 4. tour
-const markers = new Set(['help', 'bell', 'user', 'chat', 'auth', 'filters', 'products', 'payment-strip']);
+const markers = new Set(['help', 'bell', 'user', 'chat', 'auth', 'filters', 'products', 'payment-strip', 'today']);
 for (const [aud, steps] of Object.entries(TOURS)) {
   const navTargets = new Set((NAV[aud] ?? []).flatMap((e) => (isGroup(e) ? e.items.map((i) => i.to) : [e.to])));
   for (const s of steps) {

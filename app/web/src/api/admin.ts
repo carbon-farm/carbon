@@ -8,6 +8,9 @@ export interface AdminUser {
   name: string;
   isActive: boolean;
   createdAt: string;
+  // Only present on the signed-in user's own record (GET /users/me).
+  whatsappOptIn?: boolean;
+  whatsappAvailable?: boolean;
 }
 
 // The logged-in user's own record (name, mobile, user code) — shown in the header.
@@ -70,6 +73,44 @@ export function listAuditLog(token: string, filters: { entityType?: string; from
 
 export function listAuditEntityTypes(token: string) {
   return apiRequest<string[]>('/audit/entity-types', { token });
+}
+
+export interface TemporaryPasswordResult {
+  userId: string;
+  name: string;
+  userCode: string;
+  temporaryPassword: string;
+  message: string;
+}
+
+// The Administrator's "forgot password" tool: a one-time password the person must change at log in.
+export function issueTemporaryPassword(token: string, userId: string) {
+  return apiRequest<TemporaryPasswordResult>(`/users/${userId}/temporary-password`, { method: 'POST', token });
+}
+
+export interface UsageRow {
+  name: string;
+  count: number;
+  lastAt: string | null;
+}
+
+export interface UsageSummary {
+  days: number;
+  totals: Record<string, number>;
+  pageViewsByRole: { role: string; count: number }[];
+  pages: UsageRow[];
+  unanswered: UsageRow[];
+  answered: UsageRow[];
+  errors: UsageRow[];
+  tours: UsageRow[];
+}
+
+export function getUsageSummary(token: string, days: number) {
+  return apiRequest<UsageSummary>(`/telemetry/summary?days=${days}`, { token });
+}
+
+export function updatePreferences(token: string, whatsappOptIn: boolean) {
+  return apiRequest<AdminUser>('/users/me/preferences', { method: 'PATCH', body: { whatsappOptIn }, token });
 }
 
 export function setUserActive(token: string, id: string, isActive: boolean) {

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { TOURS, tourStorageKey, type Audience, type TourStep } from './steps';
 import { CLOSE_NAV_EVENT, OPEN_NAV_EVENT } from '../components/navConfig';
 import { Bi } from '../i18n/Bi';
+import { track } from '../telemetry/track';
 import { strings } from '../i18n/strings';
 
 export const START_TOUR_EVENT = 'agriai:start-tour';
@@ -149,13 +150,16 @@ export function Tour({ audience, userId, ready }: { audience: Audience; userId?:
   useEffect(() => {
     if (!steps) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close();
+      if (e.key === 'Escape') {
+        track('tour', `${audience}: skipped at step ${index + 1}`);
+        close();
+      }
       else if (e.key === 'ArrowRight') setIndex((i) => (i < steps.length - 1 ? i + 1 : i));
       else if (e.key === 'ArrowLeft') setIndex((i) => Math.max(0, i - 1));
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [steps, close]);
+  }, [steps, close, audience, index]);
 
   if (!steps || !step) return null;
 
@@ -201,7 +205,14 @@ export function Tour({ audience, userId, ready }: { audience: Audience; userId?:
           <span className="bi-te">{step.te}</span>
         </p>
         <div className="tour-actions">
-          <button type="button" className="secondary tour-skip" onClick={close}>
+          <button
+            type="button"
+            className="secondary tour-skip"
+            onClick={() => {
+              track('tour', `${audience}: skipped at step ${index + 1}`);
+              close();
+            }}
+          >
             <Bi id="tourSkip" />
           </button>
           <div className="tour-nav">
@@ -210,7 +221,16 @@ export function Tour({ audience, userId, ready }: { audience: Audience; userId?:
                 <Bi id="tourBack" />
               </button>
             )}
-            <button type="button" ref={nextRef} onClick={() => (isLast ? close() : setIndex(index + 1))}>
+            <button
+              type="button"
+              ref={nextRef}
+              onClick={() => {
+                if (isLast) {
+                  track('tour', `${audience}: finished`);
+                  close();
+                } else setIndex(index + 1);
+              }}
+            >
               <Bi id={isLast ? 'tourDone' : 'tourNext'} />
             </button>
           </div>

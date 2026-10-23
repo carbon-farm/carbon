@@ -50,3 +50,5 @@ jobs:
           cache-dependency-path: app/web/package-lock.json
       - run: npm ci
       - run: npm run build
+      # The Help page, FAQ assistant and guided tour must agree with the app's menus and each other.
+      - run: npm run check:help

@@ -8,6 +8,9 @@ import { ProductThumb } from '../components/ProductThumb';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 
+// Same line the server uses for its low-stock alerts (see stock-alerts.service.ts).
+const LOW_STOCK_THRESHOLD = 5;
+
 type SortMode = 'newest' | 'oldest' | 'title';
 
 export function ProductsManagePage() {
@@ -16,6 +19,7 @@ export function ProductsManagePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('');
+  const [stockFilter, setStockFilter] = useState('');
   const [vendorFilter, setVendorFilter] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('newest');
   const [showAdd, setShowAdd] = useState(false);
@@ -47,6 +51,8 @@ export function ProductsManagePage() {
   const visible = useMemo(() => {
     let rows = products;
     if (statusFilter) rows = rows.filter((p) => (statusFilter === 'active' ? p.isActive : !p.isActive));
+    if (stockFilter === 'out') rows = rows.filter((p) => p.stockQuantity === 0);
+    if (stockFilter === 'low') rows = rows.filter((p) => p.stockQuantity <= LOW_STOCK_THRESHOLD);
     if (vendorFilter) rows = rows.filter((p) => (vendorFilter === 'platform' ? !p.vendorId : p.vendorId === vendorFilter));
     rows = [...rows];
     switch (sortMode) {
@@ -60,7 +66,7 @@ export function ProductsManagePage() {
         rows.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
     }
     return rows;
-  }, [products, statusFilter, vendorFilter, sortMode]);
+  }, [products, statusFilter, stockFilter, vendorFilter, sortMode]);
 
   return (
     <>
@@ -93,6 +99,14 @@ export function ProductsManagePage() {
               <option value="">{biInline('allOption')}</option>
               <option value="active">{biInline('activeStatusLabel')}</option>
               <option value="inactive">{biInline('inactiveStatusLabel')}</option>
+            </select>
+          </label>
+          <label>
+            <Bi id="stockFilterLabel" />
+            <select value={stockFilter} onChange={(e) => setStockFilter(e.target.value)}>
+              <option value="">{biInline('allOption')}</option>
+              <option value="low">{strings.stockFilterLow.en.replace('{n}', String(LOW_STOCK_THRESHOLD))} / {strings.stockFilterLow.te.replace('{n}', String(LOW_STOCK_THRESHOLD))}</option>
+              <option value="out">{biInline('stockFilterOut')}</option>
             </select>
           </label>
           <label>

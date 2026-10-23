@@ -19,6 +19,16 @@ export function CartPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyProductId, setBusyProductId] = useState<string | null>(null);
+  // A one-time note left by "Order again" when some items could not be added.
+  const [notice] = useState<string | null>(() => {
+    try {
+      const n = sessionStorage.getItem('agriai.cartNotice');
+      if (n) sessionStorage.removeItem('agriai.cartNotice');
+      return n;
+    } catch {
+      return null;
+    }
+  });
 
   const isStaff = !!session && session.role !== 'MEMBER';
 
@@ -89,6 +99,7 @@ export function CartPage() {
         <Bi id="cartTitle" as="h1" />
       </div>
 
+      {notice && <div className="hint" role="status">{notice}</div>}
       {error && <div className="error-banner">{error}</div>}
 
       {isStaff ? (

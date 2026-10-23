@@ -180,16 +180,35 @@ export const HELP_SECTIONS: HelpSection[] = [
     title: { en: 'Farm advice: cases, knowledge, courses, soil tests', te: 'వ్యవసాయ సలహా: కేసులు, జ్ఞానం, కోర్సులు, నేల పరీక్షలు' },
     body: [
       {
-        en: 'My cases: describe a problem with your crop and add photos. A moderator passes it to the right expert, who answers. You can reply if they need more detail.',
-        te: 'నా కేసులు: మీ పంట సమస్యను వివరించి ఫోటోలు జోడించండి. మోడరేటర్ దాన్ని సరైన నిపుణుడికి పంపుతారు, ఆయన సమాధానం ఇస్తారు. మరిన్ని వివరాలు కావాలంటే మీరు బదులివ్వవచ్చు.',
+        en: 'My cases: take photos of the problem (up to 6 — they are shrunk on your phone so they send quickly), tap the symptoms you see, and add a few words by typing or speaking. A moderator passes it to the right expert, who answers. You can reply if they need more detail.',
+        te: 'నా కేసులు: సమస్య ఫోటోలు తీయండి (6 వరకు — త్వరగా పంపడానికి అవి మీ ఫోన్‌లోనే చిన్నవిగా చేయబడతాయి), మీకు కనిపించే లక్షణాలను తాకండి, టైప్ చేసి లేదా మాట్లాడి కొన్ని మాటలు జోడించండి. మోడరేటర్ దాన్ని సరైన నిపుణుడికి పంపుతారు, ఆయన సమాధానం ఇస్తారు. మరిన్ని వివరాలు కావాలంటే మీరు బదులివ్వవచ్చు.',
       },
       {
-        en: 'Knowledge: advice articles from solved cases — search, filter, and bookmark. Courses: finish lessons in order and earn a certificate. Soil Testing: register a sample for your land and read the report when it is ready.',
-        te: 'జ్ఞానం: పరిష్కరించిన కేసుల సలహా వ్యాసాలు — శోధించండి, ఫిల్టర్ చేయండి, బుక్‌మార్క్ చేయండి. కోర్సులు: పాఠాలను క్రమంగా పూర్తి చేసి సర్టిఫికెట్ పొందండి. నేల పరీక్ష: మీ భూమికి నమూనాను నమోదు చేసి, సిద్ధమైనప్పుడు నివేదిక చదవండి.',
+        en: 'Knowledge: advice articles from solved cases — search, filter, and bookmark; under each article “Products that may help” suggests shop products that mention the same problem or crop. Courses: finish lessons in order and earn a certificate. Soil Testing: register a sample for your land and read the report when it is ready.',
+        te: 'జ్ఞానం: పరిష్కరించిన కేసుల సలహా వ్యాసాలు — శోధించండి, ఫిల్టర్ చేయండి, బుక్‌మార్క్ చేయండి; ప్రతి వ్యాసం కింద “ఇవి సహాయపడవచ్చు” అదే సమస్య లేదా పంటను పేర్కొనే షాప్ ఉత్పత్తులను సూచిస్తుంది. కోర్సులు: పాఠాలను క్రమంగా పూర్తి చేసి సర్టిఫికెట్ పొందండి. నేల పరీక్ష: మీ భూమికి నమూనాను నమోదు చేసి, సిద్ధమైనప్పుడు నివేదిక చదవండి.',
       },
       {
         en: 'These need an active membership. Without one you will see a “Members only” card with a button to pay.',
         te: 'వీటికి యాక్టివ్ సభ్యత్వం అవసరం. అది లేకపోతే “సభ్యులకు మాత్రమే” కార్డ్, చెల్లించడానికి బటన్ కనిపిస్తాయి.',
+      },
+    ],
+  },
+  {
+    id: 'today',
+    audience: MEMBERS,
+    title: { en: 'The “Today” section, order again, receipts and stock alerts', te: '“ఈ రోజు” భాగం, మళ్ళీ ఆర్డర్, రసీదులు, స్టాక్ అలర్ట్‌లు' },
+    body: [
+      {
+        en: 'At the top of the shop, “Today” shows what needs you: days of membership left, your open cases (highlighted when an expert has answered), your latest order, and a “Photo your problem” button.',
+        te: 'షాప్ పైన “ఈ రోజు” మీకు ఏమి అవసరమో చూపిస్తుంది: సభ్యత్వ రోజులు మిగిలినవి, మీ ఓపెన్ కేసులు (నిపుణుడు సమాధానం ఇచ్చినప్పుడు హైలైట్ అవుతుంది), మీ తాజా ఆర్డర్, “సమస్య ఫోటో తీయండి” బటన్.',
+      },
+      {
+        en: 'On an order, “Order again” puts everything still available back in your cart, and “Receipt” opens a printable receipt (save it as a PDF from the print window). On an out-of-stock product, “Tell me when it is back” sends you a notification the moment stock returns.',
+        te: 'ఆర్డర్‌లో, “మళ్ళీ ఆర్డర్ చేయండి” ఇంకా అందుబాటులో ఉన్నవన్నీ మీ కార్ట్‌లో పెడుతుంది, “రసీదు” ప్రింట్ చేయదగిన రసీదును తెరుస్తుంది (ప్రింట్ విండో నుండి PDF గా సేవ్ చేయండి). స్టాక్ లేని ఉత్పత్తిపై, “మళ్ళీ వచ్చినప్పుడు నాకు చెప్పండి” స్టాక్ తిరిగి వచ్చిన క్షణంలోనే మీకు నోటిఫికేషన్ పంపుతుంది.',
+      },
+      {
+        en: 'If the store has switched WhatsApp on, Account has a “WhatsApp updates” box: tick it to get order, payment and membership updates on WhatsApp too. It is off until you tick it.',
+        te: 'స్టోర్ WhatsApp ను ఆన్ చేసి ఉంటే, ఖాతాలో “WhatsApp అప్‌డేట్‌లు” బాక్స్ ఉంటుంది: ఆర్డర్, చెల్లింపు, సభ్యత్వ అప్‌డేట్‌లు WhatsApp లో కూడా పొందడానికి దాన్ని టిక్ చేయండి. మీరు టిక్ చేసే వరకు ఇది ఆఫ్‌లో ఉంటుంది.',
       },
     ],
   },
@@ -288,6 +307,25 @@ export const HELP_SECTIONS: HelpSection[] = [
     ],
   },
   {
+    id: 'admin-passwords',
+    audience: ['ADMINISTRATOR'],
+    title: { en: 'Forgotten passwords, stock alerts and usage', te: 'మర్చిపోయిన పాస్‌వర్డ్‌లు, స్టాక్ అలర్ట్‌లు, వినియోగం' },
+    body: [
+      {
+        en: 'There is no code on the screen for resetting a password any more — that let anyone reset anyone’s. When someone asks, you get a “Password reset requested” notification. After checking it really is them, open People → Members & free access (or Staff accounts), tap “Temporary password” → Issue password, and read the one-time password out. Their old password stops working at once and they must choose their own at their next log in. If the only administrator is locked out, run npm run admin:reset-password in app/backend.',
+        te: 'పాస్‌వర్డ్ రీసెట్ కోసం స్క్రీన్‌పై ఇకపై కోడ్ లేదు — అది ఎవరైనా ఎవరి పాస్‌వర్డ్‌నైనా రీసెట్ చేయడానికి అనుమతించేది. ఎవరైనా అడిగినప్పుడు, మీకు “పాస్‌వర్డ్ రీసెట్ అభ్యర్థన” నోటిఫికేషన్ వస్తుంది. నిజంగా వారేనని నిర్ధారించుకున్న తర్వాత, వ్యక్తులు → సభ్యులు & ఉచిత ప్రాప్యత (లేదా సిబ్బంది ఖాతాలు) తెరిచి, “తాత్కాలిక పాస్‌వర్డ్” → పాస్‌వర్డ్ ఇవ్వండి తాకి, ఒక్కసారి వాడే పాస్‌వర్డ్‌ను చదివి చెప్పండి. వారి పాత పాస్‌వర్డ్ వెంటనే పనిచేయదు, తదుపరి లాగిన్‌లో వారు తమ స్వంతదాన్ని ఎంచుకోవాలి. ఏకైక అడ్మినిస్ట్రేటర్ లాక్ అయితే, app/backend లో npm run admin:reset-password నడపండి.',
+      },
+      {
+        en: 'Stock alerts: when a sale takes a product to 5 or fewer, and again at zero, administrators (and the selling vendor) get a notification, once each. Manage products has a Stock filter (Low / Out of stock). Members waiting for a product are told when you add stock.',
+        te: 'స్టాక్ అలర్ట్‌లు: అమ్మకం వల్ల ఉత్పత్తి 5 లేదా అంతకంటే తక్కువకు వచ్చినప్పుడు, సున్నాకు చేరినప్పుడు మళ్ళీ, అడ్మినిస్ట్రేటర్లకు (మరియు అమ్మే విక్రేతకు) ఒక్కొక్కటి ఒక్కసారి నోటిఫికేషన్ వస్తుంది. ఉత్పత్తులను నిర్వహించండిలో స్టాక్ ఫిల్టర్ (తక్కువ / స్టాక్ లేదు) ఉంది. ఉత్పత్తి కోసం వేచి ఉన్న సభ్యులకు మీరు స్టాక్ జోడించినప్పుడు తెలియజేయబడుతుంది.',
+      },
+      {
+        en: 'Usage & questions (Insights & setup) shows the most opened screens, the help-assistant questions it could not answer (each is a missing FAQ — add it in help/faq.ts), how the tour ended and errors people hit. Only counts are kept, for 90 days.',
+        te: 'వినియోగం & ప్రశ్నలు (నివేదికలు & సెటప్) ఎక్కువగా తెరిచిన స్క్రీన్‌లు, సహాయ అసిస్టెంట్ సమాధానం ఇవ్వలేకపోయిన ప్రశ్నలు (ప్రతి ఒక్కటి లేని FAQ — help/faq.ts లో చేర్చండి), టూర్ ఎలా ముగిసింది, ప్రజలు ఎదుర్కొన్న లోపాలు చూపిస్తుంది. లెక్కలు మాత్రమే, 90 రోజులు ఉంచబడతాయి.',
+      },
+    ],
+  },
+  {
     id: 'admin-plans',
     audience: ['ADMINISTRATOR'],
     title: { en: 'Membership plans, the UPI ID and the membership switch', te: 'సభ్యత్వ ప్లాన్లు, UPI ID, సభ్యత్వ స్విచ్' },
@@ -371,8 +409,8 @@ export const HELP_SECTIONS: HelpSection[] = [
     title: { en: 'FAQ: password and sign-in codes', te: 'తరచుగా అడిగేవి: పాస్‌వర్డ్, సైన్-ఇన్ కోడ్‌లు' },
     body: [
       {
-        en: 'Forgot your password? Use “Forgot password” on the log-in screen: enter your mobile number, type the 6-digit code shown on screen, and choose a new password. While SMS is not connected, codes appear on the screen instead of being texted.',
-        te: 'పాస్‌వర్డ్ మర్చిపోయారా? లాగిన్ స్క్రీన్‌లో “పాస్‌వర్డ్ మర్చిపోయారా” ఉపయోగించండి: మీ మొబైల్ నంబర్ నమోదు చేసి, స్క్రీన్‌పై కనిపించే 6 అంకెల కోడ్ టైప్ చేసి, కొత్త పాస్‌వర్డ్ ఎంచుకోండి. SMS అనుసంధానం అయ్యే వరకు కోడ్‌లు టెక్స్ట్ చేయబడకుండా స్క్రీన్‌పై కనిపిస్తాయి.',
+        en: 'Forgot your password? For your safety only the store can reset it. Use “Forgot password” on the log-in screen and enter your mobile number — the store’s Administrators are told. Contact the store and quote your ID; an Administrator checks it is you and gives you a temporary password, and you choose your own as soon as you log in with it. Sign-up codes (not texted yet) appear on the screen under a red “Temporary” banner.',
+        te: 'పాస్‌వర్డ్ మర్చిపోయారా? మీ భద్రత కోసం దాన్ని స్టోర్ మాత్రమే రీసెట్ చేయగలదు. లాగిన్ స్క్రీన్‌లో “పాస్‌వర్డ్ మర్చిపోయారా” ఉపయోగించి మీ మొబైల్ నంబర్ నమోదు చేయండి — స్టోర్ అడ్మినిస్ట్రేటర్లకు తెలియజేయబడుతుంది. స్టోర్‌ను సంప్రదించి మీ ID చెప్పండి; అది మీరేనని అడ్మినిస్ట్రేటర్ నిర్ధారించుకుని మీకు తాత్కాలిక పాస్‌వర్డ్ ఇస్తారు, దానితో లాగిన్ అయిన వెంటనే మీ స్వంతదాన్ని ఎంచుకుంటారు. సైన్-అప్ కోడ్‌లు (ఇంకా టెక్స్ట్ చేయబడవు) ఎరుపు “తాత్కాలికం” బ్యానర్ కింద స్క్రీన్‌పై కనిపిస్తాయి.',
       },
       {
         en: 'Every password box has an eye button at its right edge — tap it to see what you typed, and again to hide it.',
