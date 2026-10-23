@@ -31,6 +31,32 @@ export const HELP_SECTIONS: HelpSection[] = [
     ],
   },
   {
+    id: 'assistant',
+    audience: 'ALL',
+    title: { en: 'Ask the help assistant', te: 'సహాయ అసిస్టెంట్‌ను అడగండి' },
+    body: [
+      {
+        en: 'The round button at the bottom right of every screen (“Ask a question”) opens a small chat. Type a question in your own words — English, Telugu, or Telugu typed in English letters — or tap one of the suggested questions. It answers in English and Telugu and has a button that takes you straight to the screen it describes.',
+        te: 'ప్రతి స్క్రీన్ కుడి దిగువన ఉన్న గుండ్రని బటన్ (“ప్రశ్న అడగండి”) చిన్న చాట్‌ను తెరుస్తుంది. మీ సొంత మాటల్లో ప్రశ్న టైప్ చేయండి — ఇంగ్లీష్, తెలుగు, లేదా ఇంగ్లీష్ అక్షరాలతో తెలుగు — లేదా సూచించిన ప్రశ్నలలో ఒకదాన్ని తాకండి. ఇది ఇంగ్లీష్, తెలుగులో సమాధానం ఇస్తుంది, అది వివరించే స్క్రీన్‌కు నేరుగా తీసుకెళ్లే బటన్ ఉంటుంది.',
+      },
+      {
+        en: 'It gives the same answer every time and does not need an internet service of its own. If it cannot find an answer it says so and offers related questions and this Help page.',
+        te: 'ఇది ప్రతిసారీ ఒకే సమాధానం ఇస్తుంది, దానికి ప్రత్యేక ఇంటర్నెట్ సేవ అవసరం లేదు. సమాధానం దొరకకపోతే అదే చెప్పి, సంబంధిత ప్రశ్నలను, ఈ సహాయం పేజీని సూచిస్తుంది.',
+      },
+    ],
+  },
+  {
+    id: 'install',
+    audience: 'ALL',
+    title: { en: 'Using it like a phone app', te: 'ఫోన్ యాప్‌లా వాడటం' },
+    body: [
+      {
+        en: 'Open the site in your phone’s browser and choose “Add to Home screen” (or “Install app”) from the browser menu. It then opens full-screen like any other app. Nothing else needs to be downloaded.',
+        te: 'మీ ఫోన్ బ్రౌజర్‌లో సైట్ తెరిచి, బ్రౌజర్ మెనూ నుండి “హోమ్ స్క్రీన్‌కు జోడించండి” (లేదా “యాప్ ఇన్‌స్టాల్ చేయండి”) ఎంచుకోండి. తర్వాత అది ఇతర యాప్‌ల లాగే పూర్తి స్క్రీన్‌లో తెరుచుకుంటుంది. ఇంకేమీ డౌన్‌లోడ్ చేయనవసరం లేదు.',
+      },
+    ],
+  },
+  {
     id: 'shop',
     audience: SHOPPERS,
     title: { en: 'Browsing the shop', te: 'షాప్‌ను చూడటం' },
@@ -47,6 +73,10 @@ export const HELP_SECTIONS: HelpSection[] = [
         en: 'Open a product to see its photos, price, stock and reviews. “Out of stock” items cannot be added to the cart.',
         te: 'ఫోటోలు, ధర, స్టాక్, సమీక్షలు చూడటానికి ఉత్పత్తిని తెరవండి. “స్టాక్ లేదు” వస్తువులను కార్ట్‌కు జోడించలేరు.',
       },
+      {
+        en: 'Tap the heart on a product to save it to your wishlist. It works before you log in too, and your hearts join your account when you sign in. Products without a photo show a leaf tile.',
+        te: 'ఉత్పత్తిని మీ విష్‌లిస్ట్‌లో సేవ్ చేయడానికి దానిపై హృదయం గుర్తును తాకండి. లాగిన్ కాకముందే కూడా పనిచేస్తుంది, సైన్ ఇన్ చేసినప్పుడు మీ హృదయాలు మీ ఖాతాలో చేరతాయి. ఫోటో లేని ఉత్పత్తులు ఆకు టైల్‌ను చూపిస్తాయి.',
+      },
     ],
   },
   {
@@ -57,6 +87,10 @@ export const HELP_SECTIONS: HelpSection[] = [
       {
         en: 'Add products to your cart and change quantities any time. If you are not logged in, your cart is kept on this device and joins your account when you log in or register.',
         te: 'ఉత్పత్తులను కార్ట్‌కు జోడించి ఎప్పుడైనా పరిమాణాలు మార్చండి. మీరు లాగిన్ కాకపోతే, కార్ట్ ఈ పరికరంలో ఉంటుంది; లాగిన్ లేదా నమోదు చేసినప్పుడు అది మీ ఖాతాలో చేరుతుంది.',
+      },
+      {
+        en: 'You cannot put more of a product in the cart than is in stock (and at most 999 at a time); the screen tells you how many are left.',
+        te: 'స్టాక్‌లో ఉన్నదానికంటే ఎక్కువ (ఒకేసారి గరిష్ఠంగా 999) ఉత్పత్తిని కార్ట్‌లో పెట్టలేరు; ఎన్ని మిగిలాయో స్క్రీన్ చెబుతుంది.',
       },
       {
         en: 'Checking out needs an account and an active membership. Your cart is safe while you sort that out.',
@@ -97,8 +131,8 @@ export const HELP_SECTIONS: HelpSection[] = [
         te: 'మేము మా బ్యాంకులో చెల్లింపును తనిఖీ చేసి నిర్ధారిస్తాము — సాధారణంగా అదే రోజు. పై బార్ కింద ఉన్న పసుపు స్ట్రిప్ దానంతట అదే మాయమై అన్నీ అన్‌లాక్ అవుతాయి. చెల్లింపు కనిపించకపోతే కారణం కనిపిస్తుంది, మళ్ళీ ప్రయత్నించవచ్చు.',
       },
       {
-        en: 'Renewing early is never wasted: new days are added after the days you already have. Free access given by an administrator is shown as “Free access until …”.',
-        te: 'ముందే పునరుద్ధరించినా వృధా కాదు: కొత్త రోజులు మీకు ఇప్పటికే ఉన్న రోజుల తర్వాత చేరతాయి. అడ్మినిస్ట్రేటర్ ఇచ్చిన ఉచిత ప్రాప్యత “… వరకు ఉచిత ప్రాప్యత” అని కనిపిస్తుంది.',
+        en: 'In the last 3 days of your access a strip under the top bar and one bell notification remind you to renew; you get one more notice when it has ended. Renewing early is never wasted: new days are added after the days you already have. Free access given by an administrator is shown as “Free access until …”.',
+        te: 'మీ ప్రాప్యత చివరి 3 రోజుల్లో పై బార్ కింద ఒక స్ట్రిప్, ఒక బెల్ నోటిఫికేషన్ పునరుద్ధరించమని గుర్తు చేస్తాయి; అది ముగిసిన తర్వాత మరొక నోటీసు వస్తుంది. ముందే పునరుద్ధరించినా వృధా కాదు: కొత్త రోజులు మీకు ఇప్పటికే ఉన్న రోజుల తర్వాత చేరతాయి. అడ్మినిస్ట్రేటర్ ఇచ్చిన ఉచిత ప్రాప్యత “… వరకు ఉచిత ప్రాప్యత” అని కనిపిస్తుంది.',
       },
     ],
   },
@@ -133,6 +167,10 @@ export const HELP_SECTIONS: HelpSection[] = [
       {
         en: 'Each item also shows Sent or Pending. If some stock is short we send what is available first — pending items follow.',
         te: 'ప్రతి వస్తువు పంపబడింది లేదా పెండింగ్ అని కూడా చూపిస్తుంది. కొంత స్టాక్ తక్కువైతే, ఉన్నది మొదట పంపుతాము — పెండింగ్ వస్తువులు తర్వాత వస్తాయి.',
+      },
+      {
+        en: 'The price on an order never changes after you place it, even if the shop changes the price later. To cancel, contact the store with your ID and order number before it ships — the store cancels it and the items go back to stock. A delivered order cannot be cancelled.',
+        te: 'మీరు ఆర్డర్ చేసిన తర్వాత షాప్ ధర మార్చినా, ఆర్డర్‌లోని ధర ఎప్పటికీ మారదు. రద్దు చేయడానికి, అది పంపబడే ముందు మీ ID, ఆర్డర్ నంబర్‌తో స్టోర్‌ను సంప్రదించండి — స్టోర్ రద్దు చేస్తుంది, వస్తువులు స్టాక్‌కు తిరిగి వెళ్తాయి. డెలివరీ అయిన ఆర్డర్‌ను రద్దు చేయలేరు.',
       },
     ],
   },
@@ -194,6 +232,10 @@ export const HELP_SECTIONS: HelpSection[] = [
         en: 'Open an order to verify or reject its UPI payment. A UPI order cannot be confirmed until it is verified. Then Confirm → Ship → Deliver. Delivering a Cash on Delivery order marks it paid.',
         te: 'UPI చెల్లింపును ధృవీకరించడానికి లేదా తిరస్కరించడానికి ఆర్డర్ తెరవండి. ధృవీకరించే వరకు UPI ఆర్డర్‌ను నిర్ధారించలేరు. తర్వాత నిర్ధారించండి → పంపండి → డెలివరీ చేయండి. క్యాష్ ఆన్ డెలివరీ ఆర్డర్‌ను డెలివరీ చేస్తే అది చెల్లించినట్లు గుర్తించబడుతుంది.',
       },
+      {
+        en: 'Cancel puts every item back in stock exactly once and records a “Cancelled-order return” line in each product’s Stock history. Cancelling twice (even by two administrators at the same moment) or cancelling a delivered order is refused.',
+        te: 'రద్దు చేస్తే ప్రతి వస్తువు సరిగ్గా ఒక్కసారి స్టాక్‌కు తిరిగి వెళ్తుంది, ప్రతి ఉత్పత్తి స్టాక్ చరిత్రలో “రద్దు చేసిన ఆర్డర్ తిరిగి” లైన్ నమోదవుతుంది. రెండుసార్లు రద్దు చేయడం (ఇద్దరు అడ్మినిస్ట్రేటర్లు ఒకే క్షణంలో చేసినా) లేదా డెలివరీ అయిన ఆర్డర్‌ను రద్దు చేయడం తిరస్కరించబడుతుంది.',
+      },
     ],
   },
   {
@@ -208,6 +250,40 @@ export const HELP_SECTIONS: HelpSection[] = [
       {
         en: 'Staff accounts creates experts, moderators, vendors, support agents and administrators (people sign themselves up as members).',
         te: 'సిబ్బంది ఖాతాలు నిపుణులు, మోడరేటర్లు, విక్రేతలు, సపోర్ట్ ఏజెంట్లు, అడ్మినిస్ట్రేటర్లను సృష్టిస్తాయి (ప్రజలు తామే సభ్యులుగా సైన్ అప్ అవుతారు).',
+      },
+    ],
+  },
+  {
+    id: 'admin-products',
+    audience: ['ADMINISTRATOR'],
+    title: { en: 'Adding products and managing stock', te: 'ఉత్పత్తులను జోడించడం, స్టాక్ నిర్వహణ' },
+    body: [
+      {
+        en: 'Shop → Manage products → Add new product. Fill name, description (10+ characters), price (₹0.01 to ₹10,00,000, at most 2 decimals), unit, opening stock (0 to 10,00,000) and category. Products you add are sold by the platform itself; after saving you land on the product screen to upload photos. The list has search, filters (seller, status) and sortable columns.',
+        te: 'షాప్ → ఉత్పత్తులను నిర్వహించండి → కొత్త ఉత్పత్తిని జోడించండి. పేరు, వివరణ (10+ అక్షరాలు), ధర (₹0.01 నుండి ₹10,00,000, గరిష్ఠంగా 2 దశాంశాలు), యూనిట్, ప్రారంభ స్టాక్ (0 నుండి 10,00,000), వర్గం నింపండి. మీరు జోడించే ఉత్పత్తులను ప్లాట్‌ఫామ్ స్వయంగా అమ్ముతుంది; సేవ్ చేసిన తర్వాత ఫోటోలు అప్‌లోడ్ చేయడానికి ఉత్పత్తి స్క్రీన్‌కు చేరతారు. జాబితాలో శోధన, ఫిల్టర్లు (విక్రేత, స్థితి), క్రమబద్ధీకరించదగిన కాలమ్‌లు ఉన్నాయి.',
+      },
+      {
+        en: 'On a product, the Stock panel has three actions: Add stock (reason optional), Reduce stock (reason required — damaged, expired, given away; it can never go below zero) and Set to counted quantity (a stock-take; reason required). Editing the price or details never overwrites stock by accident.',
+        te: 'ఉత్పత్తిపై స్టాక్ ప్యానెల్‌లో మూడు చర్యలు ఉన్నాయి: స్టాక్ జోడించండి (కారణం ఐచ్ఛికం), స్టాక్ తగ్గించండి (కారణం తప్పనిసరి — పాడైంది, గడువు ముగిసింది, ఇచ్చేశారు; సున్నా కంటే తక్కువ కాదు), లెక్కించిన పరిమాణానికి సెట్ చేయండి (స్టాక్ లెక్కింపు; కారణం తప్పనిసరి). ధర లేదా వివరాలు సవరించినప్పుడు స్టాక్ పొరపాటున మారదు.',
+      },
+      {
+        en: 'Stock history lists every change: opening stock, each sale (with the order number and buyer), cancelled-order returns, adds, reduces and corrections — with who did it. It is sortable and filterable, and always adds up to the live count. Sales take stock automatically, and if two buyers go for the last unit exactly one gets it.',
+        te: 'స్టాక్ చరిత్ర ప్రతి మార్పును చూపిస్తుంది: ప్రారంభ స్టాక్, ప్రతి అమ్మకం (ఆర్డర్ నంబర్, కొనుగోలుదారుతో), రద్దు చేసిన ఆర్డర్ తిరిగి, జోడింపులు, తగ్గింపులు, సవరణలు — ఎవరు చేశారో సహా. దీన్ని క్రమబద్ధీకరించి ఫిల్టర్ చేయవచ్చు, ఇది ఎల్లప్పుడూ ప్రస్తుత లెక్కకు సరిపోతుంది. అమ్మకాలు స్టాక్‌ను ఆటోమేటిక్‌గా తీసుకుంటాయి; ఇద్దరు కొనుగోలుదారులు చివరి యూనిట్ కోసం వస్తే సరిగ్గా ఒకరికే దక్కుతుంది.',
+      },
+    ],
+  },
+  {
+    id: 'admin-insights',
+    audience: ['ADMINISTRATOR'],
+    title: { en: 'Vendors, reports, audit log and media', te: 'విక్రేతలు, నివేదికలు, ఆడిట్ లాగ్, మీడియా' },
+    body: [
+      {
+        en: 'Vendor approvals: review each vendor’s business name and description, then approve or reject. Expert credentials: verify an expert’s qualifications — cases can only be assigned to verified experts.',
+        te: 'విక్రేత ఆమోదాలు: ప్రతి విక్రేత వ్యాపార పేరు, వివరణ సమీక్షించి ఆమోదించండి లేదా తిరస్కరించండి. నిపుణుల ధృవపత్రాలు: నిపుణుడి అర్హతలను ధృవీకరించండి — ధృవీకరించిన నిపుణులకు మాత్రమే కేసులు కేటాయించబడతాయి.',
+      },
+      {
+        en: 'Reports show case volume, resolution time, the article funnel, expert workload and accounts by role. The Audit log records every important action (prices, UPI ID changes, approvals, stock changes) and who did it, filterable by type and date. The Media library lists every uploaded photo, video and PDF in one sortable table.',
+        te: 'నివేదికలు కేసుల సంఖ్య, పరిష్కార సమయం, వ్యాసాల ప్రవాహం, నిపుణుల పని, పాత్ర వారీ ఖాతాలను చూపిస్తాయి. ఆడిట్ లాగ్ ప్రతి ముఖ్యమైన చర్యను (ధరలు, UPI ID మార్పులు, ఆమోదాలు, స్టాక్ మార్పులు) ఎవరు చేశారో సహా నమోదు చేస్తుంది, రకం, తేదీ ద్వారా ఫిల్టర్ చేయవచ్చు. మీడియా లైబ్రరీ అప్‌లోడ్ చేసిన ప్రతి ఫోటో, వీడియో, PDFను ఒక క్రమబద్ధీకరించదగిన పట్టికలో చూపిస్తుంది.',
       },
     ],
   },
@@ -238,6 +314,10 @@ export const HELP_SECTIONS: HelpSection[] = [
       {
         en: 'Submit your business name and description from your dashboard. An administrator approves it, and only then can you list products. Add price, unit, stock, photos and a category from the full Department › Category › Sub-category list.',
         te: 'మీ డాష్‌బోర్డ్ నుండి వ్యాపార పేరు, వివరణ సమర్పించండి. అడ్మినిస్ట్రేటర్ ఆమోదిస్తారు, ఆ తర్వాతే మీరు ఉత్పత్తులను జాబితా చేయగలరు. ధర, యూనిట్, స్టాక్, ఫోటోలు, పూర్తి విభాగం › వర్గం › ఉప-వర్గం జాబితా నుండి వర్గాన్ని జోడించండి.',
+      },
+      {
+        en: 'Price must be ₹0.01 to ₹10,00,000 with at most 2 decimals; stock 0 to 10,00,000. To change stock later open the product and use the Stock panel — Add, Reduce (reason required) or Set to counted quantity. Every change, every sale and every cancelled order appears in Stock history. Only you and administrators can edit your products; if an administrator un-approves your business, your products leave the shop until it is approved again.',
+        te: 'ధర ₹0.01 నుండి ₹10,00,000 వరకు, గరిష్ఠంగా 2 దశాంశాలు; స్టాక్ 0 నుండి 10,00,000. తర్వాత స్టాక్ మార్చడానికి ఉత్పత్తిని తెరిచి స్టాక్ ప్యానెల్ వాడండి — జోడించండి, తగ్గించండి (కారణం తప్పనిసరి) లేదా లెక్కించిన పరిమాణానికి సెట్ చేయండి. ప్రతి మార్పు, ప్రతి అమ్మకం, ప్రతి రద్దు చేసిన ఆర్డర్ స్టాక్ చరిత్రలో కనిపిస్తాయి. మీరు, అడ్మినిస్ట్రేటర్లు మాత్రమే మీ ఉత్పత్తులను సవరించగలరు; అడ్మినిస్ట్రేటర్ మీ వ్యాపార ఆమోదాన్ని తొలగిస్తే, మళ్ళీ ఆమోదించే వరకు మీ ఉత్పత్తులు షాప్ నుండి వెళ్ళిపోతాయి.',
       },
     ],
   },
@@ -293,6 +373,10 @@ export const HELP_SECTIONS: HelpSection[] = [
       {
         en: 'Forgot your password? Use “Forgot password” on the log-in screen: enter your mobile number, type the 6-digit code shown on screen, and choose a new password. While SMS is not connected, codes appear on the screen instead of being texted.',
         te: 'పాస్‌వర్డ్ మర్చిపోయారా? లాగిన్ స్క్రీన్‌లో “పాస్‌వర్డ్ మర్చిపోయారా” ఉపయోగించండి: మీ మొబైల్ నంబర్ నమోదు చేసి, స్క్రీన్‌పై కనిపించే 6 అంకెల కోడ్ టైప్ చేసి, కొత్త పాస్‌వర్డ్ ఎంచుకోండి. SMS అనుసంధానం అయ్యే వరకు కోడ్‌లు టెక్స్ట్ చేయబడకుండా స్క్రీన్‌పై కనిపిస్తాయి.',
+      },
+      {
+        en: 'Every password box has an eye button at its right edge — tap it to see what you typed, and again to hide it.',
+        te: 'ప్రతి పాస్‌వర్డ్ బాక్స్ కుడి అంచున కన్ను బటన్ ఉంటుంది — మీరు టైప్ చేసినది చూడటానికి దాన్ని తాకండి, దాచడానికి మళ్ళీ తాకండి.',
       },
     ],
   },

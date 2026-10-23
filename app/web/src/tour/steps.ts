@@ -17,6 +17,12 @@ const HELP: TourStep = {
   te: 'ఇరుక్కున్నారా? ప్రతి స్క్రీన్‌కు సులభమైన సమాధానాలు Help లో ఉన్నాయి, అక్కడి నుండి ఈ టూర్‌ను ఎప్పుడైనా మళ్ళీ చూడవచ్చు.',
 };
 
+const CHAT: TourStep = {
+  target: 'chat',
+  en: 'Not sure how something works? Tap this button and ask in your own words — English or Telugu. The help assistant answers and can take you straight to the right screen.',
+  te: 'ఏదైనా ఎలా పనిచేస్తుందో తెలియదా? ఈ బటన్ తాకి మీ సొంత మాటల్లో — ఇంగ్లీష్ లేదా తెలుగులో — అడగండి. సహాయ అసిస్టెంట్ సమాధానం ఇచ్చి, సరైన స్క్రీన్‌కు నేరుగా తీసుకెళ్లగలదు.',
+};
+
 const BELL: TourStep = {
   target: 'bell',
   en: 'Notifications appear here — payment verified, order shipped, an answer to your question. The red number is how many are new.',
@@ -36,8 +42,8 @@ export const TOURS: Record<Audience, TourStep[]> = {
     },
     {
       target: 'products',
-      en: 'Tap any product to see its price, stock, photos and reviews, then add it to your cart.',
-      te: 'ఏదైనా ఉత్పత్తిని తాకి ధర, స్టాక్, ఫోటోలు, సమీక్షలు చూడండి, తర్వాత కార్ట్‌కు జోడించండి.',
+      en: 'Tap any product to see its price, stock, photos and reviews, then add it to your cart. Tap the heart to save it to your wishlist.',
+      te: 'ఏదైనా ఉత్పత్తిని తాకి ధర, స్టాక్, ఫోటోలు, సమీక్షలు చూడండి, తర్వాత కార్ట్‌కు జోడించండి. విష్‌లిస్ట్‌లో సేవ్ చేయడానికి హృదయం గుర్తును తాకండి.',
     },
     {
       target: '/marketplace/cart',
@@ -49,6 +55,7 @@ export const TOURS: Record<Audience, TourStep[]> = {
       en: 'Ready to buy? Register (or log in) to check out. Checkout and the farm-advice features need a membership.',
       te: 'కొనడానికి సిద్ధమా? చెక్అవుట్ కోసం నమోదు చేసుకోండి (లేదా లాగిన్ అవ్వండి). చెక్అవుట్, వ్యవసాయ సలహా సౌకర్యాలకు సభ్యత్వం అవసరం.',
     },
+    CHAT,
     HELP,
   ],
 
@@ -74,8 +81,8 @@ export const TOURS: Record<Audience, TourStep[]> = {
     },
     {
       target: '/marketplace/cart',
-      en: 'Your cart. Change quantities here, then proceed to checkout.',
-      te: 'మీ కార్ట్. ఇక్కడ పరిమాణాలు మార్చి, చెక్అవుట్‌కు వెళ్ళండి.',
+      en: 'Your cart. Change quantities here (up to what is in stock), then proceed to checkout.',
+      te: 'మీ కార్ట్. ఇక్కడ పరిమాణాలు మార్చండి (స్టాక్‌లో ఉన్నంత వరకు), తర్వాత చెక్అవుట్‌కు వెళ్ళండి.',
     },
     {
       target: '/marketplace/orders',
@@ -118,6 +125,7 @@ export const TOURS: Record<Audience, TourStep[]> = {
       te: 'మీ సభ్యత్వం: UPI ద్వారా చెల్లించి, రిఫరెన్స్ నంబర్ సమర్పించండి, ఎంతకాలం ఉంటుందో చూడండి. దీనితో చెక్అవుట్, వ్యవసాయ సలహా అన్‌లాక్ అవుతాయి.',
     },
     BELL,
+    CHAT,
     HELP,
   ],
 
@@ -131,20 +139,26 @@ export const TOURS: Record<Audience, TourStep[]> = {
     { target: '/admin/members', en: 'Members: everyone who signed up, labelled Paid, Free, Waiting, Unpaid or Expired. Give free access until a date here, for testing or friends of the store.', te: 'సభ్యులు: సైన్ అప్ అయిన అందరూ, చెల్లించారు, ఉచితం, వేచి ఉంది, చెల్లించలేదు లేదా గడువు ముగిసింది అని లేబుల్‌తో. పరీక్ష లేదా స్టోర్ మిత్రుల కోసం ఇక్కడ తేదీ వరకు ఉచిత ప్రాప్యత ఇవ్వండి.' },
     { target: '/admin/hariharaa-subscriptions', en: 'Membership payments waiting for you: check the UTR in the bank, then approve or reject with a reason.', te: 'మీ కోసం వేచి ఉన్న సభ్యత్వ చెల్లింపులు: బ్యాంకులో UTR తనిఖీ చేసి, ఆమోదించండి లేదా కారణంతో తిరస్కరించండి.' },
     { target: '/marketplace/manage/orders', en: 'The order queue. UPI orders must have their payment verified here before they can be confirmed and packed.', te: 'ఆర్డర్ క్యూ. UPI ఆర్డర్లను నిర్ధారించి ప్యాక్ చేసే ముందు ఇక్కడ చెల్లింపును ధృవీకరించాలి.' },
-    { target: '/marketplace/manage/products', en: 'All products from every seller, with their stock and status.', te: 'అన్ని విక్రేతల ఉత్పత్తులు, వాటి స్టాక్, స్థితితో.' },
+    { target: '/marketplace/manage/products', en: 'All products from every seller. Use “Add new product” here, and open a product to add or reduce its stock and read its Stock history — every sale, return and correction is recorded.', te: 'అన్ని విక్రేతల ఉత్పత్తులు. ఇక్కడ “కొత్త ఉత్పత్తిని జోడించండి” వాడండి; ఉత్పత్తిని తెరిచి దాని స్టాక్ జోడించండి లేదా తగ్గించండి, స్టాక్ చరిత్ర చదవండి — ప్రతి అమ్మకం, తిరిగి వచ్చినవి, సవరణ నమోదవుతాయి.' },
+    { target: '/marketplace/manage/vendors', en: 'Vendor approvals: sellers apply here. Only approved vendors can list products.', te: 'విక్రేత ఆమోదాలు: విక్రేతలు ఇక్కడ దరఖాస్తు చేస్తారు. ఆమోదించిన విక్రేతలు మాత్రమే ఉత్పత్తులను జాబితా చేయగలరు.' },
+    { target: '/admin/credentials', en: 'Expert credentials: verify an expert’s qualifications so cases can be assigned to them.', te: 'నిపుణుల ధృవపత్రాలు: నిపుణుడి అర్హతలను ధృవీకరించండి, అప్పుడు వారికి కేసులు కేటాయించవచ్చు.' },
+    { target: '/admin/media', en: 'Media library: every uploaded photo, video and PDF in one table you can sort and filter.', te: 'మీడియా లైబ్రరీ: అప్‌లోడ్ చేసిన ప్రతి ఫోటో, వీడియో, PDF ఒకే పట్టికలో — క్రమబద్ధీకరించి ఫిల్టర్ చేయవచ్చు.' },
     { target: '/admin/taxonomy', en: 'Taxonomy: crops, regions and the shop’s Department → Category → Sub-category tree.', te: 'వర్గీకరణ: పంటలు, ప్రాంతాలు, షాప్ విభాగం → వర్గం → ఉప-వర్గం చెట్టు.' },
     { target: '/admin/membership-plans', en: 'Membership plans: set prices, add plans of different lengths (monthly, yearly…), switch each on or off, and turn the membership requirement off or on for everyone.', te: 'సభ్యత్వ ప్లాన్లు: ధరలు నిర్ణయించండి, వేర్వేరు వ్యవధుల ప్లాన్లను (నెలవారీ, వార్షిక…) చేర్చండి, ప్రతిదాన్ని ఆన్ లేదా ఆఫ్ చేయండి, అందరికీ సభ్యత్వ అవసరాన్ని ఆఫ్ లేదా ఆన్ చేయండి.' },
     { target: '/admin/hariharaa-settings', en: 'Settings: the UPI ID customers pay to (change it any time), the merchant ID and payee name.', te: 'సెట్టింగ్‌లు: కస్టమర్లు చెల్లించే UPI ID (ఎప్పుడైనా మార్చవచ్చు), మర్చంట్ ID, చెల్లింపు పొందేవారి పేరు.' },
-    { target: '/admin/reports', en: 'Reports and the audit log show what is happening and who did what.', te: 'నివేదికలు, ఆడిట్ లాగ్ ఏం జరుగుతోందో, ఎవరు ఏం చేశారో చూపిస్తాయి.' },
+    { target: '/admin/reports', en: 'Reports show what is happening across the platform.', te: 'నివేదికలు ప్లాట్‌ఫామ్ అంతటా ఏం జరుగుతోందో చూపిస్తాయి.' },
+    { target: '/admin/audit', en: 'The audit log records every important action — prices, UPI ID changes, approvals, stock changes — and who did it.', te: 'ఆడిట్ లాగ్ ప్రతి ముఖ్యమైన చర్యను — ధరలు, UPI ID మార్పులు, ఆమోదాలు, స్టాక్ మార్పులు — ఎవరు చేశారో సహా నమోదు చేస్తుంది.' },
     BELL,
+    CHAT,
     HELP,
   ],
 
   VENDOR: [
     { en: 'Welcome! This tour shows how to list and manage your products.', te: 'స్వాగతం! మీ ఉత్పత్తులను ఎలా జాబితా చేయాలో, నిర్వహించాలో ఈ టూర్ చూపిస్తుంది.' },
-    { target: '/marketplace/vendor', en: 'Your vendor dashboard: submit your business for approval, then add products, prices, stock and photos. Pick each product’s category from the full Department › Category › Sub-category list.', te: 'మీ విక్రేత డాష్‌బోర్డ్: ఆమోదం కోసం మీ వ్యాపారాన్ని సమర్పించి, తర్వాత ఉత్పత్తులు, ధరలు, స్టాక్, ఫోటోలు జోడించండి. ప్రతి ఉత్పత్తి వర్గాన్ని పూర్తి విభాగం › వర్గం › ఉప-వర్గం జాబితా నుండి ఎంచుకోండి.' },
+    { target: '/marketplace/vendor', en: 'Your vendor dashboard: submit your business for approval, then add products, prices, stock and photos. Pick each product’s category from the full Department › Category › Sub-category list. Open a product later to add or reduce stock and see its Stock history.', te: 'మీ విక్రేత డాష్‌బోర్డ్: ఆమోదం కోసం మీ వ్యాపారాన్ని సమర్పించి, తర్వాత ఉత్పత్తులు, ధరలు, స్టాక్, ఫోటోలు జోడించండి. ప్రతి ఉత్పత్తి వర్గాన్ని పూర్తి విభాగం › వర్గం › ఉప-వర్గం జాబితా నుండి ఎంచుకోండి. తర్వాత ఉత్పత్తిని తెరిచి స్టాక్ జోడించండి లేదా తగ్గించండి, స్టాక్ చరిత్ర చూడండి.' },
     { target: '/marketplace', en: 'See your products the way customers see them.', te: 'కస్టమర్లు చూసినట్లే మీ ఉత్పత్తులను చూడండి.' },
     BELL,
+    CHAT,
     HELP,
   ],
 
@@ -154,6 +168,7 @@ export const TOURS: Record<Audience, TourStep[]> = {
     { target: '/expert/articles', en: 'Articles drafted from solved cases. Edit, then submit them for review.', te: 'పరిష్కరించిన కేసుల నుండి రూపొందించిన వ్యాసాలు. సవరించి, సమీక్ష కోసం సమర్పించండి.' },
     { target: '/expert/credentials', en: 'Your qualifications: submit them so an Administrator can verify you.', te: 'మీ అర్హతలు: అడ్మినిస్ట్రేటర్ మిమ్మల్ని ధృవీకరించడానికి వాటిని సమర్పించండి.' },
     BELL,
+    CHAT,
     HELP,
   ],
 
@@ -164,6 +179,7 @@ export const TOURS: Record<Audience, TourStep[]> = {
     { target: '/courses/manage', en: 'Courses: build lessons and publish them.', te: 'కోర్సులు: పాఠాలను తయారు చేసి ప్రచురించండి.' },
     { target: '/soil-samples/manage', en: 'The soil-sample queue: track each sample through to its report.', te: 'నేల నమూనా క్యూ: ప్రతి నమూనాను నివేదిక వరకు ట్రాక్ చేయండి.' },
     BELL,
+    CHAT,
     HELP,
   ],
 
@@ -171,6 +187,7 @@ export const TOURS: Record<Audience, TourStep[]> = {
     { en: 'Welcome! This tour shows how to dispatch orders.', te: 'స్వాగతం! ఆర్డర్లను ఎలా పంపాలో ఈ టూర్ చూపిస్తుంది.' },
     { target: '/support/dispatch-queue', en: 'The dispatch queue: orders ready to pack (Cash on Delivery, or UPI already verified) with the receiver’s city, PIN and phone. Open one and mark each item Sent or Pending — if some stock is short, send what you have.', te: 'డిస్పాచ్ క్యూ: ప్యాక్ చేయడానికి సిద్ధమైన ఆర్డర్లు (క్యాష్ ఆన్ డెలివరీ, లేదా ఇప్పటికే ధృవీకరించిన UPI), స్వీకర్త నగరం, పిన్, ఫోన్‌తో. ఒకదాన్ని తెరిచి ప్రతి వస్తువును పంపబడింది లేదా పెండింగ్ అని గుర్తించండి — కొంత స్టాక్ తక్కువైతే, ఉన్నది పంపండి.' },
     BELL,
+    CHAT,
     HELP,
   ],
 };
@@ -181,5 +198,5 @@ export function audienceFor(role: string | undefined): Audience {
 }
 
 // Bump the version to show the tour again to everyone after a big change to the app.
-export const TOUR_VERSION = 1;
+export const TOUR_VERSION = 2;
 export const tourStorageKey = (audience: Audience, userId?: string | null) => `agriai.tour.v${TOUR_VERSION}.${audience}${userId ? `.${userId}` : ''}`;

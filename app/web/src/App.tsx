@@ -57,6 +57,7 @@ import { AdminHariharaaSettingsPage } from './pages/hariharaa/AdminHariharaaSett
 import { ChangePasswordPage } from './pages/ChangePasswordPage';
 import { MediaLibraryPage } from './pages/MediaLibraryPage';
 import { DispatchQueuePage } from './pages/hariharaa/DispatchQueuePage';
+import { HelpChat } from './components/HelpChat';
 
 export function App() {
   return (
@@ -488,6 +489,8 @@ export function App() {
             }
           />
         </Routes>
+        {/* The help assistant: one round button on every screen, including log in and register. */}
+        <HelpChat />
         </MembershipProvider>
       </BrowserRouter>
     </AuthProvider>

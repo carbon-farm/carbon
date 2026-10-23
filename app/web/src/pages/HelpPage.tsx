@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { audienceFor } from '../tour/steps';
 import { roleHomePath } from '../auth/roleHome';
 import { startTour } from '../tour/Tour';
 import { sectionsFor } from '../help/content';
+import { faqsFor } from '../help/faq';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 
@@ -31,6 +32,15 @@ export function HelpPage() {
     );
   }, [audience, search]);
 
+  const faqs = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return faqsFor(audience).filter(
+      (f) =>
+        !q ||
+        [f.q.en, f.q.te, ...f.a.flatMap((b) => [b.en, b.te]), ...f.keywords].some((t) => t.toLowerCase().includes(q)),
+    );
+  }, [audience, search]);
+
   return (
     <>
       <div className="top-bar">
@@ -51,7 +61,7 @@ export function HelpPage() {
         </label>
       </div>
 
-      {sections.length === 0 ? (
+      {sections.length === 0 && faqs.length === 0 ? (
         <BiValue value={strings.reportNoData} as="p" className="hint" />
       ) : (
         <div className="help-grid">
@@ -70,6 +80,37 @@ export function HelpPage() {
             </section>
           ))}
         </div>
+      )}
+
+      {faqs.length > 0 && (
+        <section className="faq-section" id="faq">
+          <Bi id="helpFaqHeading" as="h2" />
+          <BiValue value={strings.helpFaqIntro} as="p" className="hint" />
+          <div className="faq-list">
+            {faqs.map((f) => (
+              <details className="faq-item" key={f.id} id={`faq-${f.id}`}>
+                <summary>
+                  <span className="bi-en">{f.q.en}</span>
+                  <span className="bi-te">{f.q.te}</span>
+                </summary>
+                {f.a.map((p, i) => (
+                  <p key={i}>
+                    <span className="bi-en">{p.en}</span>
+                    <span className="bi-te">{p.te}</span>
+                  </p>
+                ))}
+                {f.link && (
+                  <p>
+                    <Link to={f.link.to} className="link-button">
+                      <span className="bi-en">{f.link.label.en}</span>
+                      <span className="bi-te">{f.link.label.te}</span>
+                    </Link>
+                  </p>
+                )}
+              </details>
+            ))}
+          </div>
+        </section>
       )}
     </>
   );
