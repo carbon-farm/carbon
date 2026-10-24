@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { shrinkImage } from '../lib/image';
+import { CaseHistory } from '../components/CaseHistory';
 import { getCase, submitCase, respondToFollowUp, confirmCase, disputeCase, uploadCaseEvidence, type Case } from '../api/cases';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings, caseCategoryLabel, caseStatusLabel } from '../i18n/strings';
@@ -124,6 +125,15 @@ export function CaseDetailPage() {
         <h1>{theCase?.caseNumber ?? <BiValue value={strings.statusDraft} />}</h1>
       </div>
 
+      {theCase?.relatedCase && (
+        <p className="hint">
+          <Bi id="followUpToCase" />{' '}
+          <Link to={`/cases/${theCase.relatedCase.id}`} className="link-button">
+            {theCase.relatedCase.caseNumber ?? theCase.relatedCase.id.slice(0, 8)}
+          </Link>
+        </p>
+      )}
+
       {error && <div className="error-banner">{error}</div>}
 
       {loading ? (
@@ -146,10 +156,10 @@ export function CaseDetailPage() {
               <div className="field-label"><Bi id="categoryLabel" /></div>
               <div><BiValue value={caseCategoryLabel(theCase.category.name)} /></div>
             </div>
-            {theCase.crop && (
+            {(theCase.crop || theCase.cropName) && (
               <div>
                 <div className="field-label"><Bi id="articleCropField" /></div>
-                <div>{theCase.crop.name}</div>
+                <div>{theCase.crop?.name ?? theCase.cropName}</div>
               </div>
             )}
             <div>
@@ -197,6 +207,8 @@ export function CaseDetailPage() {
             )}
           </div>
 
+          {theCase.status !== 'DRAFT' && <CaseHistory caseId={theCase.id} version={theCase.status} />}
+
           {theCase.status === 'DRAFT' && (
             <div className="card">
               <BiValue value={strings.draftBadgeNotice} as="p" className="hint" />
@@ -238,6 +250,14 @@ export function CaseDetailPage() {
               <button type="button" className="secondary" onClick={handleDispute} disabled={resolutionAction !== null}>
                 {resolutionAction === 'dispute' ? <BiValue value={strings.disputing} /> : <Bi id="disputeResolutionButton" />}
               </button>
+            </div>
+          )}
+
+          {(theCase.status === 'CLOSED' || theCase.status === 'FARMER_CONFIRMED') && (
+            <div className="card">
+              <Link to={`/cases/new?from=${theCase.id}`} className="link-button">
+                <Bi id="adviceDidNotWorkButton" />
+              </Link>
             </div>
           )}
 

@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Case, CaseStatus, ClosureReason, Role } from '@prisma/client';
+import { Case, Prisma, CaseEventKind, CaseStatus, ClosureReason, Role } from '@prisma/client';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
@@ -13,6 +13,7 @@ import { UploadsService } from '../uploads/uploads.service';
 import { KnowledgeService } from '../knowledge/knowledge.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { bi } from '../../common/i18n';
+import { isUniqueViolation, MAX_NUMBER_ATTEMPTS, numberPrefix, withSequence } from '../../common/readable-number';
 import { CreateCaseDto } from './dto/create-case.dto';
 import { UpdateCaseDto } from './dto/update-case.dto';
 import { AssignCaseDto } from './dto/assign-case.dto';
@@ -35,14 +36,62 @@ export class CasesService {
     private readonly notifications: NotificationsService,
   ) {}
 
+  // The conversation on a case, kept in order. Best effort: the history is a record of what
+  // happened, never a reason for the step itself to fail.
+  private async recordEvent(caseId: string, kind: CaseEventKind, actorId: string | null, text?: string | null): Promise<void> {
+    try {
+      await this.prisma.caseEvent.create({ data: { caseId, kind, actorId, text: text ?? null } });
+    } catch {
+      // ignored on purpose
+    }
+  }
+
+  // Everything said on the case, oldest first, with who said it. Same audience as the case itself.
+  async history(caseId: string, requester: { userId: string; role: Role }) {
+    const current = await this.getById(caseId, requester); // access check
+    // A follow-up case continues the story of the case before it: walk back (a few steps) so the
+    // reader sees the whole record, oldest first, each part labelled with its case number.
+    const chain: { id: string; caseNumber: string | null }[] = [{ id: current.id, caseNumber: current.caseNumber }];
+    let cursor = current.relatedCaseId;
+    while (cursor && chain.length < 5) {
+      const earlier = await this.prisma.case.findUnique({ where: { id: cursor }, select: { id: true, caseNumber: true, relatedCaseId: true, farmerId: true } });
+      if (!earlier || earlier.farmerId !== current.farmerId) break;
+      chain.unshift({ id: earlier.id, caseNumber: earlier.caseNumber });
+      cursor = earlier.relatedCaseId;
+    }
+    const numberOf = new Map(chain.map((c) => [c.id, c.caseNumber]));
+    const events = await this.prisma.caseEvent.findMany({ where: { caseId: { in: chain.map((c) => c.id) } }, orderBy: { createdAt: 'asc' } });
+    const ids = [...new Set(events.map((e) => e.actorId).filter((x): x is string => !!x))];
+    const actors = ids.length ? await this.prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, name: true, role: true } }) : [];
+    const byId = new Map(actors.map((a) => [a.id, a]));
+    return events.map((e) => ({
+      id: e.id,
+      caseId: e.caseId,
+      caseNumber: numberOf.get(e.caseId) ?? null,
+      kind: e.kind,
+      text: e.text,
+      createdAt: e.createdAt,
+      actorName: e.actorId ? byId.get(e.actorId)?.name ?? null : null,
+      actorRole: e.actorId ? byId.get(e.actorId)?.role ?? null : null,
+    }));
+  }
+
   async createDraft(farmerId: string, dto: CreateCaseDto): Promise<Case> {
     await this.assertFarmLandOwnership(dto.farmLandId, farmerId);
+    if (dto.relatedCaseId) {
+      const earlier = await this.prisma.case.findUnique({ where: { id: dto.relatedCaseId }, select: { farmerId: true } });
+      if (!earlier || earlier.farmerId !== farmerId) {
+        throw new BadRequestException(bi('Choose one of your own earlier cases', 'మీ స్వంత ముందటి కేసును ఎంచుకోండి'));
+      }
+    }
     const created = await this.prisma.case.create({
       data: {
         farmerId,
         farmLandId: dto.farmLandId,
         categoryId: dto.categoryId,
         cropId: dto.cropId,
+        cropName: dto.cropId ? null : dto.cropName?.trim() || null,
+        relatedCaseId: dto.relatedCaseId ?? null,
         problemDescription: dto.problemDescription,
         evidenceNotes: dto.evidenceNotes,
         priorityRequested: dto.requestPriority ?? false,
@@ -64,9 +113,19 @@ export class CasesService {
     if (dto.farmLandId) {
       await this.assertFarmLandOwnership(dto.farmLandId, farmerId);
     }
+    if (dto.relatedCaseId) {
+      const earlier = await this.prisma.case.findUnique({ where: { id: dto.relatedCaseId }, select: { farmerId: true } });
+      if (!earlier || earlier.farmerId !== farmerId || dto.relatedCaseId === caseId) {
+        throw new BadRequestException(bi('Choose one of your own earlier cases', 'మీ స్వంత ముందటి కేసును ఎంచుకోండి'));
+      }
+    }
+    const data: Prisma.CaseUncheckedUpdateInput = { ...dto };
+    // a listed crop wins over a typed one, and typed names are trimmed — as when the case was created
+    if (dto.cropId) data.cropName = null;
+    else if (dto.cropName !== undefined) data.cropName = dto.cropName.trim() || null;
     const updated = await this.prisma.case.update({
       where: { id: caseId },
-      data: dto,
+      data,
       include: { category: true, farmLand: true, crop: true },
     });
     await this.audit.log({
@@ -106,15 +165,8 @@ export class CasesService {
     const existing = await this.getOwnedByFarmer(caseId, farmerId);
     this.assertStatus(existing, [CaseStatus.DRAFT], 'submit');
 
-    const updated = await this.prisma.case.update({
-      where: { id: caseId },
-      data: {
-        status: CaseStatus.SUBMITTED,
-        caseNumber: this.generateCaseNumber(),
-        submittedAt: new Date(),
-      },
-      include: { category: true, farmLand: true, crop: true },
-    });
+    const updated = await this.submitWithNumber(caseId, farmerId);
+    await this.recordEvent(caseId, CaseEventKind.SUBMITTED, farmerId, existing.problemDescription);
     await this.audit.log({
       actorId: farmerId,
       action: 'case.submit',
@@ -170,6 +222,7 @@ export class CasesService {
       data: { status: CaseStatus.ASSIGNED, assignedExpertId: dto.expertId },
       include: { category: true, farmLand: true, crop: true },
     });
+    await this.recordEvent(caseId, CaseEventKind.ASSIGNED, moderatorId);
     await this.audit.log({
       actorId: moderatorId,
       action: 'case.assign',
@@ -214,6 +267,7 @@ export class CasesService {
       data: { status: CaseStatus.WAITING_FARMER, followUpQuestion: dto.question, followUpResponse: null },
       include: { category: true, farmLand: true, crop: true },
     });
+    await this.recordEvent(caseId, CaseEventKind.FOLLOW_UP_ASKED, expertId, dto.question);
     await this.audit.log({
       actorId: expertId,
       action: 'case.followup.request',
@@ -240,6 +294,7 @@ export class CasesService {
       data: { status: CaseStatus.EXPERT_WORKING, followUpResponse: dto.answer },
       include: { category: true, farmLand: true, crop: true },
     });
+    await this.recordEvent(caseId, CaseEventKind.FOLLOW_UP_ANSWERED, farmerId, dto.answer);
     await this.audit.log({
       actorId: farmerId,
       action: 'case.followup.respond',
@@ -267,6 +322,7 @@ export class CasesService {
       data: { status: CaseStatus.ANSWERED, resolutionNotes: dto.resolutionNotes },
       include: { category: true, farmLand: true, crop: true },
     });
+    await this.recordEvent(caseId, CaseEventKind.ANSWERED, expertId, dto.resolutionNotes);
     await this.audit.log({
       actorId: expertId,
       action: 'case.answer',
@@ -299,6 +355,7 @@ export class CasesService {
       },
       include: { category: true, farmLand: true, crop: true },
     });
+    await this.recordEvent(caseId, CaseEventKind.CONFIRMED, farmerId);
     await this.audit.log({
       actorId: farmerId,
       action: 'case.confirm',
@@ -336,6 +393,7 @@ export class CasesService {
       data: { status: CaseStatus.EXPERT_WORKING },
       include: { category: true, farmLand: true, crop: true },
     });
+    await this.recordEvent(caseId, CaseEventKind.DISPUTED, farmerId);
     await this.audit.log({
       actorId: farmerId,
       action: 'case.dispute',
@@ -467,6 +525,7 @@ export class CasesService {
         category: true,
         farmLand: true,
         crop: true,
+        relatedCase: { select: { id: true, caseNumber: true } },
         knowledgeArticle: { select: { id: true, title: true, status: true } },
       },
     });
@@ -505,7 +564,7 @@ export class CasesService {
 
   private async assertFarmLandOwnership(farmLandId: string, farmerId: string): Promise<void> {
     const farmLand = await this.prisma.farmLand.findUnique({ where: { id: farmLandId } });
-    if (!farmLand || farmLand.farmerId !== farmerId) {
+    if (!farmLand || farmLand.farmerId !== farmerId || farmLand.archivedAt) {
       throw new ForbiddenException(bi('This Farm/Land parcel does not belong to you', 'ఈ పొలం స్థలం మీది కాదు'));
     }
   }
@@ -521,13 +580,28 @@ export class CasesService {
     }
   }
 
-  private generateCaseNumber(): string {
-    // Short, farmer-readable, collision-safe without a DB sequence. A real
-    // sequential number (CASE-2026-000042) is a nicer UX but needs a proper
-    // counter/sequence to stay race-free under concurrent submissions — left
-    // as a follow-up, not attempted with a fake "count + 1" that would race.
-    const year = new Date().getFullYear();
-    const random = crypto.randomBytes(4).toString('hex').toUpperCase();
-    return `CASE-${year}-${random}`;
+  // CASE-HHC0003-20261024-001: the member, the day, and which case of theirs that day. Counted
+  // per member per day; the unique constraint backs it up and a race just takes the next number.
+  private async submitWithNumber(caseId: string, farmerId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: farmerId }, select: { userCode: true } });
+    const prefix = numberPrefix('CASE', user?.userCode);
+    for (let attempt = 0; attempt < MAX_NUMBER_ATTEMPTS; attempt++) {
+      const so_far = await this.prisma.case.count({ where: { farmerId, caseNumber: { startsWith: prefix } } });
+      try {
+        return await this.prisma.case.update({
+          where: { id: caseId },
+          data: { status: CaseStatus.SUBMITTED, caseNumber: withSequence(prefix, so_far + 1 + attempt), submittedAt: new Date() },
+          include: { category: true, farmLand: true, crop: true },
+        });
+      } catch (err) {
+        if (!isUniqueViolation(err)) throw err;
+      }
+    }
+    // Practically unreachable; fall back to a random suffix rather than fail the farmer's submit.
+    return this.prisma.case.update({
+      where: { id: caseId },
+      data: { status: CaseStatus.SUBMITTED, caseNumber: `${prefix}${crypto.randomBytes(3).toString('hex').toUpperCase()}`, submittedAt: new Date() },
+      include: { category: true, farmLand: true, crop: true },
+    });
   }
 }

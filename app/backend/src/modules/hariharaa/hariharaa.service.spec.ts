@@ -59,7 +59,7 @@ describe('HariharaaService', () => {
   describe('public settings', () => {
     it('never exposes the UPI ID, merchant id or a payment link without login', async () => {
       const pub = await service.getPublicSettings();
-      expect(Object.keys(pub).sort()).toEqual(['membershipRequired', 'payeeName', 'plans', 'subscriptionPriceInr']);
+      expect(Object.keys(pub).sort()).toEqual(['contactPhone', 'membershipRequired', 'payeeName', 'plans', 'subscriptionPriceInr']);
       expect(pub).toMatchObject({ subscriptionPriceInr: 499, payeeName: 'HARIHARAA Natural Food Stores', membershipRequired: true });
     });
   });

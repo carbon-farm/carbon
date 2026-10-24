@@ -38,6 +38,13 @@ export class KnowledgeController {
     return this.knowledgeService.listPublished(categoryId);
   }
 
+  // The dashboard's "Recent advice": relevant to this member's own cases and crops.
+  @Roles(Role.MEMBER)
+  @Get('for-me')
+  forMe(@CurrentUser() user: AuthenticatedUser) {
+    return this.knowledgeService.forFarmer(user.userId);
+  }
+
   @Roles(Role.MODERATOR, Role.ADMINISTRATOR)
   @Get('flagged')
   listFlagged() {

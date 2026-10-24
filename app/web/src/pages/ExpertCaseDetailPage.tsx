@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { CaseHistory } from '../components/CaseHistory';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
@@ -108,10 +109,10 @@ export function ExpertCaseDetailPage() {
               <div className="field-label"><Bi id="categoryLabel" /></div>
               <div><BiValue value={caseCategoryLabel(theCase.category.name)} /></div>
             </div>
-            {theCase.crop && (
+            {(theCase.crop || theCase.cropName) && (
               <div>
                 <div className="field-label"><Bi id="articleCropField" /></div>
-                <div>{theCase.crop.name}</div>
+                <div>{theCase.crop?.name ?? theCase.cropName}</div>
               </div>
             )}
             <div>
@@ -122,6 +123,24 @@ export function ExpertCaseDetailPage() {
               <div>
                 <div className="field-label"><Bi id="evidenceLabel" /></div>
                 <div>{theCase.evidenceNotes}</div>
+              </div>
+            )}
+            {theCase.evidenceMediaUrls.length > 0 && (
+              <div>
+                <div className="field-label"><Bi id="evidenceMediaLabel" /></div>
+                <div className="evidence-media-grid">
+                  {theCase.evidenceMediaUrls.map((url) =>
+                    /\.(jpe?g|png|webp)$/i.test(url) ? (
+                      <a href={url} target="_blank" rel="noopener noreferrer" key={url}>
+                        <img src={url} alt="" className="evidence-thumb" />
+                      </a>
+                    ) : (
+                      <a href={url} target="_blank" rel="noopener noreferrer" key={url} className="link-button">
+                        {strings.watchVideoLink.en} / {strings.watchVideoLink.te}
+                      </a>
+                    ),
+                  )}
+                </div>
               </div>
             )}
             {theCase.followUpQuestion && (
@@ -137,6 +156,8 @@ export function ExpertCaseDetailPage() {
               </div>
             )}
           </div>
+
+          <CaseHistory caseId={theCase.id} version={theCase.status} />
 
           {theCase.status === 'ASSIGNED' && (
             <div className="card">

@@ -6,6 +6,7 @@ import { AuditService } from '../audit/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { UploadsService } from '../uploads/uploads.service';
 import { bi } from '../../common/i18n';
+import { isUniqueViolation, MAX_NUMBER_ATTEMPTS, numberPrefix, withSequence } from '../../common/readable-number';
 import { CreateSampleDto } from './dto/create-sample.dto';
 
 const SAMPLE_INCLUDE = {
@@ -31,17 +32,34 @@ export class SoilLabService {
     if (dto.caseId) {
       await this.assertCaseOwnership(dto.caseId, farmerId);
     }
-    const created = await this.prisma.soilSample.create({
-      data: {
-        sampleCode: this.generateSampleCode(),
-        farmerId,
-        farmLandId: dto.farmLandId,
-        caseId: dto.caseId,
-        collectionVideoWatched: dto.collectionVideoWatched,
-        status: SoilSampleStatus.CREATED,
-      },
-      include: SAMPLE_INCLUDE,
-    });
+    // SOIL-HHC0003-20261024-001: the member, the day, which sample of theirs that day.
+    const user = await this.prisma.user.findUnique({ where: { id: farmerId }, select: { userCode: true } });
+    const prefix = numberPrefix('SOIL', user?.userCode);
+    let created: SoilSample | null = null;
+    for (let attempt = 0; attempt < MAX_NUMBER_ATTEMPTS && !created; attempt++) {
+      const so_far = await this.prisma.soilSample.count({ where: { farmerId, sampleCode: { startsWith: prefix } } });
+      try {
+        created = await this.prisma.soilSample.create({
+          data: {
+            sampleCode: withSequence(prefix, so_far + 1 + attempt),
+            farmerId,
+            farmLandId: dto.farmLandId,
+            caseId: dto.caseId,
+            collectionVideoWatched: dto.collectionVideoWatched,
+            status: SoilSampleStatus.CREATED,
+          },
+          include: SAMPLE_INCLUDE,
+        });
+      } catch (err) {
+        if (!isUniqueViolation(err)) throw err;
+      }
+    }
+    if (!created) {
+      created = await this.prisma.soilSample.create({
+        data: { sampleCode: this.generateSampleCode(), farmerId, farmLandId: dto.farmLandId, caseId: dto.caseId, collectionVideoWatched: dto.collectionVideoWatched, status: SoilSampleStatus.CREATED },
+        include: SAMPLE_INCLUDE,
+      });
+    }
     await this.audit.log({
       actorId: farmerId,
       action: 'soilsample.create',
@@ -144,7 +162,7 @@ export class SoilLabService {
 
   private async assertFarmLandOwnership(farmLandId: string, farmerId: string): Promise<void> {
     const farmLand = await this.prisma.farmLand.findUnique({ where: { id: farmLandId } });
-    if (!farmLand || farmLand.farmerId !== farmerId) {
+    if (!farmLand || farmLand.farmerId !== farmerId || farmLand.archivedAt) {
       throw new ForbiddenException(bi('This Farm/Land parcel does not belong to you', 'ఈ పొలం స్థలం మీది కాదు'));
     }
   }

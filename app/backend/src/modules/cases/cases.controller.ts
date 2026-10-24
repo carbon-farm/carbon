@@ -47,6 +47,12 @@ export class CasesController {
   // Kept below the fixed /mine, /assigned, /queue routes deliberately —
   // NestJS matches in declaration order, and :id would otherwise swallow
   // those static paths as case IDs.
+  // The whole conversation on a case (what was asked, answered and disputed, in order).
+  @Get(':id/history')
+  history(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.casesService.history(id, { userId: user.userId, role: user.role as Role });
+  }
+
   @Get(':id')
   getById(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.casesService.getById(id, { userId: user.userId, role: user.role as Role });

@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { createAddress, deleteAddress, listAddresses, setDefaultAddress, updateAddress, type Address, type AddressInput } from '../api/addresses';
 import { AddressBlock } from '../components/AddressBlock';
 import { AddressForm } from '../components/AddressForm';
+import { ListBar } from '../components/ListBar';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 
@@ -17,6 +18,17 @@ export function AddressesPage() {
   const [editing, setEditing] = useState<Address | 'new' | null>(null);
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('default');
+
+  const shown = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const rows = addresses.filter(
+      (a) => !q || [a.label, a.recipientName, a.city, a.state, a.pincode, a.line1].some((v) => (v ?? '').toLowerCase().includes(q)),
+    );
+    const byLabel = (a: Address, b: Address) => (a.label ?? a.recipientName).localeCompare(b.label ?? b.recipientName);
+    return [...rows].sort((a, b) => (sort === 'name' ? byLabel(a, b) : sort === 'city' ? a.city.localeCompare(b.city) : Number(b.isDefault) - Number(a.isDefault) || byLabel(a, b)));
+  }, [addresses, search, sort]);
 
   async function load() {
     if (!session) return;
@@ -96,8 +108,23 @@ export function AddressesPage() {
       ) : addresses.length === 0 ? (
         editing === null && <BiValue value={strings.noAddressesYet} as="p" className="hint" />
       ) : (
+        <>
+          {addresses.length > 1 && (
+            <ListBar
+              search={search}
+              onSearch={setSearch}
+              sort={sort}
+              onSort={setSort}
+              sorts={[
+                { value: 'default', label: strings.sortDefaultFirst },
+                { value: 'name', label: strings.sortNameAZ },
+                { value: 'city', label: strings.sortCityAZ },
+              ]}
+            />
+          )}
+          {shown.length === 0 && <BiValue value={strings.noMatchesNotice} as="p" className="hint" />}
         <div className="product-grid">
-          {addresses.map((a) => (
+          {shown.map((a) => (
             <div className="farm-item" key={a.id}>
               <div className="label">
                 {a.label || strings.addrUntitled.en}
@@ -120,6 +147,7 @@ export function AddressesPage() {
             </div>
           ))}
         </div>
+        </>
       )}
     </>
   );

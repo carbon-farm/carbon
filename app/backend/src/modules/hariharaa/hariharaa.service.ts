@@ -56,6 +56,7 @@ export class HariharaaService {
     return {
       subscriptionPriceInr: plans[0] ? Math.min(...plans.map((p) => p.priceInr)) : settings.subscriptionPriceInr,
       payeeName: settings.payeeName,
+      contactPhone: settings.contactPhone,
       membershipRequired,
       plans,
     };
@@ -76,6 +77,7 @@ export class HariharaaService {
       payeeName: dto.payeeName?.trim() || undefined,
       secondaryUpiId: blankToNull(dto.secondaryUpiId),
       upiAid: blankToNull(dto.upiAid),
+      contactPhone: blankToNull(dto.contactPhone),
       vendorProfileId: blankToNull(dto.vendorProfileId),
     };
     const updated = await this.prisma.hariharaaSettings.upsert({

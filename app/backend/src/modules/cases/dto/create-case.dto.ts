@@ -1,4 +1,4 @@
-import { IsBoolean, IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 
 export class CreateCaseDto {
   @IsUUID()
@@ -13,6 +13,17 @@ export class CreateCaseDto {
   @IsOptional()
   @IsUUID()
   cropId?: string;
+
+  // A crop the master list does not have (a parcel can list any crop). Ignored when cropId is set.
+  @IsOptional()
+  @IsString()
+  @MaxLength(60)
+  cropName?: string;
+
+  // The earlier case this one follows ("the advice did not work"). Must be the farmer's own.
+  @IsOptional()
+  @IsUUID()
+  relatedCaseId?: string;
 
   @IsString()
   @MinLength(5)

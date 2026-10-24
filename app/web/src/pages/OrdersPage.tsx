@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { listMyOrders, type Order } from '../api/marketplace';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
-import { strings, orderStatusLabel } from '../i18n/strings';
+import { strings, orderProgressNote, orderStatusLabel } from '../i18n/strings';
 
 type SortMode = 'newest' | 'oldest';
 
@@ -92,6 +92,10 @@ export function OrdersPage() {
                 <div className="status-line">
                   {status.en} / {status.te}
                 </div>
+                {(() => {
+                  const note = orderProgressNote(o);
+                  return note ? <div className="hint">{note.en} / {note.te}</div> : null;
+                })()}
               </Link>
             );
           })}

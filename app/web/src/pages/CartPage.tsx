@@ -5,8 +5,64 @@ import { useMembership } from '../auth/MembershipContext';
 import { ApiError } from '../api/client';
 import { getCart, previewGuestCart, setCartItem, removeFromCart, type Cart } from '../api/marketplace';
 import { readGuestCart, removeGuestCartItem, setGuestCartItem } from '../cart/guestCart';
-import { Bi, BiValue } from '../i18n/Bi';
+import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
+
+// Quantity with − / + buttons and a box that can be typed in freely: the number is only sent when
+// the person leaves the box or presses Enter, so clearing it to type "12" never jumps to 1 and
+// never fires a request per keystroke.
+function QuantityStepper({
+  value,
+  max,
+  disabled,
+  onCommit,
+}: {
+  value: number;
+  max: number;
+  disabled: boolean;
+  onCommit: (n: number) => void;
+}) {
+  const [text, setText] = useState(String(value));
+  useEffect(() => setText(String(value)), [value]);
+
+  function commit(raw: string) {
+    const n = Math.floor(Number(raw));
+    if (!raw.trim() || !Number.isFinite(n) || n < 1) {
+      setText(String(value)); // nothing sensible typed — put the old number back
+      return;
+    }
+    const clamped = Math.min(n, max);
+    setText(String(clamped));
+    if (clamped !== value) onCommit(clamped);
+  }
+
+  return (
+    <div className="qty-stepper">
+      <button type="button" className="secondary qty-btn" aria-label={biInline('quantityLess')} disabled={disabled || value <= 1} onClick={() => onCommit(value - 1)}>
+        −
+      </button>
+      <input
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        aria-label={biInline('quantityLabel')}
+        value={text}
+        disabled={disabled}
+        onChange={(e) => setText(e.target.value.replace(/[^0-9]/g, ''))}
+        onBlur={(e) => commit(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            commit(text);
+          }
+        }}
+      />
+      <button type="button" className="secondary qty-btn" aria-label={biInline('quantityMore')} disabled={disabled || value >= max} onClick={() => onCommit(value + 1)}>
+        +
+      </button>
+    </div>
+  );
+}
 
 // One cart screen for everyone. Signed in: the saved cart. Signed out: the cart kept in this
 // browser (priced by the server), which joins the saved cart at sign-in. Checkout itself needs
@@ -107,7 +163,17 @@ export function CartPage() {
       ) : loading ? (
         <BiValue value={strings.loading} as="p" className="hint" />
       ) : !cart || cart.items.length === 0 ? (
-        <BiValue value={strings.cartEmptyNotice} as="p" className="hint" />
+        <div className="card">
+          <BiValue value={session ? strings.cartEmptyAfterOrder : strings.cartEmptyNotice} as="p" />
+          <button type="button" onClick={() => navigate('/marketplace')}>
+            <BiValue value={strings.continueShoppingButton} />
+          </button>
+          {session && (
+            <button type="button" className="secondary" onClick={() => navigate('/marketplace/orders')}>
+              <BiValue value={strings.viewMyOrdersButton} />
+            </button>
+          )}
+        </div>
       ) : (
         <>
           <div className="card">
@@ -120,17 +186,18 @@ export function CartPage() {
                     <div className="meta">
                       ₹{item.product.price.toFixed(2)} {item.product.unit}
                     </div>
-                    <label>
+                    <div>
                       <Bi id="quantityLabel" />
-                      <input
-                        type="number"
-                        min={1}
-                        max={item.product.stockQuantity}
+                      <QuantityStepper
                         value={item.quantity}
-                        onChange={(e) => handleQuantityChange(item.productId, Number(e.target.value))}
+                        max={Math.max(1, item.product.stockQuantity)}
                         disabled={isBusy}
+                        onCommit={(n) => handleQuantityChange(item.productId, n)}
                       />
-                    </label>
+                      {item.quantity >= item.product.stockQuantity && (
+                        <small className="hint">{strings.quantityMaxHint.en.replace('{n}', String(item.product.stockQuantity))} / {strings.quantityMaxHint.te.replace('{n}', String(item.product.stockQuantity))}</small>
+                      )}
+                    </div>
                     <button type="button" className="secondary" onClick={() => handleRemove(item.productId)} disabled={isBusy}>
                       {isBusy ? <BiValue value={strings.removingItem} /> : <Bi id="removeButton" />}
                     </button>

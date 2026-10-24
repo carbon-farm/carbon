@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { listPendingVendors, verifyVendor, type VendorProfile } from '../api/marketplace';
+import { ListBar } from '../components/ListBar';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
@@ -13,6 +14,8 @@ export function VendorApprovalsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('newest');
   const [rejectReason, setRejectReason] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -20,6 +23,12 @@ export function VendorApprovalsPage() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
+
+  const shown = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const rows = vendors.filter((v) => !q || [v.businessName, v.user?.name, v.user?.mobileNumber, v.description].some((t) => (t ?? '').toLowerCase().includes(q)));
+    return [...rows].sort((a, b) => (sort === 'name' ? a.businessName.localeCompare(b.businessName) : sort === 'oldest' ? a.createdAt.localeCompare(b.createdAt) : b.createdAt.localeCompare(a.createdAt)));
+  }, [vendors, search, sort]);
 
   function load() {
     if (!session) return;
@@ -80,8 +89,21 @@ export function VendorApprovalsPage() {
       ) : vendors.length === 0 ? (
         <BiValue value={strings.noVendorsPending} as="p" className="hint" />
       ) : (
+        <>
+        <ListBar
+          search={search}
+          onSearch={setSearch}
+          sort={sort}
+          onSort={setSort}
+          sorts={[
+            { value: 'newest', label: strings.sortNewestFirst },
+            { value: 'oldest', label: strings.sortOldestFirst },
+            { value: 'name', label: strings.sortNameAZ },
+          ]}
+        />
+        {shown.length === 0 && <BiValue value={strings.noMatchesNotice} as="p" className="hint" />}
         <div className="card">
-          {vendors.map((v) => {
+          {shown.map((v) => {
             const isBusy = busyId === v.id;
             return (
               <div className="farm-item" key={v.id}>
@@ -114,6 +136,7 @@ export function VendorApprovalsPage() {
             );
           })}
         </div>
+        </>
       )}
 
       <Link to="/admin" className="link-button">

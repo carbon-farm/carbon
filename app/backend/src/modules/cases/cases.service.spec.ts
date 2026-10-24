@@ -22,6 +22,8 @@ function buildCase(overrides: Partial<Case> = {}): Case {
     farmLandId: 'farmland-1',
     categoryId: 'category-1',
     cropId: null,
+    cropName: null,
+    relatedCaseId: null,
     problemDescription: 'Leaves have yellow spots.',
     evidenceNotes: null,
     evidenceMediaUrls: [],
@@ -44,8 +46,9 @@ function buildCase(overrides: Partial<Case> = {}): Case {
 
 describe('CasesService', () => {
   let prisma: {
-    case: { create: jest.Mock; update: jest.Mock; findUnique: jest.Mock; findMany: jest.Mock };
+    case: { create: jest.Mock; update: jest.Mock; findUnique: jest.Mock; findMany: jest.Mock; count: jest.Mock };
     farmLand: { findUnique: jest.Mock };
+    user: { findUnique: jest.Mock };
   };
   let audit: { log: jest.Mock };
   let experts: { isVerified: jest.Mock };
@@ -56,7 +59,8 @@ describe('CasesService', () => {
 
   beforeEach(() => {
     prisma = {
-      case: { create: jest.fn(), update: jest.fn(), findUnique: jest.fn(), findMany: jest.fn() },
+      case: { create: jest.fn(), update: jest.fn(), findUnique: jest.fn(), findMany: jest.fn(), count: jest.fn().mockResolvedValue(0) },
+      user: { findUnique: jest.fn().mockResolvedValue({ userCode: 'HHC-0003' }) },
       farmLand: { findUnique: jest.fn() },
     };
     audit = { log: jest.fn().mockResolvedValue(undefined) };
@@ -144,7 +148,23 @@ describe('CasesService', () => {
       const result = await service.submit('case-1', 'farmer-1');
 
       expect(result.status).toBe(CaseStatus.SUBMITTED);
-      expect(result.caseNumber).toMatch(/^CASE-\d{4}-[0-9A-F]+$/);
+      // the member's code, the day, and which case of theirs that day
+      expect(result.caseNumber).toMatch(/^CASE-HHC0003-\d{8}-001$/);
+    });
+
+    it('numbers a member\'s second case of the day 002', async () => {
+      prisma.case.findUnique.mockResolvedValue(buildCase({ status: CaseStatus.DRAFT }));
+      prisma.case.count.mockResolvedValue(1);
+      prisma.case.update.mockImplementation(({ data }) => Promise.resolve(buildCase({ ...data })));
+      expect((await service.submit('case-1', 'farmer-1')).caseNumber).toMatch(/-002$/);
+    });
+
+    it('takes the next number if another submit from the same member took this one a moment earlier', async () => {
+      prisma.case.findUnique.mockResolvedValue(buildCase({ status: CaseStatus.DRAFT }));
+      prisma.case.update
+        .mockRejectedValueOnce(Object.assign(new Error('Unique constraint failed'), { code: 'P2002' }))
+        .mockImplementation(({ data }) => Promise.resolve(buildCase({ ...data })));
+      expect((await service.submit('case-1', 'farmer-1')).caseNumber).toMatch(/-002$/);
     });
 
     it('refuses to submit a case that is not DRAFT', async () => {

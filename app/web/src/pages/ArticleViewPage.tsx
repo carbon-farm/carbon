@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
+import { getCase } from '../api/cases';
 import {
   getArticle,
   getFeedbackSummary,
@@ -32,6 +33,9 @@ export function ArticleViewPage() {
   const [comment, setComment] = useState('');
   const [feedbackBusy, setFeedbackBusy] = useState(false);
   const [feedbackSaved, setFeedbackSaved] = useState(false);
+  // True when the case this advice came from is the signed-in member's own — then "it did not work"
+  // can start a follow-up to that case; otherwise it starts a fresh report.
+  const [ownsSourceCase, setOwnsSourceCase] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const [bookmarkBusy, setBookmarkBusy] = useState(false);
 
@@ -64,6 +68,17 @@ export function ArticleViewPage() {
       // block reading the article itself, so it fails silently.
       .catch(() => {});
   }, [session, id]);
+
+  useEffect(() => {
+    if (!session || session.role !== 'MEMBER' || !article) return;
+    let live = true;
+    getCase(session.accessToken, article.sourceCaseId)
+      .then(() => live && setOwnsSourceCase(true))
+      .catch(() => live && setOwnsSourceCase(false));
+    return () => {
+      live = false;
+    };
+  }, [session, article]);
 
   useEffect(() => {
     if (!session || !id) return;
@@ -126,10 +141,10 @@ export function ArticleViewPage() {
               {bookmarked ? <Bi id="bookmarkedButton" /> : <Bi id="bookmarkButton" />}
             </button>
           </div>
-          {article.crop && (
+          {(article.crop || article.cropName) && (
             <div>
               <div className="field-label"><Bi id="articleCropField" /></div>
-              <div>{article.crop.name}</div>
+              <div>{article.crop?.name ?? article.cropName}</div>
             </div>
           )}
           {article.category && (
@@ -238,6 +253,13 @@ export function ArticleViewPage() {
             </label>
 
             {feedbackSaved && <BiValue value={strings.feedbackSavedNotice} as="p" className="hint" />}
+            {session?.role === 'MEMBER' && (
+              <p>
+                <Link to={ownsSourceCase && article ? `/cases/new?from=${article.sourceCaseId}` : '/cases/new'} className="link-button">
+                  <Bi id="adviceDidNotWorkButton" />
+                </Link>
+              </p>
+            )}
 
             <button type="submit" disabled={feedbackBusy || helpful === null || rating === 0}>
               {feedbackBusy ? (

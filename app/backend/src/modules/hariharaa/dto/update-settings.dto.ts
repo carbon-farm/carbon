@@ -41,4 +41,10 @@ export class UpdateSettingsDto {
   @IsOptional()
   @IsString()
   upiAid?: string;
+
+  // Shown to members as "contact the store". Digits, spaces, + and - only. Empty clears it.
+  @IsOptional()
+  @ValidateIf((o) => o.contactPhone !== '')
+  @Matches(/^[0-9+\-\s]{7,20}$/, { message: 'Phone number can only have digits, spaces, + and -' })
+  contactPhone?: string;
 }

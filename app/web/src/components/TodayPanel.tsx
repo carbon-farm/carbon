@@ -6,7 +6,7 @@ import { listMyOrders, type Order } from '../api/marketplace';
 import { listMyCases, type Case } from '../api/cases';
 import { getCurrentTips, type CurrentTip } from '../api/seasonal';
 import { Bi, BiValue } from '../i18n/Bi';
-import { strings, orderStatusLabel, caseStatusLabel } from '../i18n/strings';
+import { strings, orderProgressNote, orderStatusLabel, caseStatusLabel } from '../i18n/strings';
 
 const CLOSED: string[] = ['CLOSED', 'ABANDONED'];
 
@@ -96,7 +96,7 @@ export function TodayPanel() {
             <Bi id="todayLastOrder" as="span" className="field-label" />
             <strong>{lastOrder.orderNumber}</strong>
             <small className="hint">
-              <BiValue value={orderStatusLabel(lastOrder.status)} />
+              <BiValue value={orderProgressNote(lastOrder) ?? orderStatusLabel(lastOrder.status)} />
             </small>
           </Link>
         )}

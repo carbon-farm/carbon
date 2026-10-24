@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { bi } from '../../common/i18n';
@@ -13,6 +13,15 @@ export class FarmsService {
   ) {}
 
   async create(farmerId: string, dto: CreateFarmLandDto) {
+    // The same name, place and size twice is almost always a double tap, never two real parcels.
+    const duplicate = await this.prisma.farmLand.findFirst({
+      where: { farmerId, archivedAt: null, label: dto.label, address: dto.address, landSizeAcres: dto.landSizeAcres },
+    });
+    if (duplicate) {
+      throw new ConflictException(
+        bi('You already have a parcel with this name, place and size', 'ఈ పేరు, ప్రదేశం, పరిమాణంతో మీకు ఇప్పటికే ఒక స్థలం ఉంది'),
+      );
+    }
     const farmLand = await this.prisma.farmLand.create({
       data: { ...dto, farmerId },
     });
@@ -27,7 +36,7 @@ export class FarmsService {
 
   async listMine(farmerId: string) {
     return this.prisma.farmLand.findMany({
-      where: { farmerId },
+      where: { farmerId, archivedAt: null },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -53,15 +62,28 @@ export class FarmsService {
     return farmLand;
   }
 
+  // A parcel nobody has used is simply deleted. One that has cases or soil samples is hidden
+  // instead (archived): deleting it would delete those cases, their advice and the articles made
+  // from them along with it.
   async remove(id: string, farmerId: string) {
     await this.getOwned(id, farmerId); // ownership check
+    const [cases, samples] = await Promise.all([
+      this.prisma.case.count({ where: { farmLandId: id } }),
+      this.prisma.soilSample.count({ where: { farmLandId: id } }),
+    ]);
+    if (cases + samples > 0) {
+      await this.prisma.farmLand.update({ where: { id }, data: { archivedAt: new Date() } });
+      await this.audit.log({ actorId: farmerId, action: 'farmland.archive', entityType: 'FarmLand', entityId: id, metadata: { cases, samples } });
+      return {
+        archived: true,
+        message: bi(
+          'This parcel has cases or soil tests, so it was hidden from your list instead — they stay safe.',
+          'ఈ స్థలానికి కేసులు లేదా నేల పరీక్షలు ఉన్నాయి, కాబట్టి దాన్ని మీ జాబితా నుండి దాచాము — అవి భద్రంగా ఉంటాయి.',
+        ),
+      };
+    }
     await this.prisma.farmLand.delete({ where: { id } });
-    await this.audit.log({
-      actorId: farmerId,
-      action: 'farmland.delete',
-      entityType: 'FarmLand',
-      entityId: id,
-    });
-    return { message: bi('Farm/Land parcel removed.', 'పొలం స్థలం తీసివేయబడింది.') };
+    await this.audit.log({ actorId: farmerId, action: 'farmland.delete', entityType: 'FarmLand', entityId: id });
+    return { archived: false, message: bi('Farm/Land parcel removed.', 'పొలం స్థలం తీసివేయబడింది.') };
   }
 }

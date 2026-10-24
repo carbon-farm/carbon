@@ -146,8 +146,8 @@ export const HELP_SECTIONS: HelpSection[] = [
         te: 'కార్ట్ నుండి చెక్అవుట్‌కు వెళ్ళండి ఎంచుకోండి. సేవ్ చేసిన చిరునామాను ఎంచుకోండి లేదా కొత్తది చేర్చండి: స్వీకర్త పేరు, ఫోన్, ఇంటి నంబర్/వీధి, పట్టణం, రాష్ట్రం, 6 అంకెల పిన్ అవసరం; ల్యాండ్‌మార్క్, రెండవ ఫోన్, ఇమెయిల్ ఐచ్ఛికం.',
       },
       {
-        en: 'Choose Cash on Delivery (pay when it arrives) or UPI. For UPI, open the order, tap Pay now, pay the exact total, and submit the UTR. We verify it before we pack your order.',
-        te: 'క్యాష్ ఆన్ డెలివరీ (అందినప్పుడు చెల్లించండి) లేదా UPI ఎంచుకోండి. UPI కోసం ఆర్డర్ తెరిచి, ఇప్పుడే చెల్లించండి తాకి, ఖచ్చితమైన మొత్తం చెల్లించి, UTR సమర్పించండి. మేము మీ ఆర్డర్‌ను ప్యాక్ చేసే ముందు దాన్ని ధృవీకరిస్తాము.',
+        en: 'Payment is by UPI. After you place the order, open it, tap Pay now, pay the exact total, and submit the UTR. We verify it before we pack your order.',
+        te: 'చెల్లింపు UPI ద్వారా. ఆర్డర్ చేసిన తర్వాత దాన్ని తెరిచి, ఇప్పుడే చెల్లించండి తాకి, ఖచ్చితమైన మొత్తం చెల్లించి, UTR సమర్పించండి. మేము మీ ఆర్డర్‌ను ప్యాక్ చేసే ముందు దాన్ని ధృవీకరిస్తాము.',
       },
       {
         en: 'Your addresses are saved under Addresses. Changing a saved address never changes an order you already placed.',
@@ -184,8 +184,8 @@ export const HELP_SECTIONS: HelpSection[] = [
         te: 'నా కేసులు: సమస్య ఫోటోలు తీయండి (6 వరకు — త్వరగా పంపడానికి అవి మీ ఫోన్‌లోనే చిన్నవిగా చేయబడతాయి), మీకు కనిపించే లక్షణాలను తాకండి, టైప్ చేసి లేదా మాట్లాడి కొన్ని మాటలు జోడించండి. మీరు రాసేది వెళ్తున్న కొద్దీ మీ ఫోన్‌లో భద్రపరచబడుతుంది, పంపండి తాకినప్పుడు సిగ్నల్ లేకపోతే కేసు ఫోన్‌లో వేచి ఉండి, మీరు మళ్ళీ ఆన్‌లైన్‌లోకి రాగానే దానంతట అదే పంపబడుతుంది. మోడరేటర్ దాన్ని సరైన నిపుణుడికి పంపుతారు, ఆయన సమాధానం ఇస్తారు. మరిన్ని వివరాలు కావాలంటే మీరు బదులివ్వవచ్చు.',
       },
       {
-        en: 'Knowledge: advice articles from solved cases — search, filter, and bookmark; under each article “Products that may help” suggests shop products that mention the same problem or crop. Courses: finish lessons in order and earn a certificate. Soil Testing: register a sample for your land and read the report when it is ready.',
-        te: 'జ్ఞానం: పరిష్కరించిన కేసుల సలహా వ్యాసాలు — శోధించండి, ఫిల్టర్ చేయండి, బుక్‌మార్క్ చేయండి; ప్రతి వ్యాసం కింద “ఇవి సహాయపడవచ్చు” అదే సమస్య లేదా పంటను పేర్కొనే షాప్ ఉత్పత్తులను సూచిస్తుంది. కోర్సులు: పాఠాలను క్రమంగా పూర్తి చేసి సర్టిఫికెట్ పొందండి. నేల పరీక్ష: మీ భూమికి నమూనాను నమోదు చేసి, సిద్ధమైనప్పుడు నివేదిక చదవండి.',
+        en: 'On your Dashboard, “Recent advice” shows advice for the crops on your parcels and from your own cases, with a tag saying why. “Delete parcel” removes a parcel nobody has used, or hides one that has cases (they stay safe). Knowledge: advice articles from solved cases — search, filter, and bookmark; under each article “Products that may help” suggests shop products that mention the same problem or crop. Courses: finish lessons in order and earn a certificate. Soil Testing: register a sample for your land and read the report when it is ready.',
+        te: 'మీ డాష్‌బోర్డ్‌లో “ఇటీవలి సలహా” మీ స్థలాలలోని పంటలకు, మీ స్వంత కేసుల నుండి సలహాను చూపిస్తుంది, ఎందుకో ఒక ట్యాగ్ చెబుతుంది. “స్థలాన్ని తొలగించండి” ఎవరూ వాడని స్థలాన్ని తీసివేస్తుంది, కేసులు ఉన్నదాన్ని దాచుతుంది (అవి భద్రంగా ఉంటాయి). జ్ఞానం: పరిష్కరించిన కేసుల సలహా వ్యాసాలు — శోధించండి, ఫిల్టర్ చేయండి, బుక్‌మార్క్ చేయండి; ప్రతి వ్యాసం కింద “ఇవి సహాయపడవచ్చు” అదే సమస్య లేదా పంటను పేర్కొనే షాప్ ఉత్పత్తులను సూచిస్తుంది. కోర్సులు: పాఠాలను క్రమంగా పూర్తి చేసి సర్టిఫికెట్ పొందండి. నేల పరీక్ష: మీ భూమికి నమూనాను నమోదు చేసి, సిద్ధమైనప్పుడు నివేదిక చదవండి.',
       },
       {
         en: 'These need an active membership. Without one you will see a “Members only” card with a button to pay.',
@@ -248,7 +248,7 @@ export const HELP_SECTIONS: HelpSection[] = [
         te: 'ఆర్డర్ క్యూ మీరు క్రమబద్ధీకరించి ఫిల్టర్ చేయగల పట్టిక (స్థితి, చెల్లింపు విధానం, చెల్లింపు స్థితి, ఆర్డర్, కస్టమర్ లేదా UTR ద్వారా శోధన). దాని పైన ఉన్న బటన్ ధృవీకరణ కోసం వేచి ఉన్న UPI చెల్లింపులకు తీసుకెళ్తుంది.',
       },
       {
-        en: 'Open an order to verify or reject its UPI payment. A UPI order cannot be confirmed until it is verified. Then Confirm → Ship → Deliver. Delivering a Cash on Delivery order marks it paid.',
+        en: 'Open an order to verify or reject its UPI payment. A UPI order cannot be confirmed until it is verified. Then Confirm → Ship → Deliver. Delivering an older Cash on Delivery order marks it paid.',
         te: 'UPI చెల్లింపును ధృవీకరించడానికి లేదా తిరస్కరించడానికి ఆర్డర్ తెరవండి. ధృవీకరించే వరకు UPI ఆర్డర్‌ను నిర్ధారించలేరు. తర్వాత నిర్ధారించండి → పంపండి → డెలివరీ చేయండి. క్యాష్ ఆన్ డెలివరీ ఆర్డర్‌ను డెలివరీ చేస్తే అది చెల్లించినట్లు గుర్తించబడుతుంది.',
       },
       {
@@ -380,8 +380,8 @@ export const HELP_SECTIONS: HelpSection[] = [
     title: { en: 'Answering cases and writing articles', te: 'కేసులకు సమాధానం, వ్యాసాలు రాయడం' },
     body: [
       {
-        en: 'Submit your qualifications first; once an administrator verifies you, cases can be assigned to you. Open a case, read the photos, and answer or ask the farmer for more detail. Solved cases become draft articles you can edit and send for review.',
-        te: 'ముందు మీ అర్హతలను సమర్పించండి; అడ్మినిస్ట్రేటర్ ధృవీకరించిన తర్వాత మీకు కేసులు కేటాయించబడతాయి. కేసు తెరిచి, ఫోటోలు చూసి, సమాధానం ఇవ్వండి లేదా రైతును మరిన్ని వివరాలు అడగండి. పరిష్కరించిన కేసులు మీరు సవరించి సమీక్షకు పంపగల డ్రాఫ్ట్ వ్యాసాలు అవుతాయి.',
+        en: 'Submit your qualifications first; once an administrator verifies you, cases can be assigned to you. Open a case: you see the farmer’s photos and videos and “What has been said on this case” — the whole conversation, including your earlier advice if the farmer disputed it. Then answer, or ask the farmer for more detail. Solved cases become draft articles you can edit and send for review.',
+        te: 'ముందు మీ అర్హతలను సమర్పించండి; అడ్మినిస్ట్రేటర్ ధృవీకరించిన తర్వాత మీకు కేసులు కేటాయించబడతాయి. కేసు తెరవండి: రైతు ఫోటోలు, వీడియోలు, “ఈ కేసులో ఇప్పటివరకు చెప్పినవి” — రైతు వివాదం చేస్తే మీ ముందటి సలహా సహా మొత్తం సంభాషణ — కనిపిస్తాయి. తర్వాత సమాధానం ఇవ్వండి, లేదా రైతును మరిన్ని వివరాలు అడగండి. పరిష్కరించిన కేసులు మీరు సవరించి సమీక్షకు పంపగల డ్రాఫ్ట్ వ్యాసాలు అవుతాయి.',
       },
     ],
   },
@@ -402,7 +402,7 @@ export const HELP_SECTIONS: HelpSection[] = [
     title: { en: 'Dispatching orders', te: 'ఆర్డర్లను పంపడం' },
     body: [
       {
-        en: 'The queue shows orders ready to pack: Cash on Delivery, or UPI already verified. Each row shows the receiver’s city, PIN and phone. Open an order, pack what you have and mark each item Sent; leave the rest Pending. Untick “ready to pack only” to see everything.',
+        en: 'The queue shows orders ready to pack: UPI payment already verified (or an older Cash on Delivery order). Each row shows the receiver’s city, PIN and phone. Open an order, pack what you have and mark each item Sent; leave the rest Pending. Untick “ready to pack only” to see everything.',
         te: 'క్యూ ప్యాక్ చేయడానికి సిద్ధమైన ఆర్డర్లను చూపిస్తుంది: క్యాష్ ఆన్ డెలివరీ, లేదా ఇప్పటికే ధృవీకరించిన UPI. ప్రతి వరుస స్వీకర్త నగరం, పిన్, ఫోన్ చూపిస్తుంది. ఆర్డర్ తెరిచి, ఉన్నది ప్యాక్ చేసి ప్రతి వస్తువును పంపబడింది అని గుర్తించండి; మిగతావి పెండింగ్‌లో ఉంచండి. అన్నీ చూడటానికి “ప్యాక్ చేయడానికి సిద్ధమైనవి మాత్రమే” టిక్ తీసేయండి.',
       },
     ],

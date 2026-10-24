@@ -180,6 +180,31 @@ model User {
 // Farm/Land Parcel — its own entity per Charter v0.4.0: a farmer may operate more
 // than one; Cases and Soil Reports (Stage 2+) link to the specific parcel, not the
 // farmer generally.
+// Everything that was said on a case, in order: what the farmer asked, what the expert asked
+// and was told back, every answer (including ones the farmer later disputed), and the outcome.
+// The case row only holds the latest answer; this keeps the whole conversation.
+enum CaseEventKind {
+  SUBMITTED
+  ASSIGNED
+  FOLLOW_UP_ASKED
+  FOLLOW_UP_ANSWERED
+  ANSWERED
+  DISPUTED
+  CONFIRMED
+}
+
+model CaseEvent {
+  id        String        @id @default(uuid())
+  caseId    String
+  case      Case          @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  kind      CaseEventKind
+  actorId   String?
+  text      String?
+  createdAt DateTime      @default(now())
+
+  @@index([caseId, createdAt])
+}
+
 model FarmLand {
   id            String   @id @default(uuid())
   farmerId      String
@@ -190,6 +215,9 @@ model FarmLand {
   primaryCrops  String[] // crop names, validated against CropMaster at the API layer
   latitude      Float? // optional GPS pin, captured via the browser's Geolocation
   longitude     Float? // API — easier for a farmer standing in the field than typing an address
+  // Set when a farmer "deletes" a parcel that has cases or soil samples: hidden from their lists
+  // and pickers, but kept so those cases and reports still make sense.
+  archivedAt    DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -219,6 +247,14 @@ model Case {
   crop       CropMaster?        @relation(fields: [cropId], references: [id]) // General Advisory
   // cases aren't always about one
 
+  // A crop the master list does not have (a parcel can list any crop). Used when cropId is empty.
+  cropName String?
+
+  // This case follows an earlier one ("the advice did not work"): its history continues that one's.
+  relatedCaseId String?
+  relatedCase   Case?   @relation("CaseFollowUp", fields: [relatedCaseId], references: [id], onDelete: SetNull)
+  followUps     Case[]  @relation("CaseFollowUp")
+
   problemDescription String
   evidenceNotes      String?
   evidenceMediaUrls  String[] @default([]) // Supabase Storage public URLs (photos/videos)
@@ -232,6 +268,8 @@ model Case {
   priorityRequested   Boolean @default(false) // the farmer's ask, alone, grants nothing
   isPriority          Boolean @default(false) // true only after a Moderator/Administrator confirms — the actual anti-abuse gate
   priorityConfirmedBy String? // userId of the Moderator/Administrator who confirmed it
+
+  events CaseEvent[]
 
   followUpQuestion String? // set when Expert Working -> Waiting Farmer
   followUpResponse String? // set when the farmer responds, before returning to Expert Working
@@ -274,6 +312,7 @@ model KnowledgeArticle {
   title              String
   cropId             String?
   crop               CropMaster?         @relation(fields: [cropId], references: [id])
+  cropName           String? // when the case's crop is not on the master list
   categoryId         String?
   category           CaseCategoryMaster? @relation(fields: [categoryId], references: [id])
   symptoms           String? // clinical framing, distinct from the farmer's own
@@ -928,6 +967,9 @@ model HariharaaSettings {
   // static QR). Without it the UPI app treats the link as a person-to-person
   // payment instead of a payment to the registered business.
   upiAid               String?
+  // The store's phone / WhatsApp number shown to members (forgot password, help, chat) so they
+  // know whom to contact. Empty = not shown.
+  contactPhone         String?
   // The master switch: when false nobody needs a membership (checkout and farm advice are open
   // to every signed-in member). Defaults to on.
   membershipRequired   Boolean        @default(true)

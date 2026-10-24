@@ -18,6 +18,7 @@ export interface PublicPlan {
 export interface PublicSettings {
   subscriptionPriceInr: number; // the cheapest plan (kept for older screens)
   payeeName: string;
+  contactPhone: string | null; // the store's phone, when an Administrator has set one
   membershipRequired: boolean;
   plans: PublicPlan[];
 }
@@ -37,6 +38,7 @@ export interface AdminSettings {
   primaryUpiId: string;
   secondaryUpiId: string | null;
   upiAid: string | null;
+  contactPhone: string | null;
   vendorProfileId: string | null;
 }
 
@@ -101,6 +103,7 @@ export function updateSettings(
     secondaryUpiId?: string;
     vendorProfileId?: string;
     upiAid?: string;
+    contactPhone?: string; // empty removes it
   },
 ) {
   return apiRequest<AdminSettings>('/hariharaa/settings', { method: 'PATCH', body: data, token });

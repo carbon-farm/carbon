@@ -23,7 +23,8 @@ export function CheckoutPage() {
   const [addressId, setAddressId] = useState('');
   const [adding, setAdding] = useState(false);
   const [savingAddress, setSavingAddress] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'COD' | 'UPI'>('COD');
+  // Cash on delivery is no longer offered — every new order is paid by UPI.
+  const paymentMethod = 'UPI' as const;
   const [loading, setLoading] = useState(true);
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +71,8 @@ export function CheckoutPage() {
     setError(null);
     try {
       const order = await checkout(session.accessToken, { addressId, paymentMethod });
-      navigate(`/marketplace/orders/${order.id}`);
+      // replace: Back from the order should not land on a checkout whose cart has just emptied.
+      navigate(`/marketplace/orders/${order.id}`, { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.couldNotCheckout.en} / ${strings.couldNotCheckout.te}`);
     } finally {
@@ -148,15 +150,8 @@ export function CheckoutPage() {
             <div className="card">
               <Bi id="paymentMethodHeading" as="h2" />
               <div className="option-list" role="radiogroup">
-                <label className={`option-card${paymentMethod === 'COD' ? ' selected' : ''}`}>
-                  <input type="radio" name="payment" checked={paymentMethod === 'COD'} onChange={() => setPaymentMethod('COD')} />
-                  <span>
-                    <Bi id="paymentCod" as="span" className="label" />
-                    <BiValue value={strings.paymentCodHint} as="span" className="hint" />
-                  </span>
-                </label>
                 <label className={`option-card${paymentMethod === 'UPI' ? ' selected' : ''}`}>
-                  <input type="radio" name="payment" checked={paymentMethod === 'UPI'} onChange={() => setPaymentMethod('UPI')} />
+                  <input type="radio" name="payment" checked readOnly />
                   <span>
                     <Bi id="paymentUpi" as="span" className="label" />
                     <BiValue value={strings.paymentUpiHint} as="span" className="hint" />

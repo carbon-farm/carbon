@@ -340,8 +340,8 @@ export const FAQS: Faq[] = [
     q: { en: 'How do I place an order?', te: 'ఆర్డర్ ఎలా చేయాలి?' },
     a: [
       {
-        en: 'Open your cart and choose Proceed to checkout. Pick a saved address or add one (name, phone, house/street, town, state, 6-digit PIN), choose Cash on Delivery or UPI, and place the order.',
-        te: 'మీ కార్ట్ తెరిచి చెక్అవుట్‌కు వెళ్ళండి ఎంచుకోండి. సేవ్ చేసిన చిరునామా ఎంచుకోండి లేదా కొత్తది చేర్చండి (పేరు, ఫోన్, ఇంటి నంబర్/వీధి, పట్టణం, రాష్ట్రం, 6 అంకెల పిన్), క్యాష్ ఆన్ డెలివరీ లేదా UPI ఎంచుకుని ఆర్డర్ చేయండి.',
+        en: 'Open your cart and choose Proceed to checkout. Pick a saved address or add one (name, phone, house/street, town, state, 6-digit PIN), and place the order. Payment is by UPI after you order.',
+        te: 'మీ కార్ట్ తెరిచి చెక్అవుట్‌కు వెళ్ళండి ఎంచుకోండి. సేవ్ చేసిన చిరునామా ఎంచుకోండి లేదా కొత్తది చేర్చండి (పేరు, ఫోన్, ఇంటి నంబర్/వీధి, పట్టణం, రాష్ట్రం, 6 అంకెల పిన్), ఆర్డర్ చేయండి. ఆర్డర్ తర్వాత చెల్లింపు UPI ద్వారా.',
       },
     ],
     keywords: ['place order', 'place an order', 'buy', 'purchase', 'checkout', 'check out', 'order cheyali', 'how to order', 'how do i order', 'ఆర్డర్ ఎలా', 'ఆర్డర్ చేయ', 'కొనడం', 'చెక్అవుట్'],
@@ -361,16 +361,16 @@ export const FAQS: Faq[] = [
     link: { to: '/account/addresses', label: { en: 'Open Addresses', te: 'చిరునామాలు తెరవండి' } },
   },
   {
-    id: 'cod-or-upi',
+    id: 'how-to-pay',
     audience: MEMBER,
-    q: { en: 'Cash on Delivery or UPI — which should I choose?', te: 'క్యాష్ ఆన్ డెలివరీ లేదా UPI — ఏది ఎంచుకోవాలి?' },
+    q: { en: 'How do I pay for an order?', te: 'ఆర్డర్‌కు ఎలా చెల్లించాలి?' },
     a: [
       {
-        en: 'Cash on Delivery: pay when the parcel arrives. UPI: open the order, tap Pay now, pay the exact total, and submit the UTR; we verify it before packing. Both give the same order.',
-        te: 'క్యాష్ ఆన్ డెలివరీ: పార్సెల్ వచ్చినప్పుడు చెల్లించండి. UPI: ఆర్డర్ తెరిచి ఇప్పుడే చెల్లించండి తాకి, ఖచ్చితమైన మొత్తం చెల్లించి, UTR సమర్పించండి; ప్యాక్ చేసే ముందు మేము ధృవీకరిస్తాము. రెండింటికీ ఒకే ఆర్డర్ వస్తుంది.',
+        en: 'Orders are paid by UPI (Cash on Delivery is no longer offered). Open the order, tap Pay now, pay the exact total, and submit the UTR; we verify it before packing.',
+        te: 'ఆర్డర్లకు UPI ద్వారా చెల్లించాలి (క్యాష్ ఆన్ డెలివరీ ఇకపై లేదు). ఆర్డర్ తెరిచి ఇప్పుడే చెల్లించండి తాకి, ఖచ్చితమైన మొత్తం చెల్లించి, UTR సమర్పించండి; ప్యాక్ చేసే ముందు మేము ధృవీకరిస్తాము.',
       },
     ],
-    keywords: ['cod', 'cash on delivery', 'upi order', 'pay for order', 'pay my order', 'order payment', 'క్యాష్ ఆన్ డెలివరీ', 'ఆర్డర్‌కు చెల్లి'],
+    keywords: ['cod', 'cash on delivery', 'upi order', 'how to pay for an order', 'pay for order', 'pay my order', 'order payment', 'క్యాష్ ఆన్ డెలివరీ', 'ఆర్డర్‌కు చెల్లి'],
   },
   {
     id: 'order-status',
@@ -579,6 +579,82 @@ export const FAQS: Faq[] = [
     keywords: ['today', 'home', 'summary', 'dashboard', 'days left', 'ఈ రోజు', 'సారాంశం'],
   },
   {
+    id: 'delete-parcel',
+    audience: MEMBER,
+    q: { en: 'How do I delete a parcel I added twice or by mistake?', te: 'రెండుసార్లు లేదా పొరపాటున జోడించిన స్థలాన్ని ఎలా తొలగించాలి?' },
+    a: [
+      {
+        en: 'On the Dashboard, under Farm/Land parcels, tap “Delete parcel” on it and confirm. A parcel nobody has used is removed. A parcel that already has cases or soil tests is only hidden from your list — so the cases, the expert’s advice and the test reports stay safe. The same name, place and size cannot be added twice.',
+        te: 'డాష్‌బోర్డ్‌లో, పొలం స్థలాల కింద, దానిపై “స్థలాన్ని తొలగించండి” తాకి నిర్ధారించండి. ఎవరూ వాడని స్థలం తీసివేయబడుతుంది. ఇప్పటికే కేసులు లేదా నేల పరీక్షలు ఉన్న స్థలం మీ జాబితా నుండి దాచబడుతుంది మాత్రమే — కాబట్టి కేసులు, నిపుణుడి సలహా, పరీక్ష నివేదికలు భద్రంగా ఉంటాయి. ఒకే పేరు, ప్రదేశం, పరిమాణంతో రెండుసార్లు జోడించలేరు.',
+      },
+    ],
+    keywords: ['delete parcel', 'remove parcel', 'delete land', 'remove land', 'duplicate parcel', 'added twice', 'parcel twice', 'delete farm', 'remove farm', 'స్థలాన్ని తొలగించ', 'స్థలం తొలగించ', 'పార్సెల్'],
+    link: { to: '/dashboard', label: { en: 'Open Dashboard', te: 'డాష్‌బోర్డ్ తెరవండి' } },
+  },
+  {
+    id: 'edit-parcel',
+    audience: MEMBER,
+    q: { en: 'How do I change a parcel or its crops?', te: 'స్థలాన్ని లేదా దాని పంటలను ఎలా మార్చాలి?' },
+    a: [
+      {
+        en: 'On the Dashboard, under Farm/Land parcels, tap “Edit parcel”. Change the name, place or size, then tap the crops it grows (or type a crop that is not shown and tap Add). Tap Save parcel. Advice on your dashboard follows the crops you choose.',
+        te: 'డాష్‌బోర్డ్‌లో, పొలం స్థలాల కింద, “స్థలాన్ని సవరించండి” తాకండి. పేరు, ప్రదేశం లేదా పరిమాణం మార్చి, అది పండించే పంటలను తాకండి (లేదా కనిపించని పంటను టైప్ చేసి జోడించండి తాకండి). స్థలాన్ని సేవ్ చేయండి తాకండి. మీ డాష్‌బోర్డ్‌లోని సలహా మీరు ఎంచుకున్న పంటలను అనుసరిస్తుంది.',
+      },
+    ],
+    keywords: ['edit parcel', 'change parcel', 'change crops', 'add crop', 'crop not in list', 'other crop', 'update parcel', 'edit land', 'స్థలాన్ని సవరించ', 'పంటలను మార్చ', 'పంట జోడించ'],
+    link: { to: '/dashboard', label: { en: 'Open Dashboard', te: 'డాష్‌బోర్డ్ తెరవండి' } },
+  },
+  {
+    id: 'parcel-soil-test',
+    audience: MEMBER,
+    q: { en: 'How do I ask for a soil test for one parcel?', te: 'ఒక స్థలానికి మట్టి పరీక్ష ఎలా అడగాలి?' },
+    a: [
+      {
+        en: 'On the Dashboard, each parcel lists its soil tests with their status and report. Tap “Request a soil test for this parcel” — the soil test form opens with that parcel already chosen. Linking it to a case is optional; leave it on None if there is no case.',
+        te: 'డాష్‌బోర్డ్‌లో ప్రతి స్థలం కింద దాని మట్టి పరీక్షలు, స్థితి, నివేదికతో కనిపిస్తాయి. “ఈ స్థలానికి మట్టి పరీక్ష అభ్యర్థించండి” తాకండి — ఆ స్థలం ఇప్పటికే ఎంచుకుని మట్టి పరీక్ష ఫారం తెరుచుకుంటుంది. కేసుతో లింక్ చేయడం ఐచ్ఛికం; కేసు లేకపోతే ఏదీ కాదు అలాగే ఉంచండి.',
+      },
+    ],
+    keywords: ['soil test for parcel', 'soil test for my land', 'request soil test', 'soil test parcel', 'test my soil', 'మట్టి పరీక్ష అభ్యర్థించ', 'మట్టి పరీక్ష'],
+    link: { to: '/soil-samples', label: { en: 'Open Soil tests', te: 'మట్టి పరీక్షలు తెరవండి' } },
+  },
+  {
+    id: 'advice-did-not-work',
+    audience: MEMBER,
+    q: { en: 'The advice did not work — what do I do?', te: 'సలహా పని చేయలేదు — ఏం చేయాలి?' },
+    a: [
+      {
+        en: 'Tap “This did not work — ask the expert again” on the case (or under the guide). It opens a new report that is linked to the earlier case, with the parcel, problem type and crop filled in. The expert can see everything that was said before — look for “Earlier case” in the history.',
+        te: 'కేసులో (లేదా గైడ్ కింద) “ఇది పని చేయలేదు — నిపుణుడిని మళ్లీ అడగండి” తాకండి. ఇది ముందటి కేసుకు లింక్ అయిన కొత్త నివేదికను తెరుస్తుంది; స్థలం, సమస్య రకం, పంట ముందే నింపబడతాయి. అంతకు ముందు చెప్పినదంతా నిపుణుడికి కనిపిస్తుంది — చరిత్రలో “ముందటి కేసు” చూడండి.',
+      },
+    ],
+    keywords: ['advice did not work', 'did not work', 'didnt work', 'not working advice', 'ask again', 'ask expert again', 'follow up case', 'still the same problem', 'problem not solved', 'సలహా పని చేయలేదు', 'పని చేయలేదు', 'మళ్లీ అడగ'],
+    link: { to: '/cases', label: { en: 'Open My cases', te: 'నా కేసులు తెరవండి' } },
+  },
+  {
+    id: 'store-phone',
+    audience: 'ALL',
+    q: { en: 'What is the store’s phone number?', te: 'స్టోర్ ఫోన్ నంబర్ ఏమిటి?' },
+    a: [
+      {
+        en: 'The store’s phone / WhatsApp number is shown at the top of this Help page, on the Forgot password page, and in the chat when it cannot answer. If you do not see one, the store has not added it yet.',
+        te: 'స్టోర్ ఫోన్ / వాట్సాప్ నంబర్ ఈ సహాయం పేజీ పైన, పాస్‌వర్డ్ మర్చిపోయాను పేజీలో, చాట్ సమాధానం ఇవ్వలేనప్పుడు కనిపిస్తుంది. నంబర్ కనిపించకపోతే స్టోర్ ఇంకా జోడించలేదు.',
+      },
+    ],
+    keywords: ['store phone', 'store number', 'phone number of store', 'contact store', 'call the store', 'whatsapp number', 'contact number', 'helpline', 'స్టోర్ ఫోన్', 'స్టోర్ నంబర్', 'సంప్రదించ'],
+  },
+  {
+    id: 'dashboard-advice',
+    audience: MEMBER,
+    q: { en: 'What is “Recent advice” on my dashboard?', te: 'నా డాష్‌బోర్డ్‌లోని “ఇటీవలి సలహా” ఏమిటి?' },
+    a: [
+      {
+        en: 'Advice made for you: first the advice that came out of your own cases, then advice for the crops listed on your parcels — whether or not you have asked anything about them. A tag says why each one is shown. If you have no parcels yet it shows the newest advice instead; add a parcel with its crops to see advice for your own crops.',
+        te: 'మీ కోసం సలహా: ముందుగా మీ స్వంత కేసుల నుండి వచ్చిన సలహా, తర్వాత మీ స్థలాలలో నమోదు చేసిన పంటలకు సలహా — వాటి గురించి మీరు ఏదైనా అడిగినా, అడగకపోయినా. ప్రతిదీ ఎందుకు చూపబడిందో ఒక ట్యాగ్ చెబుతుంది. మీకు ఇంకా స్థలాలు లేకపోతే బదులుగా తాజా సలహా చూపబడుతుంది; మీ స్వంత పంటలకు సలహా చూడటానికి పంటలతో సహా ఒక స్థలాన్ని జోడించండి.',
+      },
+    ],
+    keywords: ['recent advice', 'advice on dashboard', 'dashboard advice', 'why this advice', 'advice for my crop', 'ఇటీవలి సలహా', 'నా పంటకు సలహా'],
+  },
+  {
     id: 'seasonal-tips',
     audience: MEMBER,
     q: { en: 'What is “This month on your farm”?', te: '“ఈ నెల మీ పొలంలో” అంటే ఏమిటి?' },
@@ -625,7 +701,7 @@ export const FAQS: Faq[] = [
     q: { en: 'How do I verify a UPI order payment and move an order along?', te: 'UPI ఆర్డర్ చెల్లింపును ఎలా ధృవీకరించి ఆర్డర్‌ను ముందుకు నడపాలి?' },
     a: [
       {
-        en: 'Order queue → open the order → verify or reject the payment. A UPI order cannot be confirmed until it is verified. Then Confirm → Ship → Deliver (delivering a Cash on Delivery order marks it paid). The yellow shortcut lists UPI payments waiting.',
+        en: 'Order queue → open the order → verify or reject the payment. A UPI order cannot be confirmed until it is verified. Then Confirm → Ship → Deliver (delivering an older Cash on Delivery order marks it paid). The yellow shortcut lists UPI payments waiting.',
         te: 'ఆర్డర్ క్యూ → ఆర్డర్ తెరవండి → చెల్లింపును ధృవీకరించండి లేదా తిరస్కరించండి. ధృవీకరించే వరకు UPI ఆర్డర్‌ను నిర్ధారించలేరు. తర్వాత నిర్ధారించండి → పంపండి → డెలివరీ చేయండి (క్యాష్ ఆన్ డెలివరీ ఆర్డర్‌ను డెలివరీ చేస్తే అది చెల్లించినట్లు గుర్తించబడుతుంది). పసుపు షార్ట్‌కట్ వేచి ఉన్న UPI చెల్లింపులను చూపిస్తుంది.',
       },
     ],
@@ -909,6 +985,18 @@ export const FAQS: Faq[] = [
     link: { to: '/expert/cases', label: { en: 'My cases', te: 'నా కేసులు' } },
   },
   {
+    id: 'expert-history',
+    audience: ['EXPERT', 'MODERATOR'],
+    q: { en: 'Where can I see what I advised earlier on a case the farmer disputed?', te: 'రైతు వివాదం చేసిన కేసులో నేను ముందు ఏమి సలహా ఇచ్చానో ఎక్కడ చూడాలి?' },
+    a: [
+      {
+        en: 'Open the case: “What has been said on this case” lists everything in order — the problem, your questions and the farmer’s replies, every answer you gave (including the earlier one that was disputed), the dispute itself and how it ended. The farmer’s photos and videos are shown on the same page.',
+        te: 'కేసును తెరవండి: “ఈ కేసులో ఇప్పటివరకు చెప్పినవి” అన్నింటినీ క్రమంలో చూపిస్తుంది — సమస్య, మీ ప్రశ్నలు, రైతు బదులు, మీరు ఇచ్చిన ప్రతి సమాధానం (వివాదం చేసిన ముందటిది సహా), వివాదం, అది ఎలా ముగిసిందో. రైతు ఫోటోలు, వీడియోలు అదే పేజీలో కనిపిస్తాయి.',
+      },
+    ],
+    keywords: ['history', 'case history', 'earlier advice', 'previous answer', 'previous advice', 'what i advised', 'disputed', 'dispute', 'reopened', 'photos of the case', 'చరిత్ర', 'ముందటి సలహా', 'వివాదం'],
+  },
+  {
     id: 'moderator-start',
     audience: ['MODERATOR'],
     popular: true,
@@ -929,7 +1017,7 @@ export const FAQS: Faq[] = [
     q: { en: 'How do I dispatch an order?', te: 'ఆర్డర్‌ను ఎలా పంపాలి?' },
     a: [
       {
-        en: 'The dispatch queue shows orders ready to pack (Cash on Delivery, or UPI already verified) with the receiver’s city, PIN and phone. Open one, pack what you have and mark each item Sent; leave the rest Pending. Untick “ready to pack only” to see everything.',
+        en: 'The dispatch queue shows orders ready to pack (UPI already verified, or an older Cash on Delivery order) with the receiver’s city, PIN and phone. Open one, pack what you have and mark each item Sent; leave the rest Pending. Untick “ready to pack only” to see everything.',
         te: 'డిస్పాచ్ క్యూ ప్యాక్ చేయడానికి సిద్ధమైన ఆర్డర్లను (క్యాష్ ఆన్ డెలివరీ, లేదా ఇప్పటికే ధృవీకరించిన UPI) స్వీకర్త నగరం, పిన్, ఫోన్‌తో చూపిస్తుంది. ఒకదాన్ని తెరిచి, ఉన్నది ప్యాక్ చేసి ప్రతి వస్తువును పంపబడింది అని గుర్తించండి; మిగతావి పెండింగ్‌లో ఉంచండి. అన్నీ చూడటానికి “ప్యాక్ చేయడానికి సిద్ధమైనవి మాత్రమే” టిక్ తీసేయండి.',
       },
     ],

@@ -300,7 +300,7 @@ export function removeFromCart(token: string, productId: string) {
 
 // ---------- Orders ----------
 
-export function checkout(token: string, data: { addressId: string; paymentMethod: 'COD' | 'UPI' }) {
+export function checkout(token: string, data: { addressId: string; paymentMethod: 'UPI' }) {
   return apiRequest<Order>('/marketplace/orders/checkout', { method: 'POST', body: data, token });
 }
 

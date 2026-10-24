@@ -15,6 +15,7 @@ import { MAX_CATEGORY_LEVEL, levelOf, resolveCategoryIds } from './category-tree
 import { AdjustStockDto, CreateProductDto, UpdateProductDto } from './dto/product.dto';
 import { giveStock, recordMovement, roundMoney, takeStock } from './stock-ledger';
 import { recommend } from './recommend';
+import { isUniqueViolation, MAX_NUMBER_ATTEMPTS, numberPrefix, withSequence } from '../../common/readable-number';
 import { StockAlertsService } from './stock-alerts.service';
 import { AddToCartDto, GuestCartDto } from './dto/cart.dto';
 import { CheckoutDto } from './dto/checkout.dto';
@@ -584,13 +585,21 @@ export class MarketplaceService {
     } else {
       throw new BadRequestException(bi('Choose a delivery address', 'డెలివరీ చిరునామాను ఎంచుకోండి'));
     }
-    const paymentMethod = dto.paymentMethod ?? 'COD';
+    const paymentMethod = dto.paymentMethod ?? 'UPI';
 
     const lines = cart.map((item) => ({ item, lineTotal: roundMoney(item.quantity * item.product.price) }));
     const totalAmount = roundMoney(lines.reduce((sum, l) => sum + l.lineTotal, 0));
     // Stock left per product after this order, for the low-stock alerts sent once it is committed.
     const balancesAfter = new Map<string, number>();
-    const order = await this.prisma.$transaction(async (tx) => {
+    // ORD-HHC0003-20261024-001: the member, the day, which order of theirs that day. Counted before
+    // the transaction; if two checkouts of the same member race for one number the unique
+    // constraint refuses the second and the whole checkout is simply tried again with the next.
+    const buyer = await this.prisma.user.findUnique({ where: { id: userId }, select: { userCode: true } });
+    const prefix = numberPrefix('ORD', buyer?.userCode);
+    let orderNumber = '';
+    const order = await this.runWithOrderNumber(userId, prefix, (n) => {
+      orderNumber = n;
+      return this.prisma.$transaction(async (tx) => {
       // Take the stock FIRST, one atomic statement per line that only succeeds while enough is
       // there. The earlier check above is just for a friendly message; this is the one that
       // counts — two people buying the last unit at the same moment get exactly one order.
@@ -607,7 +616,7 @@ export class MarketplaceService {
       }
       const created = await tx.order.create({
         data: {
-          orderNumber: this.generateOrderNumber(),
+          orderNumber,
           farmerId: userId,
           totalAmount,
           deliveryAddress,
@@ -640,6 +649,7 @@ export class MarketplaceService {
       await tx.cartItem.deleteMany({ where: { userId } });
       return created;
     }, TX_OPTIONS);
+    });
 
     await this.audit.log({
       actorId: userId,
@@ -694,6 +704,24 @@ export class MarketplaceService {
     if (!item || item.orderId !== orderId) {
       throw new NotFoundException(bi('Order item not found', 'ఆర్డర్ అంశం కనుగొనబడలేదు'));
     }
+    if (item.dispatchStatus === status) {
+      // Already in that state (a double tap): nothing to change and nobody to notify again.
+      const same = await this.prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
+      if (!same) throw new NotFoundException(bi('Order not found', 'ఆర్డర్ కనుగొనబడలేదు'));
+      return same;
+    }
+    if (status === DispatchStatus.SENT) {
+      // Nothing goes out on a cancelled order, or on a UPI order whose money is not verified yet.
+      const order = await this.getOrderOrThrow(orderId);
+      if (order.status === OrderStatus.CANCELLED) {
+        throw new BadRequestException(bi('This order was cancelled — nothing can be sent', 'ఈ ఆర్డర్ రద్దు చేయబడింది — ఏదీ పంపలేరు'));
+      }
+      if (order.paymentMethod === 'UPI' && order.paymentStatus !== OrderPaymentStatus.PAID) {
+        throw new BadRequestException(
+          bi('Verify the UPI payment before sending items', 'వస్తువులు పంపే ముందు UPI చెల్లింపును ధృవీకరించండి'),
+        );
+      }
+    }
     await this.prisma.orderItem.update({ where: { id: itemId }, data: { dispatchStatus: status } });
     await this.audit.log({
       actorId,
@@ -704,6 +732,24 @@ export class MarketplaceService {
     });
     const updated = await this.prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
     if (!updated) throw new NotFoundException(bi('Order not found', 'ఆర్డర్ కనుగొనబడలేదు'));
+    // When items go out in parts, say so: how many have gone and that the rest will follow.
+    if (status === DispatchStatus.SENT) {
+      const sent = updated.items.filter((i) => i.dispatchStatus === DispatchStatus.SENT).length;
+      const total = updated.items.length;
+      const all = sent === total;
+      await this.notifications.create(
+        updated.farmerId,
+        'order.items_sent',
+        all ? bi('All items of your order have been sent', 'మీ ఆర్డర్‌లోని అన్ని వస్తువులు పంపబడ్డాయి') : bi('Part of your order has been sent', 'మీ ఆర్డర్‌లో కొంత భాగం పంపబడింది'),
+        all
+          ? bi(`${updated.orderNumber}: all ${total} item(s) are on the way`, `${updated.orderNumber}: మొత్తం ${total} వస్తువు(లు) దారిలో ఉన్నాయి`)
+          : bi(
+              `${updated.orderNumber}: ${sent} of ${total} items sent. The rest will follow as soon as they are available.`,
+              `${updated.orderNumber}: ${total}లో ${sent} వస్తువులు పంపబడ్డాయి. మిగతావి అందుబాటులోకి రాగానే వస్తాయి.`,
+            ),
+        `/marketplace/orders/${orderId}`,
+      );
+    }
     return updated;
   }
 
@@ -814,10 +860,19 @@ export class MarketplaceService {
     return found;
   }
 
-  private generateOrderNumber(): string {
-    const year = new Date().getFullYear();
-    const random = crypto.randomBytes(4).toString('hex').toUpperCase();
-    return `ORD-${year}-${random}`;
+  // Runs an order-placing step with the next free readable number, trying the following one if the
+  // same member's other checkout took it at the same moment. Nothing from a failed attempt remains
+  // (the step is one transaction).
+  private async runWithOrderNumber<T>(userId: string, prefix: string, step: (orderNumber: string) => Promise<T>): Promise<T> {
+    for (let attempt = 0; attempt < MAX_NUMBER_ATTEMPTS; attempt++) {
+      const so_far = await this.prisma.order.count({ where: { farmerId: userId, orderNumber: { startsWith: prefix } } });
+      try {
+        return await step(withSequence(prefix, so_far + 1 + attempt));
+      } catch (err) {
+        if (!isUniqueViolation(err)) throw err;
+      }
+    }
+    return step(`${prefix}${crypto.randomBytes(3).toString('hex').toUpperCase()}`);
   }
 
   // ---------- Reviews ----------

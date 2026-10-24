@@ -11,7 +11,9 @@ export interface Bilingual {
   te: string;
 }
 
-export const strings = {
+// Typed as plain {en, te} pairs (not one literal type per key): indexing by a StringKey union of a
+// thousand literal types overflows the compiler, and nothing needs the exact wording as a type.
+const stringsDef = {
   brand: { en: 'Organic Carbon Farming', te: 'ఆర్గానిక్ కార్బన్ ఫార్మింగ్' },
   brandGroup: { en: 'HARIHARAA Group', te: 'హరిహర గ్రూప్' },
 
@@ -57,6 +59,12 @@ export const strings = {
   forgotIntro: {
     en: 'For your safety only the store can reset a password. Enter your mobile number and we will tell an Administrator. They will check it is really you and give you a temporary password.',
     te: 'మీ భద్రత కోసం పాస్‌వర్డ్‌ను స్టోర్ మాత్రమే రీసెట్ చేయగలదు. మీ మొబైల్ నంబర్ నమోదు చేయండి, మేము అడ్మినిస్ట్రేటర్‌కు తెలియజేస్తాము. వారు మీరేనని నిర్ధారించుకుని మీకు తాత్కాలిక పాస్‌వర్డ్ ఇస్తారు.',
+  },
+  storeContactLabel: { en: 'Store phone / WhatsApp:', te: 'స్టోర్ ఫోన్ / వాట్సాప్:' },
+  storeContactField: { en: 'Store phone / WhatsApp number', te: 'స్టోర్ ఫోన్ / వాట్సాప్ నంబర్' },
+  storeContactHint: {
+    en: 'Shown to members on the Forgot password page, Help and the chat so they know whom to call. Leave empty to hide it.',
+    te: 'పాస్‌వర్డ్ మర్చిపోయాను పేజీ, సహాయం మరియు చాట్‌లో సభ్యులకు ఎవరికి కాల్ చేయాలో తెలియడానికి చూపబడుతుంది. దాచడానికి ఖాళీగా ఉంచండి.',
   },
   sendResetRequestButton: { en: 'Ask the store to reset it', te: 'రీసెట్ చేయమని స్టోర్‌ను అడగండి' },
   resetRequestSentTitle: { en: 'Request sent', te: 'అభ్యర్థన పంపబడింది' },
@@ -447,12 +455,29 @@ export const strings = {
   // Generic list toolbar (sort/filter) controls, reused across list screens
   sortByLabel: { en: 'Sort by', te: 'క్రమం' },
   allOption: { en: 'All', te: 'అన్నీ' },
+  cropsOnParcel: { en: 'Crops on this parcel:', te: 'ఈ స్థలంలోని పంటలు:' },
+  cropOtherOption: { en: 'Other crop (type its name)', te: 'ఇతర పంట (పేరు టైప్ చేయండి)' },
+  cropOtherPlaceholder: { en: 'Name of the crop', te: 'పంట పేరు' },
+  followUpOf: {
+    en: 'This report follows up case {n} — the earlier advice did not solve it.',
+    te: 'ఈ నివేదిక కేసు {n} కు కొనసాగింపు — ముందు ఇచ్చిన సలహా సమస్యను పరిష్కరించలేదు.',
+  },
+  historyEarlierCase: { en: 'Earlier case', te: 'ముందటి కేసు' },
+  historyThisCase: { en: 'This case', te: 'ఈ కేసు' },
+  followUpToCase: { en: 'Follow-up to case', te: 'దీనికి కొనసాగింపు కేసు' },
+  adviceDidNotWorkButton: { en: 'This did not work — ask the expert again', te: 'ఇది పని చేయలేదు — నిపుణుడిని మళ్లీ అడగండి' },
+  noneOption: { en: 'None', te: 'ఏదీ కాదు' },
+  noSamplesMatch: { en: 'No soil tests match these filters.', te: 'ఈ ఫిల్టర్లకు సరిపోయే మట్టి పరీక్షలు లేవు.' },
   searchPlaceholder: { en: 'Search…', te: 'వెతకండి…' },
   sortNewestFirst: { en: 'Newest first', te: 'కొత్తవి మొదట' },
   sortOldestFirst: { en: 'Oldest first', te: 'పాతవి మొదట' },
   sortPriorityFirst: { en: 'Priority first', te: 'ప్రాధాన్యత మొదట' },
   sortStatusAZ: { en: 'Status (A–Z)', te: 'స్థితి (A–Z)' },
   sortTitleAZ: { en: 'Title (A–Z)', te: 'శీర్షిక (A–Z)' },
+  sortLargestFirst: { en: 'Largest first', te: 'పెద్దవి మొదట' },
+  sortCityAZ: { en: 'Town (A–Z)', te: 'పట్టణం (A–Z)' },
+  sortDefaultFirst: { en: 'Default first', te: 'డిఫాల్ట్ మొదట' },
+  noMatchesNotice: { en: 'Nothing matches your search.', te: 'మీ శోధనకు ఏదీ సరిపోలలేదు.' },
   sortNameAZ: { en: 'Name (A–Z)', te: 'పేరు (A–Z)' },
   statusFilterLabel: { en: 'Status', te: 'స్థితి' },
   accountStatusFilterLabel: { en: 'Account status', te: 'ఖాతా స్థితి' },
@@ -625,6 +650,15 @@ export const strings = {
   viewCartButton: { en: 'View cart', te: 'కార్ట్‌ను చూడండి' },
   cartTitle: { en: 'Cart', te: 'కార్ట్' },
   cartEmptyNotice: { en: 'Your cart is empty.', te: 'మీ కార్ట్ ఖాళీగా ఉంది.' },
+  cartEmptyAfterOrder: {
+    en: 'Your cart is empty. If you have just placed an order, it is saved under My orders.',
+    te: 'మీ కార్ట్ ఖాళీగా ఉంది. మీరు ఇప్పుడే ఆర్డర్ చేసి ఉంటే, అది నా ఆర్డర్లలో భద్రంగా ఉంది.',
+  },
+  continueShoppingButton: { en: 'Continue shopping', te: 'షాపింగ్ కొనసాగించండి' },
+  viewMyOrdersButton: { en: 'View my orders', te: 'నా ఆర్డర్లు చూడండి' },
+  quantityLess: { en: 'One less', te: 'ఒకటి తగ్గించండి' },
+  quantityMore: { en: 'One more', te: 'ఒకటి పెంచండి' },
+  quantityMaxHint: { en: 'Only {n} in stock.', te: 'స్టాక్‌లో {n} మాత్రమే ఉన్నాయి.' },
   couldNotLoadCart: { en: 'Could not load your cart.', te: 'మీ కార్ట్‌ను లోడ్ చేయలేకపోయాము.' },
   removeButton: { en: 'Remove', te: 'తీసివేయండి' },
   removingItem: { en: 'Removing…', te: 'తీసివేస్తోంది…' },
@@ -633,10 +667,6 @@ export const strings = {
   checkoutTitle: { en: 'Checkout', te: 'చెక్అవుట్' },
   deliveryAddressField: { en: 'Delivery address', te: 'డెలివరీ చిరునామా' },
   paymentMethodLabel: { en: 'Payment method', te: 'చెల్లింపు విధానం' },
-  cashOnDeliveryNotice: {
-    en: 'Cash on Delivery only — online payment is not available yet.',
-    te: 'డెలివరీ సమయంలో నగదు మాత్రమే — ఆన్‌లైన్ చెల్లింపు ఇంకా అందుబాటులో లేదు.',
-  },
   placeOrderButton: { en: 'Place order', te: 'ఆర్డర్ చేయండి' },
   placingOrder: { en: 'Placing order…', te: 'ఆర్డర్ చేస్తోంది…' },
   couldNotCheckout: { en: 'Could not place this order.', te: 'ఈ ఆర్డర్‌ను చేయలేకపోయాము.' },
@@ -871,6 +901,10 @@ export const strings = {
   // Dispatch queue (SUPPORT_AGENT) + per-item status, shared with OrderDetailPage
   dispatchQueueTitle: { en: 'Dispatch queue', te: 'డిస్పాచ్ క్యూ' },
   dispatchStatusLabel: { en: 'Dispatch status', te: 'డిస్పాచ్ స్థితి' },
+  dispatchNotReadyHint: {
+    en: 'Cannot be sent yet — the order is cancelled or its UPI payment is not verified.',
+    te: 'ఇంకా పంపలేరు — ఆర్డర్ రద్దు చేయబడింది లేదా దాని UPI చెల్లింపు ధృవీకరించబడలేదు.',
+  },
   dispatchStatusPending: { en: 'Pending', te: 'పెండింగ్‌లో' },
   dispatchStatusSent: { en: 'Sent', te: 'పంపబడింది' },
   markSentButton: { en: 'Mark sent', te: 'పంపినట్లు గుర్తించండి' },
@@ -1238,6 +1272,38 @@ export const strings = {
   restockColSuggest: { en: 'Suggested to order', te: 'ఆర్డర్ చేయమని సూచన' },
   restockNoSales: { en: 'no recent sales', te: 'ఇటీవల అమ్మకాలు లేవు' },
   restockEnough: { en: 'enough already', te: 'ఇప్పటికే సరిపడా' },
+  historyHeading: { en: 'What has been said on this case', te: 'ఈ కేసులో ఇప్పటివరకు చెప్పినవి' },
+  historySubmitted: { en: 'Problem reported', te: 'సమస్య నివేదించబడింది' },
+  historyAssigned: { en: 'Given to an expert', te: 'నిపుణుడికి ఇవ్వబడింది' },
+  historyFollowUpAsked: { en: 'Expert asked the farmer', te: 'నిపుణుడు రైతును అడిగారు' },
+  historyFollowUpAnswered: { en: 'Farmer replied', te: 'రైతు బదులిచ్చారు' },
+  historyAnswered: { en: 'Expert’s advice', te: 'నిపుణుడి సలహా' },
+  historyDisputed: { en: 'Farmer disputed the advice — asked for another look', te: 'రైతు సలహాను వివాదాస్పదం చేశారు — మళ్ళీ చూడమని కోరారు' },
+  historyConfirmed: { en: 'Farmer confirmed it worked — case closed', te: 'రైతు అది పనిచేసిందని ధృవీకరించారు — కేసు మూసివేయబడింది' },
+  adviceForYourHint: {
+    en: 'Advice for the crops on your parcels, and advice from your own cases.',
+    te: 'మీ స్థలాలలోని పంటలకు సలహా, మీ స్వంత కేసుల నుండి సలహా.',
+  },
+  adviceNoParcelsHint: {
+    en: 'Add a parcel with its crops below and this shows advice for your own crops. Until then, here is the newest advice.',
+    te: 'కింద పంటలతో సహా ఒక స్థలాన్ని జోడిస్తే ఇది మీ స్వంత పంటలకు సలహాను చూపిస్తుంది. అప్పటి వరకు, తాజా సలహా ఇదిగో.',
+  },
+  adviceWhyYourCase: { en: 'From your case', te: 'మీ కేసు నుండి' },
+  adviceWhyYourCrop: { en: 'For your crop', te: 'మీ పంటకు' },
+  cropsPickLabel: { en: 'Main crops — tap to choose', te: 'ప్రధాన పంటలు — ఎంచుకోవడానికి తాకండి' },
+  cropAddOtherButton: { en: 'Add', te: 'జోడించండి' },
+  cropsRequired: { en: 'Choose at least one crop.', te: 'కనీసం ఒక పంటను ఎంచుకోండి.' },
+  savingParcel: { en: 'Saving…', te: 'సేవ్ చేస్తోంది…' },
+  parcelEditButton: { en: 'Edit parcel', te: 'స్థలాన్ని సవరించండి' },
+  parcelSoilHeading: { en: 'Soil tests for this parcel', te: 'ఈ స్థలానికి మట్టి పరీక్షలు' },
+  parcelNoSoilTests: { en: 'No soil test yet for this parcel.', te: 'ఈ స్థలానికి ఇంకా మట్టి పరీక్ష లేదు.' },
+  parcelRequestSoilTest: { en: 'Request a soil test for this parcel', te: 'ఈ స్థలానికి మట్టి పరీక్ష అభ్యర్థించండి' },
+  parcelAllSoilTests: { en: 'See all my soil tests', te: 'నా అన్ని మట్టి పరీక్షలు చూడండి' },
+  parcelDeleteButton: { en: 'Delete parcel', te: 'స్థలాన్ని తొలగించండి' },
+  parcelDeleteConfirm: {
+    en: 'Delete the parcel "{name}"? If it has cases or soil tests it is only hidden, so they stay safe.',
+    te: '"{name}" స్థలాన్ని తొలగించాలా? దానికి కేసులు లేదా నేల పరీక్షలు ఉంటే అది దాచబడుతుంది మాత్రమే, అవి భద్రంగా ఉంటాయి.',
+  },
   tourReplayButton: { en: 'Take the tour', te: 'టూర్ చూడండి' },
   tourLabel: { en: 'Guided tour', te: 'గైడెడ్ టూర్' },
   tourStepOf: { en: 'Step {n} of {total}', te: '{total} లో {n}వ దశ' },
@@ -1376,7 +1442,8 @@ export const strings = {
   stockTypeSet: { en: 'Stock-take correction', te: 'స్టాక్ లెక్క సవరణ' },
 } as const satisfies Record<string, Bilingual>;
 
-export type StringKey = keyof typeof strings;
+export type StringKey = keyof typeof stringsDef;
+export const strings: Record<StringKey, Bilingual> = stringsDef;
 
 // "We sent a 6-digit code to {mobile}." needs the mobile number interpolated —
 // kept as a function, outside the static dictionary, for that reason alone.
@@ -1489,6 +1556,20 @@ const ORDER_STATUS_KEYS: Record<string, StringKey> = {
 export function orderStatusLabel(status: string): Bilingual {
   const key = ORDER_STATUS_KEYS[status];
   return key ? strings[key] : { en: status, te: status };
+}
+
+// "3 of 5 items sent — the rest will follow", for an order that has been split into
+// shipments. Null when there is nothing worth saying (nothing sent yet, finished or cancelled).
+export function orderProgressNote(order: { status: string; items: { dispatchStatus: string }[] }): Bilingual | null {
+  if (order.status === 'CANCELLED' || order.status === 'DELIVERED' || order.status === 'PLACED') return null;
+  const total = order.items.length;
+  const sent = order.items.filter((i) => i.dispatchStatus === 'SENT').length;
+  if (total < 2 || sent === 0) return null;
+  if (sent === total) return { en: 'All items sent', te: 'అన్ని వస్తువులు పంపబడ్డాయి' };
+  return {
+    en: `Partly sent — ${sent} of ${total} items sent, the rest will follow`,
+    te: `కొంత పంపబడింది — ${total} వస్తువులలో ${sent} పంపబడ్డాయి, మిగిలినవి త్వరలో వస్తాయి`,
+  };
 }
 
 const MEDIA_KIND_KEYS: Record<string, StringKey> = {

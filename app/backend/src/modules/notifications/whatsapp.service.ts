@@ -24,6 +24,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 export const SENT_TYPES = [
   'order.confirmed',
   'order.shipped',
+  'order.items_sent',
   'order.delivered',
   'order.cancelled',
   'order.payment_verified',

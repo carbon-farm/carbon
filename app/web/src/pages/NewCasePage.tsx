@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { listFarms, type FarmLand } from '../api/farms';
+import { getCase } from '../api/cases';
 import { listCaseCategories, listCrops, type CaseCategory, type Crop } from '../api/configuration';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, caseCategoryLabel } from '../i18n/strings';
@@ -13,6 +14,7 @@ import { buildDescription, isNetworkFailure, sendCase } from '../lib/caseSend';
 import { clearDraft, draftKeyFor, isEmptyDraft, loadDraft, saveDraft, type CaseDraftFields } from '../lib/draftStore';
 
 const MAX_PHOTOS = 6;
+const OTHER_CROP = '__other__';
 const AUTOSAVE_MS = 700;
 
 interface Photo {
@@ -31,6 +33,10 @@ const photoFrom = (file: File): Photo => ({ id: `${file.name}-${file.size}-${Mat
 export function NewCasePage() {
   const { session, logout } = useAuth();
   const navigate = useNavigate();
+  // ?from=<caseId>: this report follows up an earlier case whose advice did not work.
+  const [searchParams] = useSearchParams();
+  const relatedCaseId = searchParams.get('from') ?? '';
+  const [relatedLabel, setRelatedLabel] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
@@ -46,6 +52,9 @@ export function NewCasePage() {
   const [farmLandId, setFarmLandId] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [cropId, setCropId] = useState('');
+  const [cropName, setCropName] = useState('');
+  // "Other crop" stays open while its box is emptied to retype
+  const [otherCrop, setOtherCrop] = useState(false);
   const [evidenceNotes, setEvidenceNotes] = useState('');
   const [requestPriority, setRequestPriority] = useState(false);
   const [savedCaseId, setSavedCaseId] = useState<string | null>(null);
@@ -84,6 +93,8 @@ export function NewCasePage() {
         setFarmLandId(d.fields.farmLandId);
         setCategoryId(d.fields.categoryId);
         setCropId(d.fields.cropId);
+        setCropName(d.fields.cropName ?? '');
+        setOtherCrop(!!d.fields.cropName?.trim());
         setDescription(d.fields.description);
         setEvidenceNotes(d.fields.evidenceNotes);
         setRequestPriority(d.fields.requestPriority);
@@ -98,12 +109,50 @@ export function NewCasePage() {
     };
   }, [draftKey]);
 
+  // Following up an earlier case: say which one, and start from its parcel, category and crop.
+  const prefilledFrom = useRef('');
+  useEffect(() => {
+    if (!ready || !session || !relatedCaseId || prefilledFrom.current === relatedCaseId) return;
+    prefilledFrom.current = relatedCaseId;
+    getCase(session.accessToken, relatedCaseId)
+      .then((c) => {
+        setRelatedLabel(c.caseNumber ?? c.id.slice(0, 8));
+        setFarmLandId((v) => v || c.farmLandId);
+        setCategoryId((v) => v || c.categoryId);
+        if (!cropId && !cropName) {
+          if (c.cropId) setCropId(c.cropId);
+          else if (c.cropName) {
+            setCropName(c.cropName);
+            setOtherCrop(true);
+          }
+        }
+      })
+      .catch(() => setRelatedLabel(null));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, session, relatedCaseId]);
+
+  // The crop choices: what this parcel grows first, then every crop we know, then "other".
+  const parcelCrops = useMemo(() => farms.find((f) => f.id === farmLandId)?.primaryCrops ?? [], [farms, farmLandId]);
+  const cropSelectValue = cropId || (cropName.trim() || otherCrop ? OTHER_CROP : '');
+  function pickParcelCrop(name: string) {
+    const known = crops.find((c) => c.name.trim().toLowerCase() === name.trim().toLowerCase());
+    if (known) {
+      setCropId(known.id);
+      setCropName('');
+      setOtherCrop(false);
+    } else {
+      setCropId('');
+      setCropName(name);
+      setOtherCrop(true);
+    }
+  }
+
   // Free the preview URLs when leaving.
   useEffect(() => () => photos.forEach((p) => URL.revokeObjectURL(p.url)), [photos]);
 
   const fields: CaseDraftFields = useMemo(
-    () => ({ farmLandId, categoryId, cropId, description, evidenceNotes, requestPriority, symptoms }),
-    [farmLandId, categoryId, cropId, description, evidenceNotes, requestPriority, symptoms],
+    () => ({ farmLandId, categoryId, cropId, cropName, relatedCaseId, description, evidenceNotes, requestPriority, symptoms }),
+    [farmLandId, categoryId, cropId, cropName, relatedCaseId, description, evidenceNotes, requestPriority, symptoms],
   );
 
   // Keep what is on the screen safe on the phone as it changes.
@@ -148,6 +197,8 @@ export function NewCasePage() {
     setFarmLandId('');
     setCategoryId('');
     setCropId('');
+    setCropName('');
+    setOtherCrop(false);
     setEvidenceNotes('');
     setRequestPriority(false);
     setRestored(false);
@@ -210,6 +261,11 @@ export function NewCasePage() {
         <Bi id="newCaseTitle" as="h1" />
       </div>
 
+      {relatedCaseId && (
+        <div className="payment-strip" role="status">
+          {strings.followUpOf.en.replace('{n}', relatedLabel ?? '…')} / {strings.followUpOf.te.replace('{n}', relatedLabel ?? '…')}
+        </div>
+      )}
       {error && <div className="error-banner">{error}</div>}
       {savedCaseId && error && (
         <Link to={`/cases/${savedCaseId}`} className="link-button">
@@ -364,17 +420,59 @@ export function NewCasePage() {
               </select>
             </label>
 
-            <label>
+            <div className="field-group">
               <Bi id="articleCropField" />
-              <select name="cropId" value={cropId} onChange={(e) => setCropId(e.target.value)}>
+              {parcelCrops.length > 0 && (
+                <div className="chip-row" role="group" aria-label={biInline('cropsOnParcel')}>
+                  <span className="hint">
+                    <Bi id="cropsOnParcel" />
+                  </span>
+                  {parcelCrops.map((name) => {
+                    const on = (cropId && crops.find((c) => c.id === cropId)?.name.toLowerCase() === name.trim().toLowerCase()) || (!cropId && cropName.trim().toLowerCase() === name.trim().toLowerCase());
+                    return (
+                      <button key={name} type="button" className={on ? 'chip-on' : 'secondary'} aria-pressed={!!on} onClick={() => pickParcelCrop(name)}>
+                        {name}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              <select
+                name="cropId"
+                aria-label={biInline('articleCropField')}
+                value={cropSelectValue}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === OTHER_CROP) {
+                    setCropId('');
+                    setOtherCrop(true);
+                  } else {
+                    setCropId(v);
+                    setCropName('');
+                    setOtherCrop(false);
+                  }
+                }}
+              >
                 <option value="">{biInline('selectPlaceholder')}</option>
                 {crops.map((crop) => (
                   <option key={crop.id} value={crop.id}>
                     {crop.name}
                   </option>
                 ))}
+                <option value={OTHER_CROP}>{biInline('cropOtherOption')}</option>
               </select>
-            </label>
+              {cropSelectValue === OTHER_CROP && (
+                <input
+                  type="text"
+                  name="cropName"
+                  maxLength={60}
+                  value={cropName}
+                  onChange={(e) => setCropName(e.target.value.replace(/^\s+/, ''))}
+                  placeholder={biInline('cropOtherPlaceholder')}
+                  aria-label={biInline('cropOtherPlaceholder')}
+                />
+              )}
+            </div>
 
             <label>
               <Bi id="evidenceNotesField" />

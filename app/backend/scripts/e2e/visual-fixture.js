@@ -34,7 +34,7 @@ const call = async (m, p, t, b) => {
   const token = (await call('POST', '/auth/login', null, { mobileNumber: '7000000011', password: 'Member12345' })).d.accessToken;
   const addr = (await call('POST', '/addresses', token, { recipientName: 'ZZ Demo', phone: '9876543210', line1: '12 Test Street', city: 'Guntur', state: 'Andhra Pradesh', pincode: '522001' })).d;
   await call('POST', '/marketplace/cart', token, { productId: mg.id, quantity: 2 });
-  await call('POST', '/marketplace/orders/checkout', token, { addressId: addr.id, paymentMethod: 'COD' });
+  await call('POST', '/marketplace/orders/checkout', token, { addressId: addr.id, paymentMethod: 'UPI' });
 
   const farm = (await prisma.farmLand.findFirst({ where: { farmerId: member.id } })) ?? (await prisma.farmLand.create({ data: { farmerId: member.id, label: 'North field', address: 'Guntur', landSizeAcres: 2, primaryCrops: ['Chilli'] } }));
   const cat = await prisma.caseCategoryMaster.findFirst();

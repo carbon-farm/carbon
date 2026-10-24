@@ -74,7 +74,7 @@ export class SeasonalService {
     const month = currentMonthIst(now);
     const [tips, farms] = await Promise.all([
       this.prisma.seasonalTip.findMany({ where: { isActive: true }, include: { crop: { select: { id: true, name: true } } } }),
-      this.prisma.farmLand.findMany({ where: { farmerId: userId }, select: { primaryCrops: true } }),
+      this.prisma.farmLand.findMany({ where: { farmerId: userId, archivedAt: null }, select: { primaryCrops: true } }),
     ]);
     const grown = new Set(farms.flatMap((f) => f.primaryCrops.map((c) => c.trim().toLowerCase())));
     return tips

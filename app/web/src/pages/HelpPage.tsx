@@ -6,6 +6,7 @@ import { roleHomePath } from '../auth/roleHome';
 import { startTour } from '../tour/Tour';
 import { sectionsFor } from '../help/content';
 import { faqsFor } from '../help/faq';
+import { StoreContact } from '../components/StoreContact';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 
@@ -53,6 +54,7 @@ export function HelpPage() {
         </button>
       </div>
       <BiValue value={strings.helpIntro} as="p" className="hint" />
+      <StoreContact />
 
       <div className="list-toolbar">
         <label>

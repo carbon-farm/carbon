@@ -10,6 +10,10 @@ export interface CaseDraftFields {
   farmLandId: string;
   categoryId: string;
   cropId: string;
+  // A crop typed in because it was not in the list; empty when cropId is set.
+  cropName?: string;
+  // The earlier case this one follows up ("that advice did not work").
+  relatedCaseId?: string;
   description: string;
   evidenceNotes: string;
   requestPriority: boolean;
@@ -89,5 +93,5 @@ export async function clearDraft(key: string): Promise<void> {
 
 // True when there is nothing worth keeping.
 export function isEmptyDraft(f: CaseDraftFields, photos: File[]): boolean {
-  return !f.description.trim() && !f.evidenceNotes.trim() && f.symptoms.length === 0 && photos.length === 0 && !f.farmLandId && !f.categoryId && !f.cropId;
+  return !f.description.trim() && !f.evidenceNotes.trim() && f.symptoms.length === 0 && photos.length === 0 && !f.farmLandId && !f.categoryId && !f.cropId && !f.cropName?.trim();
 }

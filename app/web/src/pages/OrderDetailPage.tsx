@@ -20,7 +20,7 @@ import { AddressBlock } from '../components/AddressBlock';
 import { UpiPaymentCard } from './hariharaa/UpiPaymentCard';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 import { Bi, BiValue } from '../i18n/Bi';
-import { strings, orderStatusLabel, dispatchStatusLabel, orderPaymentStatusLabel } from '../i18n/strings';
+import { strings, orderProgressNote, orderStatusLabel, dispatchStatusLabel, orderPaymentStatusLabel } from '../i18n/strings';
 
 export function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -43,6 +43,8 @@ export function OrderDetailPage() {
   // dispatch controls below but not the whole-order confirm/ship/deliver/
   // cancel buttons, which stay Administrator-only.
   const canDispatch = session?.role === 'ADMINISTRATOR' || session?.role === 'SUPPORT_AGENT';
+  // Items go out only on a live order whose payment is settled (a UPI order must be verified first).
+  const readyToSend = !!order && order.status !== 'CANCELLED' && (order.paymentMethod !== 'UPI' || order.paymentStatus === 'PAID');
   const backTo =
     session?.role === 'SUPPORT_AGENT'
       ? '/support/dispatch-queue'
@@ -193,6 +195,10 @@ export function OrderDetailPage() {
           <div className="status-line">
             {orderStatusLabel(order.status).en} / {orderStatusLabel(order.status).te}
           </div>
+          {(() => {
+            const note = orderProgressNote(order);
+            return note ? <p className="hint">{note.en} / {note.te}</p> : null;
+          })()}
           {isStaff && order.farmer && (
             <div>
               <div className="field-label"><Bi id="actorColumnLabel" /></div>
@@ -272,7 +278,10 @@ export function OrderDetailPage() {
                 <div className="status-line">
                   {itemStatus.en} / {itemStatus.te}
                 </div>
-                {canDispatch && (
+                {canDispatch && !readyToSend && item.dispatchStatus === 'PENDING' && (
+                  <BiValue value={strings.dispatchNotReadyHint} as="small" className="hint" />
+                )}
+                {canDispatch && (readyToSend || item.dispatchStatus === 'SENT') && (
                   <button
                     type="button"
                     className="secondary"

@@ -10,6 +10,7 @@ export interface Article {
   title: string;
   cropId: string | null;
   crop: { id: string; name: string } | null;
+  cropName: string | null;
   categoryId: string | null;
   category: { id: string; name: string } | null;
   symptoms: string | null;
@@ -40,6 +41,18 @@ export function listPendingArticles(token: string) {
 
 export function listPublishedArticles(token: string, categoryId?: string) {
   return apiRequest<Article[]>(`/knowledge/published${categoryId ? `?categoryId=${categoryId}` : ''}`, { token });
+}
+
+export type AdviceReason = 'YOUR_CASE' | 'YOUR_CROP' | 'LATEST';
+
+export interface ForMeResult {
+  hasParcels: boolean;
+  items: (Article & { why: AdviceReason })[];
+}
+
+// The dashboard's "Recent advice": advice for this farmer's own cases and crops.
+export function getAdviceForMe(token: string) {
+  return apiRequest<ForMeResult>('/knowledge/for-me', { token });
 }
 
 export function getArticle(token: string, id: string) {

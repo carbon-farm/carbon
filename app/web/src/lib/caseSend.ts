@@ -39,6 +39,8 @@ export async function sendCase(token: string, fields: CaseDraftFields, photos: F
     farmLandId: fields.farmLandId,
     categoryId: fields.categoryId,
     cropId: fields.cropId || undefined,
+    cropName: !fields.cropId && fields.cropName?.trim() ? fields.cropName.trim() : undefined,
+    relatedCaseId: fields.relatedCaseId || undefined,
     problemDescription: buildDescription(fields.symptoms, fields.description),
     evidenceNotes: fields.evidenceNotes || undefined,
     requestPriority: fields.requestPriority,

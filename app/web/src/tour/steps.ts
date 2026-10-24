@@ -192,7 +192,7 @@ export const TOURS: Record<Audience, TourStep[]> = {
 
   SUPPORT_AGENT: [
     { en: 'Welcome! This tour shows how to dispatch orders.', te: 'స్వాగతం! ఆర్డర్లను ఎలా పంపాలో ఈ టూర్ చూపిస్తుంది.' },
-    { target: '/support/dispatch-queue', en: 'The dispatch queue: orders ready to pack (Cash on Delivery, or UPI already verified) with the receiver’s city, PIN and phone. Open one and mark each item Sent or Pending — if some stock is short, send what you have.', te: 'డిస్పాచ్ క్యూ: ప్యాక్ చేయడానికి సిద్ధమైన ఆర్డర్లు (క్యాష్ ఆన్ డెలివరీ, లేదా ఇప్పటికే ధృవీకరించిన UPI), స్వీకర్త నగరం, పిన్, ఫోన్‌తో. ఒకదాన్ని తెరిచి ప్రతి వస్తువును పంపబడింది లేదా పెండింగ్ అని గుర్తించండి — కొంత స్టాక్ తక్కువైతే, ఉన్నది పంపండి.' },
+    { target: '/support/dispatch-queue', en: 'The dispatch queue: orders ready to pack (UPI already verified, or an older Cash on Delivery order) with the receiver’s city, PIN and phone. Open one and mark each item Sent or Pending — if some stock is short, send what you have.', te: 'డిస్పాచ్ క్యూ: ప్యాక్ చేయడానికి సిద్ధమైన ఆర్డర్లు (క్యాష్ ఆన్ డెలివరీ, లేదా ఇప్పటికే ధృవీకరించిన UPI), స్వీకర్త నగరం, పిన్, ఫోన్‌తో. ఒకదాన్ని తెరిచి ప్రతి వస్తువును పంపబడింది లేదా పెండింగ్ అని గుర్తించండి — కొంత స్టాక్ తక్కువైతే, ఉన్నది పంపండి.' },
     BELL,
     CHAT,
     HELP,

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { createSample, listMySamples, type SoilSample } from '../api/soilLab';
@@ -10,13 +10,19 @@ import { strings, sampleStatusLabel } from '../i18n/strings';
 
 export function SoilSamplesPage() {
   const { session, logout } = useAuth();
+  // ?parcel=<id> comes from "Request soil test" on a parcel: open the form with it chosen.
+  const [searchParams] = useSearchParams();
+  const presetParcel = searchParams.get('parcel') ?? '';
+  const [statusFilter, setStatusFilter] = useState('');
+  const [parcelFilter, setParcelFilter] = useState('');
+  const [sortMode, setSortMode] = useState<'newest' | 'oldest'>('newest');
   const [samples, setSamples] = useState<SoilSample[]>([]);
   const [farms, setFarms] = useState<FarmLand[]>([]);
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [farmLandId, setFarmLandId] = useState('');
+  const [showAddForm, setShowAddForm] = useState(!!presetParcel);
+  const [farmLandId, setFarmLandId] = useState(presetParcel);
   const [caseId, setCaseId] = useState('');
   const [videoConfirmed, setVideoConfirmed] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -61,6 +67,14 @@ export function SoilSamplesPage() {
     }
   }
 
+  const visible = useMemo(() => {
+    let rows = samples;
+    if (statusFilter) rows = rows.filter((s) => s.status === statusFilter);
+    if (parcelFilter) rows = rows.filter((s) => s.farmLandId === parcelFilter);
+    return [...rows].sort((a, b) => (sortMode === 'newest' ? b.createdAt.localeCompare(a.createdAt) : a.createdAt.localeCompare(b.createdAt)));
+  }, [samples, statusFilter, parcelFilter, sortMode]);
+  const statuses = useMemo(() => Array.from(new Set(samples.map((s) => s.status))), [samples]);
+
   return (
     <>
       <div className="top-bar">
@@ -94,7 +108,7 @@ export function SoilSamplesPage() {
             <label>
               <Bi id="linkToCaseField" />
               <select value={caseId} onChange={(e) => setCaseId(e.target.value)}>
-                <option value="">{biInline('allOption')}</option>
+                <option value="">{biInline('noneOption')}</option>
                 {cases.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.caseNumber ?? c.id.slice(0, 8)}
@@ -113,13 +127,52 @@ export function SoilSamplesPage() {
         </div>
       )}
 
+      {!loading && samples.length > 0 && (
+        <div className="list-toolbar">
+          <label>
+            <Bi id="statusFilterLabel" />
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="">{biInline('allOption')}</option>
+              {statuses.map((s) => {
+                const label = sampleStatusLabel(s);
+                return (
+                  <option key={s} value={s}>
+                    {label.en} / {label.te}
+                  </option>
+                );
+              })}
+            </select>
+          </label>
+          <label>
+            <Bi id="parcelLabel" />
+            <select value={parcelFilter} onChange={(e) => setParcelFilter(e.target.value)}>
+              <option value="">{biInline('allOption')}</option>
+              {Array.from(new Map(samples.map((s) => [s.farmLandId, s.farmLand.label])).entries()).map(([id, label]) => (
+                <option key={id} value={id}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <Bi id="sortByLabel" />
+            <select value={sortMode} onChange={(e) => setSortMode(e.target.value as 'newest' | 'oldest')}>
+              <option value="newest">{biInline('sortNewestFirst')}</option>
+              <option value="oldest">{biInline('sortOldestFirst')}</option>
+            </select>
+          </label>
+        </div>
+      )}
+
       {loading ? (
         <BiValue value={strings.loading} as="p" className="hint" />
       ) : samples.length === 0 ? (
         <BiValue value={strings.noSamplesYet} as="p" className="hint" />
+      ) : visible.length === 0 ? (
+        <BiValue value={strings.noSamplesMatch} as="p" className="hint" />
       ) : (
         <div className="card">
-          {samples.map((s) => {
+          {visible.map((s) => {
             const status = sampleStatusLabel(s.status);
             return (
               <Link to={`/soil-samples/${s.id}`} key={s.id} className="case-item">

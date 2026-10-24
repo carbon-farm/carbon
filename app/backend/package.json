@@ -16,7 +16,9 @@
     "admin:reset-password": "ts-node prisma/reset-password.ts",
     "cleanup:test-data": "ts-node prisma/cleanup-test-data.ts",
     "e2e:security": "node scripts/e2e/security.e2e.js",
-    "e2e:features": "node scripts/e2e/features.e2e.js"
+    "e2e:features": "node scripts/e2e/features.e2e.js",
+    "e2e:review": "node scripts/e2e/review-fixes.e2e.js",
+    "e2e:rev1": "node scripts/e2e/rev1.e2e.js"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.0",

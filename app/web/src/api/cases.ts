@@ -24,6 +24,11 @@ export interface Case {
   category: { id: string; name: string };
   cropId: string | null;
   crop: { id: string; name: string } | null;
+  // A crop typed by the farmer because it was not in the list (used when cropId is empty).
+  cropName: string | null;
+  // Set when this case is a follow-up: "the earlier advice did not work".
+  relatedCaseId: string | null;
+  relatedCase?: { id: string; caseNumber: string | null } | null;
   problemDescription: string;
   evidenceNotes: string | null;
   evidenceMediaUrls: string[];
@@ -54,6 +59,22 @@ export function listQueueCases(token: string) {
   return apiRequest<Case[]>('/cases/queue', { token });
 }
 
+export interface CaseEvent {
+  id: string;
+  caseId: string;
+  caseNumber: string | null;
+  kind: 'SUBMITTED' | 'ASSIGNED' | 'FOLLOW_UP_ASKED' | 'FOLLOW_UP_ANSWERED' | 'ANSWERED' | 'DISPUTED' | 'CONFIRMED';
+  text: string | null;
+  createdAt: string;
+  actorName: string | null;
+  actorRole: string | null;
+}
+
+// The conversation on a case, oldest first (what was asked, answered, disputed).
+export function getCaseHistory(token: string, id: string) {
+  return apiRequest<CaseEvent[]>(`/cases/${id}/history`, { token });
+}
+
 export function getCase(token: string, id: string) {
   return apiRequest<Case>(`/cases/${id}`, { token });
 }
@@ -64,6 +85,8 @@ export function createCaseDraft(
     farmLandId: string;
     categoryId: string;
     cropId?: string;
+    cropName?: string;
+    relatedCaseId?: string;
     problemDescription: string;
     evidenceNotes?: string;
     requestPriority?: boolean;

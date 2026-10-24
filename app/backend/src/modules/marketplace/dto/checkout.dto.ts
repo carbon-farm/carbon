@@ -1,6 +1,8 @@
 import { IsIn, IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
 
-export const PAYMENT_METHODS = ['COD', 'UPI'] as const;
+// Cash on Delivery was switched off (2026-10, owner decision): new orders are paid by UPI and
+// verified before packing. Older COD orders still exist and are handled as before.
+export const PAYMENT_METHODS = ['UPI'] as const;
 export type CheckoutPaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 export class CheckoutDto {

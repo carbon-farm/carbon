@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
+import { StoreContact } from '../components/StoreContact';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
@@ -43,10 +44,12 @@ export function ForgotPasswordPage() {
         <div className="card">
           <Bi id="resetRequestSentTitle" as="h2" />
           <BiValue value={strings.resetRequestSentBody} as="p" />
+          <StoreContact />
         </div>
       ) : (
         <>
           <BiValue value={strings.forgotIntro} as="p" className="hint" />
+          <StoreContact />
           {error && <div className="error-banner">{error}</div>}
           <form onSubmit={handleSubmit}>
             <label>

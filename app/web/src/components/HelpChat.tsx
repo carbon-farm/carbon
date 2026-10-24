@@ -6,6 +6,7 @@ import { audienceFor } from '../tour/steps';
 import { startTour } from '../tour/Tour';
 import { FAQS, type Faq } from '../help/faq';
 import { answer, popularFor } from '../help/faqMatch';
+import { StoreContact } from './StoreContact';
 import { Bi, biInline } from '../i18n/Bi';
 import { track } from '../telemetry/track';
 
@@ -211,6 +212,7 @@ export function HelpChat() {
                     <small className="chat-note">
                       <Bi id="chatStillStuck" />
                     </small>
+                    <StoreContact className="chat-note" />
                   </div>
                 );
               }

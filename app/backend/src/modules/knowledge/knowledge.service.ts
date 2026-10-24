@@ -48,7 +48,8 @@ export class KnowledgeService {
     const crop = closedCase.cropId
       ? await this.prisma.cropMaster.findUnique({ where: { id: closedCase.cropId } })
       : null;
-    const title = [crop?.name, category?.name].filter(Boolean).join(' — ') || `Case ${closedCase.caseNumber ?? closedCase.id}`;
+    const cropLabel = crop?.name ?? closedCase.cropName ?? undefined;
+    const title = [cropLabel, category?.name].filter(Boolean).join(' — ') || `Case ${closedCase.caseNumber ?? closedCase.id}`;
 
     const created = await this.prisma.knowledgeArticle.create({
       data: {
@@ -56,6 +57,7 @@ export class KnowledgeService {
         authorId: closedCase.assignedExpertId,
         title,
         cropId: closedCase.cropId,
+        cropName: closedCase.cropId ? null : closedCase.cropName,
         categoryId: closedCase.categoryId,
         problemDescription: closedCase.problemDescription,
         expertSolution: closedCase.resolutionNotes ?? '',
@@ -379,6 +381,40 @@ export class KnowledgeService {
       orderBy: { publishedAt: 'desc' },
       include: ARTICLE_INCLUDE,
     });
+  }
+
+  // "Recent advice" for one farmer: advice that matters to THEM, whether or not they ever asked —
+  // first the articles made from their own cases, then advice for the crops they grow on their
+  // parcels, newest first. With no parcels there is nothing to match, so the newest advice is shown
+  // and the screen says how to get advice for their own crops.
+  async forFarmer(userId: string, limit = 3) {
+    const [parcels, published] = await Promise.all([
+      this.prisma.farmLand.findMany({ where: { farmerId: userId, archivedAt: null }, select: { primaryCrops: true } }),
+      this.prisma.knowledgeArticle.findMany({
+        where: { status: KnowledgeArticleStatus.PUBLISHED },
+        orderBy: { publishedAt: 'desc' },
+        take: 200,
+        include: { ...ARTICLE_INCLUDE, sourceCase: { select: { farmerId: true } } },
+      }),
+    ]);
+    const grown = new Set(parcels.flatMap((p) => p.primaryCrops.map((c) => c.trim().toLowerCase())).filter(Boolean));
+    const reason = (a: (typeof published)[number]): 'YOUR_CASE' | 'YOUR_CROP' | null =>
+      a.sourceCase?.farmerId === userId
+        ? 'YOUR_CASE'
+        : (a.crop?.name ?? a.cropName) && grown.has((a.crop?.name ?? a.cropName)!.trim().toLowerCase())
+          ? 'YOUR_CROP'
+          : null;
+    const matched = published.map((a) => ({ a, why: reason(a) })).filter((x) => x.why !== null);
+    matched.sort((x, y) => Number(y.why === 'YOUR_CASE') - Number(x.why === 'YOUR_CASE'));
+    const pick = matched.slice(0, limit);
+    const fallback = grown.size === 0 && pick.length === 0 ? published.slice(0, limit).map((a) => ({ a, why: 'LATEST' as const })) : [];
+    return {
+      hasParcels: parcels.length > 0,
+      items: [...pick, ...fallback].map(({ a, why }) => {
+        const { sourceCase: _sc, ...article } = a;
+        return { ...article, why };
+      }),
+    };
   }
 
   async getById(articleId: string, requester: { userId: string; role: Role }) {

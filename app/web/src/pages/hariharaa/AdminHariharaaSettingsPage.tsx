@@ -49,6 +49,7 @@ export function AdminHariharaaSettingsPage() {
     const payeeName = String(formData.get('payeeName') ?? '').trim();
     const upiAid = String(formData.get('upiAid') ?? '').trim();
     const vendorProfileId = String(formData.get('vendorProfileId') ?? '').trim();
+    const contactPhone = String(formData.get('contactPhone') ?? '').trim();
     const newPrimary = primary.trim();
 
     // Changing where the money goes deserves a second look.
@@ -68,6 +69,7 @@ export function AdminHariharaaSettingsPage() {
         secondaryUpiId: spare.trim(), // empty removes it
         upiAid, // empty removes it
         vendorProfileId, // empty removes it
+        contactPhone, // empty removes it
         ...(payeeName ? { payeeName } : {}),
       });
       setSettings(updated);
@@ -162,6 +164,13 @@ export function AdminHariharaaSettingsPage() {
             <input name="upiAid" defaultValue={settings?.upiAid ?? ''} />
           </label>
           <BiValue value={strings.upiAidWarning} as="p" className="hint" />
+          <label>
+            <Bi id="storeContactField" />
+            <div className="hint">
+              <Bi id="storeContactHint" />
+            </div>
+            <input name="contactPhone" type="tel" inputMode="tel" defaultValue={settings?.contactPhone ?? ''} placeholder="+91 98765 43210" />
+          </label>
           <label>
             <Bi id="hariharaaPayeeNameField" />
             <input name="payeeName" defaultValue={settings?.payeeName ?? ''} />
