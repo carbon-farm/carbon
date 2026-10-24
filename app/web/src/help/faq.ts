@@ -492,6 +492,19 @@ export const FAQS: Faq[] = [
     keywords: ['speak', 'voice', 'microphone', 'mic', 'talk', 'say', 'voice typing', 'dictate', 'మాట్లాడ', 'మైక్రోఫోన్', 'వాయిస్', 'matladali', 'matladochha'],
   },
   {
+    id: 'offline-case',
+    audience: MEMBER,
+    q: { en: 'What if I have no signal when I report a problem?', te: 'సమస్యను నివేదించేటప్పుడు సిగ్నల్ లేకపోతే ఏమి చేయాలి?' },
+    a: [
+      {
+        en: 'Keep going. Everything you take or write on the New case screen is kept on your phone as you go, so closing the app or losing signal loses nothing — open New case again and it picks up where you left off. If you press Send with no connection, the case waits on your phone, a strip says so, and it is sent by itself the moment you are back online (on any screen). Photos are kept too.',
+        te: 'కొనసాగించండి. కొత్త కేసు స్క్రీన్‌లో మీరు తీసినవి, రాసినవన్నీ మీరు వెళ్తున్న కొద్దీ మీ ఫోన్‌లో భద్రపరచబడతాయి, కాబట్టి యాప్‌ను మూసివేసినా లేదా సిగ్నల్ పోయినా ఏదీ పోదు — కొత్త కేసును మళ్ళీ తెరిస్తే మీరు ఆపిన చోటి నుండి కొనసాగుతుంది. కనెక్షన్ లేకుండా పంపండి తాకితే, కేసు మీ ఫోన్‌లో వేచి ఉంటుంది, ఒక స్ట్రిప్ అదే చెబుతుంది, మీరు మళ్ళీ ఆన్‌లైన్‌లోకి రాగానే (ఏ స్క్రీన్‌లో ఉన్నా) అది దానంతట అదే పంపబడుతుంది. ఫోటోలు కూడా భద్రంగా ఉంటాయి.',
+      },
+    ],
+    keywords: ['no signal', 'no network', 'no internet', 'offline', 'no connection', 'poor signal', 'weak signal', 'lost signal', 'saved on phone', 'draft', 'సిగ్నల్ లేకపోతే', 'సిగ్నల్ లేదు', 'ఇంటర్నెట్ లేదు', 'కనెక్షన్ లేదు', 'ఆఫ్‌లైన్'],
+    link: { to: '/cases/new', label: { en: 'Start a new case', te: 'కొత్త కేసు ప్రారంభించండి' } },
+  },
+  {
     id: 'symptom-chips',
     audience: MEMBER,
     q: { en: 'I cannot type well — how else can I describe the problem?', te: 'నేను బాగా టైప్ చేయలేను — సమస్యను ఇంకెలా వివరించాలి?' },
@@ -564,6 +577,18 @@ export const FAQS: Faq[] = [
       },
     ],
     keywords: ['today', 'home', 'summary', 'dashboard', 'days left', 'ఈ రోజు', 'సారాంశం'],
+  },
+  {
+    id: 'seasonal-tips',
+    audience: MEMBER,
+    q: { en: 'What is “This month on your farm”?', te: '“ఈ నెల మీ పొలంలో” అంటే ఏమిటి?' },
+    a: [
+      {
+        en: 'Short tips for this time of year, shown under “Today” at the top of the shop. Some are for everyone; others appear only if you have listed that crop on one of your farms (Dashboard → your farms). They come from the store’s experts and change with the months.',
+        te: 'సంవత్సరంలో ఈ సమయానికి సంబంధించిన చిన్న చిట్కాలు, షాప్ పైన “ఈ రోజు” కింద కనిపిస్తాయి. కొన్ని అందరికీ; మరికొన్ని మీ పొలాలలో ఒకదానిలో ఆ పంటను నమోదు చేసి ఉంటేనే కనిపిస్తాయి (డాష్‌బోర్డ్ → మీ పొలాలు). అవి స్టోర్ నిపుణుల నుండి వస్తాయి, నెలలతో మారతాయి.',
+      },
+    ],
+    keywords: ['this month', 'seasonal', 'season', 'tips', 'tip', 'what to do this month', 'seasonal tips', 'ఈ నెల', 'సీజన్', 'చిట్కా', 'చిట్కాలు'],
   },
   {
     id: 'whatsapp',
@@ -803,16 +828,42 @@ export const FAQS: Faq[] = [
     link: { to: '/admin/usage', label: { en: 'Open Usage', te: 'వినియోగం తెరవండి' } },
   },
   {
+    id: 'admin-seasonal',
+    audience: ['ADMINISTRATOR', 'MODERATOR'],
+    q: { en: 'How do I add a seasonal tip for members?', te: 'సభ్యుల కోసం సీజన్ చిట్కాను ఎలా జోడించాలి?' },
+    a: [
+      {
+        en: 'Content → Seasonal tips → Add a tip. Write a short title and message in English and in Telugu, choose the first and last month (a season may run over the new year, for example November to February), and optionally a crop so that only members who grow it see the tip. Members with access see up to three tips in season, crop-specific ones first, on their Today panel. Switch a tip off to hide it without deleting it. The list sorts, searches and filters by season, status and crop.',
+        te: 'కంటెంట్ → సీజన్ చిట్కాలు → చిట్కా జోడించండి. ఇంగ్లీష్‌లో, తెలుగులో చిన్న శీర్షిక, సందేశం రాయండి, మొదటి, చివరి నెలను ఎంచుకోండి (సీజన్ కొత్త సంవత్సరం దాటి ఉండవచ్చు, ఉదాహరణకు నవంబర్ నుండి ఫిబ్రవరి), కావాలంటే పంటను కూడా ఎంచుకోండి — అప్పుడు ఆ పంట పండించే సభ్యులకు మాత్రమే కనిపిస్తుంది. యాక్సెస్ ఉన్న సభ్యులు సీజన్‌లో ఉన్న మూడు చిట్కాల వరకు (పంట-నిర్దిష్టమైనవి ముందు) తమ ఈ రోజు ప్యానెల్‌లో చూస్తారు. తొలగించకుండా దాచడానికి చిట్కాను ఆఫ్ చేయండి. జాబితా సీజన్, స్థితి, పంట ద్వారా క్రమబద్ధీకరించి, శోధించి, ఫిల్టర్ చేయవచ్చు.',
+      },
+    ],
+    keywords: ['seasonal tip', 'add tip', 'add a tip', 'add seasonal', 'new tip', 'tips for members', 'సీజన్ చిట్కా', 'చిట్కా జోడ'],
+    link: { to: '/admin/seasonal', label: { en: 'Seasonal tips', te: 'సీజన్ చిట్కాలు' } },
+  },
+  {
+    id: 'admin-restock',
+    audience: ADMIN,
+    q: { en: 'How much should I reorder?', te: 'ఎంత తిరిగి ఆర్డర్ చేయాలి?' },
+    a: [
+      {
+        en: 'Manage products shows “Running low — what to restock” at the top whenever something is at or below its warning level. For each product it lists what it sold in the last 30 days (cancelled orders do not count) and a suggested quantity: enough for the next 30 days at that rate, plus a quarter extra, minus what is in stock. A product that has not sold lately gets no suggestion rather than a guess. Click a product to add stock when it arrives.',
+        te: 'ఏదైనా దాని హెచ్చరిక స్థాయి లేదా అంతకంటే తక్కువగా ఉన్నప్పుడల్లా ఉత్పత్తులను నిర్వహించండి పైన “తక్కువగా ఉన్నవి — ఏవి తిరిగి తెప్పించాలి” చూపిస్తుంది. ప్రతి ఉత్పత్తికి గత 30 రోజుల్లో అమ్మినవి (రద్దు చేసిన ఆర్డర్లు లెక్కలోకి రావు), సూచించిన పరిమాణం చూపిస్తుంది: ఆ రేటుతో తర్వాతి 30 రోజులకు సరిపడా, పావు వంతు అదనం, స్టాక్‌లో ఉన్నది తీసివేసి. ఇటీవల అమ్ముడుపోని ఉత్పత్తికి ఊహ కాకుండా ఏ సూచనా ఇవ్వదు. స్టాక్ వచ్చినప్పుడు జోడించడానికి ఉత్పత్తిని తాకండి.',
+      },
+    ],
+    keywords: ['reorder', 're-order', 'restock', 'how much to order', 'how much should i order', 'order from supplier', 'purchase order', 'what to restock', 'తిరిగి ఆర్డర్', 'ఎంత ఆర్డర్', 'రీస్టాక్'],
+    link: { to: '/marketplace/manage/products', label: { en: 'Manage products', te: 'ఉత్పత్తులను నిర్వహించండి' } },
+  },
+  {
     id: 'admin-low-stock',
     audience: ['ADMINISTRATOR', 'VENDOR'],
     q: { en: 'How will I know when stock is running low?', te: 'స్టాక్ తక్కువైనప్పుడు నాకు ఎలా తెలుస్తుంది?' },
     a: [
       {
-        en: 'When a sale takes a product down to 5 or fewer, the administrators (and the selling vendor) get a bell notification “Running low on stock”, and another when it reaches zero. Each is sent once, when the line is crossed. In Manage products use the Stock filter (Low or Out of stock) to see them all. Members who asked to be told when it returns are notified the moment you add stock.',
-        te: 'అమ్మకం వల్ల ఉత్పత్తి 5 లేదా అంతకంటే తక్కువకు వచ్చినప్పుడు, అడ్మినిస్ట్రేటర్లకు (మరియు అమ్మే విక్రేతకు) బెల్ నోటిఫికేషన్ “స్టాక్ తక్కువగా ఉంది” వస్తుంది, సున్నాకు చేరినప్పుడు మరొకటి. ప్రతి ఒక్కటి ఆ గీతను దాటినప్పుడు ఒక్కసారి పంపబడుతుంది. ఉత్పత్తులను నిర్వహించండిలో స్టాక్ ఫిల్టర్ (తక్కువ లేదా స్టాక్ లేదు) వాడి అన్నింటినీ చూడండి. తిరిగి వచ్చినప్పుడు చెప్పమని అడిగిన సభ్యులకు మీరు స్టాక్ జోడించిన క్షణంలోనే తెలియజేయబడుతుంది.',
+        en: 'When a sale takes a product down to its warning level, the administrators (and the selling vendor) get a bell notification “Running low on stock”, and another when it reaches zero. Each is sent once, when the line is crossed. The level is 5 unless you set one: on a product’s create or edit screen, “Warn me when stock is at or below” (put 0 to be warned only when it is all gone; empty goes back to 5). In Manage products use the Stock filter (Low or Out of stock) to see them all. Members who asked to be told when it returns are notified the moment you add stock.',
+        te: 'అమ్మకం వల్ల ఉత్పత్తి దాని హెచ్చరిక స్థాయికి వచ్చినప్పుడు, అడ్మినిస్ట్రేటర్లకు (మరియు అమ్మే విక్రేతకు) బెల్ నోటిఫికేషన్ “స్టాక్ తక్కువగా ఉంది” వస్తుంది, సున్నాకు చేరినప్పుడు మరొకటి. ప్రతి ఒక్కటి ఆ గీతను దాటినప్పుడు ఒక్కసారి పంపబడుతుంది. మీరు సెట్ చేయకపోతే స్థాయి 5: ఉత్పత్తి సృష్టించే లేదా సవరించే స్క్రీన్‌లో “స్టాక్ ఇంత లేదా తక్కువకు వచ్చినప్పుడు నాకు చెప్పండి” (పూర్తిగా అయిపోయినప్పుడు మాత్రమే చెప్పాలంటే 0 పెట్టండి; ఖాళీ చేస్తే 5 కు తిరిగి వెళ్తుంది). ఉత్పత్తులను నిర్వహించండిలో స్టాక్ ఫిల్టర్ (తక్కువ లేదా స్టాక్ లేదు) వాడి అన్నింటినీ చూడండి. తిరిగి వచ్చినప్పుడు చెప్పమని అడిగిన సభ్యులకు మీరు స్టాక్ జోడించిన క్షణంలోనే తెలియజేయబడుతుంది.',
       },
     ],
-    keywords: ['low stock', 'running low', 'stock alert', 'stock low', 'out of stock alert', 'reorder level', 'స్టాక్ తక్కువ', 'స్టాక్ అలర్ట్'],
+    keywords: ['low stock', 'running low', 'stock alert', 'stock low', 'out of stock alert', 'reorder level', 'warning level', 'warn me when stock', 'స్టాక్ తక్కువ', 'స్టాక్ అలర్ట్'],
     link: { to: '/marketplace/manage/products', label: { en: 'Manage products', te: 'ఉత్పత్తులను నిర్వహించండి' } },
   },
 

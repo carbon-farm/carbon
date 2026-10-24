@@ -117,6 +117,70 @@ const mobile = `79${RUN}${Math.floor(Math.random() * 90 + 10)}`.slice(0, 10);
   ok('a non-boolean is refused', (await call('PATCH', '/users/me/preferences', M, { whatsappOptIn: 'yes' })).s === 400);
   ok('unknown fields are refused', (await call('PATCH', '/users/me/preferences', M, { whatsappOptIn: true, role: 'ADMINISTRATOR' })).s === 400);
 
+  console.log('== 6b. a warning level of its own for each product');
+  const own = (await call('POST', '/marketplace/products', admin, { name: `ZZ Feat ${RUN} Own Level`, description: 'A product with its own warning level', unit: 'per bag', price: 50, stockQuantity: 25, lowStockAt: 20 })).d;
+  ok('created with its own level (20)', own.lowStockAt === 20);
+  await buy(own.id, 3); // 25 -> 22: still above 20
+  ok('no alert while above its level', !(await adminNotes()).some((n) => n.type === 'stock.low' && /Own Level/.test(n.body)));
+  await buy(own.id, 3); // 22 -> 19: crosses 20
+  ok('alert as soon as it reaches its own level (19 left)', (await adminNotes()).some((n) => n.type === 'stock.low' && /Own Level/.test(n.body) && /only 19 left/.test(n.body)));
+  const zero = (await call('POST', '/marketplace/products', admin, { name: `ZZ Feat ${RUN} Zero Level`, description: 'Only warn me when it is all gone', unit: 'per bag', price: 50, stockQuantity: 8, lowStockAt: 0 })).d;
+  await buy(zero.id, 6); // 8 -> 2: below the shop default, but this product only warns at zero
+  ok('level 0 means no low warning above zero', !(await adminNotes()).some((n) => n.type === 'stock.low' && /Zero Level/.test(n.body)));
+  await buy(zero.id, 2); // -> 0
+  ok('...but it does warn when it is gone', (await adminNotes()).some((n) => n.type === 'stock.out' && /Zero Level/.test(n.body)));
+  const lowList2 = (await call('GET', '/marketplace/alerts/low-stock', admin)).d;
+  ok('the low-stock list respects each product\'s level', lowList2.some((p) => p.id === own.id) && lowList2.some((p) => p.id === zero.id));
+  const reset = await call('PATCH', `/marketplace/products/${own.id}`, admin, { lowStockAt: null });
+  ok('an empty level puts a product back on the shop default', reset.s === 200 && reset.d.lowStockAt === null);
+  ok('a negative level is refused', (await call('PATCH', `/marketplace/products/${own.id}`, admin, { lowStockAt: -1 })).s === 400);
+  ok('a fractional level is refused', (await call('PATCH', `/marketplace/products/${own.id}`, admin, { lowStockAt: 2.5 })).s === 400);
+
+  console.log('== 6c. restock suggestions');
+  const lowRows = (await call('GET', '/marketplace/alerts/low-stock', admin)).d;
+  const neemRow = lowRows.find((r) => r.id === zero.id);
+  ok('every row carries last-30-day sales and a suggestion field', lowRows.every((r) => typeof r.soldLast30Days === 'number' && 'suggestedReorder' in r));
+  ok(`the product that just sold out shows its sales (${neemRow?.soldLast30Days}) and a restock number (${neemRow?.suggestedReorder})`, neemRow && neemRow.soldLast30Days === 8 && neemRow.suggestedReorder === 10 + 0);
+  await call('PATCH', `/marketplace/products/${own.id}`, admin, { lowStockAt: 25 }); // so it is on the low list again
+  const cancelledSale = await buy(own.id, 1);
+  await call('POST', `/marketplace/orders/${cancelledSale.d.id}/cancel`, admin);
+  const ownRow = (await call('GET', '/marketplace/alerts/low-stock', admin)).d.find((r) => r.id === own.id);
+  ok('a cancelled order does not count as a sale', ownRow && ownRow.soldLast30Days === 6);
+
+  console.log('== 6d. seasonal tips');
+  const month = new Date(Date.now() + 5.5 * 3600_000).getUTCMonth() + 1;
+  const m = (n) => ((n - 1 + 12) % 12) + 1;
+  const chilliCrop = await prisma.cropMaster.findFirst({ where: { name: { contains: 'Chilli', mode: 'insensitive' } } });
+  const tipBody = { titleEn: 'Check for thrips', titleTe: 'తామర పురుగులను చూడండి', bodyEn: 'Look under young leaves every few days.', bodyTe: 'ప్రతి కొన్ని రోజులకు లేత ఆకుల కింద చూడండి.' };
+  const general = await call('POST', '/seasonal-tips', admin, { ...tipBody, titleEn: `ZZ general ${RUN}`, startMonth: m(month - 1), endMonth: m(month + 1) });
+  ok(`administrator adds a general tip -> ${general.s}`, general.s === 201);
+  const wrap = await call('POST', '/seasonal-tips', admin, { ...tipBody, titleEn: `ZZ wraps ${RUN}`, startMonth: m(month - 2), endMonth: m(month + 2) });
+  ok('a season that spans the year end is accepted', wrap.s === 201);
+  const later = await call('POST', '/seasonal-tips', admin, { ...tipBody, titleEn: `ZZ later ${RUN}`, startMonth: m(month + 3), endMonth: m(month + 4) });
+  const cropTip = await call('POST', '/seasonal-tips', admin, { ...tipBody, titleEn: `ZZ chilli ${RUN}`, startMonth: month, endMonth: month, cropId: chilliCrop.id });
+  ok('a crop tip is accepted', cropTip.s === 201 && cropTip.d.crop?.name === chilliCrop.name);
+  ok('month 13 is refused', (await call('POST', '/seasonal-tips', admin, { ...tipBody, startMonth: 13, endMonth: 1 })).s === 400);
+  ok('a very short message is refused', (await call('POST', '/seasonal-tips', admin, { ...tipBody, bodyEn: 'short', startMonth: 1, endMonth: 2 })).s === 400);
+  ok('a member cannot add tips', (await call('POST', '/seasonal-tips', M, { ...tipBody, startMonth: 1, endMonth: 2 })).s === 403);
+  const titles = async () => (await call('GET', '/seasonal-tips/current', M)).d.map((t) => t.titleEn);
+  let seen = await titles();
+  ok('the member sees the tips in season', seen.includes(`ZZ general ${RUN}`) && seen.includes(`ZZ wraps ${RUN}`));
+  ok('...not the one out of season', !seen.includes(`ZZ later ${RUN}`));
+  ok('...nor the chilli tip while they do not grow chilli', !seen.includes(`ZZ chilli ${RUN}`));
+  const chilliFarm = await prisma.farmLand.create({ data: { farmerId: me.id, label: 'ZZ chilli farm', address: 'x', landSizeAcres: 1, primaryCrops: [chilliCrop.name.toLowerCase()] } });
+  seen = await titles();
+  ok('once they grow chilli (any letter case) the chilli tip appears first', seen[0] === `ZZ chilli ${RUN}`);
+  const off = await call('PATCH', `/seasonal-tips/${general.d.id}`, admin, { isActive: false });
+  ok('switching a tip off hides it', off.s === 200 && !(await titles()).includes(`ZZ general ${RUN}`));
+  const edit = await call('PATCH', `/seasonal-tips/${cropTip.d.id}`, admin, { cropId: null });
+  ok('a crop tip can be made general again', edit.s === 200 && edit.d.cropId === null);
+  const allTips = await call('GET', '/seasonal-tips', admin);
+  ok('the administrator list includes switched-off tips', allTips.d.some((t) => t.id === general.d.id && t.isActive === false));
+  ok('a member cannot list the administrator view', (await call('GET', '/seasonal-tips', M)).s === 403);
+  for (const t of [general, wrap, later, cropTip]) await call('DELETE', `/seasonal-tips/${t.d.id}`, admin);
+  ok('deleted tips are gone', !(await call('GET', '/seasonal-tips', admin)).d.some((t) => String(t.titleEn).includes(`ZZ`) && String(t.titleEn).includes(RUN)));
+  await prisma.farmLand.delete({ where: { id: chilliFarm.id } });
+
   console.log('== 7. simultaneous buyers of the last units');
   const race = (await mk('Race Item', 3, 'Three units, six buyers')).d;
   const buyers = [];

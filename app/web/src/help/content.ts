@@ -180,8 +180,8 @@ export const HELP_SECTIONS: HelpSection[] = [
     title: { en: 'Farm advice: cases, knowledge, courses, soil tests', te: 'వ్యవసాయ సలహా: కేసులు, జ్ఞానం, కోర్సులు, నేల పరీక్షలు' },
     body: [
       {
-        en: 'My cases: take photos of the problem (up to 6 — they are shrunk on your phone so they send quickly), tap the symptoms you see, and add a few words by typing or speaking. A moderator passes it to the right expert, who answers. You can reply if they need more detail.',
-        te: 'నా కేసులు: సమస్య ఫోటోలు తీయండి (6 వరకు — త్వరగా పంపడానికి అవి మీ ఫోన్‌లోనే చిన్నవిగా చేయబడతాయి), మీకు కనిపించే లక్షణాలను తాకండి, టైప్ చేసి లేదా మాట్లాడి కొన్ని మాటలు జోడించండి. మోడరేటర్ దాన్ని సరైన నిపుణుడికి పంపుతారు, ఆయన సమాధానం ఇస్తారు. మరిన్ని వివరాలు కావాలంటే మీరు బదులివ్వవచ్చు.',
+        en: 'My cases: take photos of the problem (up to 6 — they are shrunk on your phone so they send quickly), tap the symptoms you see, and add a few words by typing or speaking. What you write is kept on your phone as you go, and if there is no signal when you press Send, the case waits on the phone and is sent by itself when you are back online. A moderator passes it to the right expert, who answers. You can reply if they need more detail.',
+        te: 'నా కేసులు: సమస్య ఫోటోలు తీయండి (6 వరకు — త్వరగా పంపడానికి అవి మీ ఫోన్‌లోనే చిన్నవిగా చేయబడతాయి), మీకు కనిపించే లక్షణాలను తాకండి, టైప్ చేసి లేదా మాట్లాడి కొన్ని మాటలు జోడించండి. మీరు రాసేది వెళ్తున్న కొద్దీ మీ ఫోన్‌లో భద్రపరచబడుతుంది, పంపండి తాకినప్పుడు సిగ్నల్ లేకపోతే కేసు ఫోన్‌లో వేచి ఉండి, మీరు మళ్ళీ ఆన్‌లైన్‌లోకి రాగానే దానంతట అదే పంపబడుతుంది. మోడరేటర్ దాన్ని సరైన నిపుణుడికి పంపుతారు, ఆయన సమాధానం ఇస్తారు. మరిన్ని వివరాలు కావాలంటే మీరు బదులివ్వవచ్చు.',
       },
       {
         en: 'Knowledge: advice articles from solved cases — search, filter, and bookmark; under each article “Products that may help” suggests shop products that mention the same problem or crop. Courses: finish lessons in order and earn a certificate. Soil Testing: register a sample for your land and read the report when it is ready.',
@@ -199,8 +199,8 @@ export const HELP_SECTIONS: HelpSection[] = [
     title: { en: 'The “Today” section, order again, receipts and stock alerts', te: '“ఈ రోజు” భాగం, మళ్ళీ ఆర్డర్, రసీదులు, స్టాక్ అలర్ట్‌లు' },
     body: [
       {
-        en: 'At the top of the shop, “Today” shows what needs you: days of membership left, your open cases (highlighted when an expert has answered), your latest order, and a “Photo your problem” button.',
-        te: 'షాప్ పైన “ఈ రోజు” మీకు ఏమి అవసరమో చూపిస్తుంది: సభ్యత్వ రోజులు మిగిలినవి, మీ ఓపెన్ కేసులు (నిపుణుడు సమాధానం ఇచ్చినప్పుడు హైలైట్ అవుతుంది), మీ తాజా ఆర్డర్, “సమస్య ఫోటో తీయండి” బటన్.',
+        en: 'At the top of the shop, “Today” shows what needs you: days of membership left, your open cases (highlighted when an expert has answered), your latest order, and a “Photo your problem” button. Below it, “This month on your farm” shows short seasonal tips — some only for crops you grow.',
+        te: 'షాప్ పైన “ఈ రోజు” మీకు ఏమి అవసరమో చూపిస్తుంది: సభ్యత్వ రోజులు మిగిలినవి, మీ ఓపెన్ కేసులు (నిపుణుడు సమాధానం ఇచ్చినప్పుడు హైలైట్ అవుతుంది), మీ తాజా ఆర్డర్, “సమస్య ఫోటో తీయండి” బటన్. దాని కింద “ఈ నెల మీ పొలంలో” చిన్న సీజన్ చిట్కాలను చూపిస్తుంది — కొన్ని మీరు పండించే పంటలకు మాత్రమే.',
       },
       {
         en: 'On an order, “Order again” puts everything still available back in your cart, and “Receipt” opens a printable receipt (save it as a PDF from the print window). On an out-of-stock product, “Tell me when it is back” sends you a notification the moment stock returns.',
@@ -307,6 +307,21 @@ export const HELP_SECTIONS: HelpSection[] = [
     ],
   },
   {
+    id: 'admin-seasonal',
+    audience: ['ADMINISTRATOR', 'MODERATOR'],
+    title: { en: 'Seasonal tips and restock suggestions', te: 'సీజన్ చిట్కాలు, రీస్టాక్ సూచనలు' },
+    body: [
+      {
+        en: 'Content → Seasonal tips: write short English and Telugu tips for a stretch of months (a season can run over the new year), optionally for one crop. Members with access see up to three tips that are in season, crop-specific first, under “This month on your farm” on the Today panel. Switch a tip off to hide it without deleting.',
+        te: 'కంటెంట్ → సీజన్ చిట్కాలు: కొన్ని నెలల కాలానికి (సీజన్ కొత్త సంవత్సరం దాటి ఉండవచ్చు) చిన్న ఇంగ్లీష్, తెలుగు చిట్కాలు రాయండి, కావాలంటే ఒక పంటకు మాత్రమే. యాక్సెస్ ఉన్న సభ్యులు ఈ రోజు ప్యానెల్‌లో “ఈ నెల మీ పొలంలో” కింద సీజన్‌లో ఉన్న మూడు చిట్కాల వరకు (పంట-నిర్దిష్టమైనవి ముందు) చూస్తారు. తొలగించకుండా దాచడానికి చిట్కాను ఆఫ్ చేయండి.',
+      },
+      {
+        en: 'Administrators: Manage products starts with “Running low — what to restock”, listing products at or below their warning level with their last-30-day sales and a suggested quantity to order. Nothing is suggested for products that have not sold lately.',
+        te: 'అడ్మినిస్ట్రేటర్లు: ఉత్పత్తులను నిర్వహించండి “తక్కువగా ఉన్నవి — ఏవి తిరిగి తెప్పించాలి” తో మొదలవుతుంది; హెచ్చరిక స్థాయి లేదా అంతకంటే తక్కువగా ఉన్న ఉత్పత్తులను, వాటి గత 30 రోజుల అమ్మకాలను, ఆర్డర్ చేయమని సూచించిన పరిమాణాన్ని చూపిస్తుంది. ఇటీవల అమ్ముడుపోని ఉత్పత్తులకు ఏదీ సూచించబడదు.',
+      },
+    ],
+  },
+  {
     id: 'admin-passwords',
     audience: ['ADMINISTRATOR'],
     title: { en: 'Forgotten passwords, stock alerts and usage', te: 'మర్చిపోయిన పాస్‌వర్డ్‌లు, స్టాక్ అలర్ట్‌లు, వినియోగం' },
@@ -316,8 +331,8 @@ export const HELP_SECTIONS: HelpSection[] = [
         te: 'పాస్‌వర్డ్ రీసెట్ కోసం స్క్రీన్‌పై ఇకపై కోడ్ లేదు — అది ఎవరైనా ఎవరి పాస్‌వర్డ్‌నైనా రీసెట్ చేయడానికి అనుమతించేది. ఎవరైనా అడిగినప్పుడు, మీకు “పాస్‌వర్డ్ రీసెట్ అభ్యర్థన” నోటిఫికేషన్ వస్తుంది. నిజంగా వారేనని నిర్ధారించుకున్న తర్వాత, వ్యక్తులు → సభ్యులు & ఉచిత ప్రాప్యత (లేదా సిబ్బంది ఖాతాలు) తెరిచి, “తాత్కాలిక పాస్‌వర్డ్” → పాస్‌వర్డ్ ఇవ్వండి తాకి, ఒక్కసారి వాడే పాస్‌వర్డ్‌ను చదివి చెప్పండి. వారి పాత పాస్‌వర్డ్ వెంటనే పనిచేయదు, తదుపరి లాగిన్‌లో వారు తమ స్వంతదాన్ని ఎంచుకోవాలి. ఏకైక అడ్మినిస్ట్రేటర్ లాక్ అయితే, app/backend లో npm run admin:reset-password నడపండి.',
       },
       {
-        en: 'Stock alerts: when a sale takes a product to 5 or fewer, and again at zero, administrators (and the selling vendor) get a notification, once each. Manage products has a Stock filter (Low / Out of stock). Members waiting for a product are told when you add stock.',
-        te: 'స్టాక్ అలర్ట్‌లు: అమ్మకం వల్ల ఉత్పత్తి 5 లేదా అంతకంటే తక్కువకు వచ్చినప్పుడు, సున్నాకు చేరినప్పుడు మళ్ళీ, అడ్మినిస్ట్రేటర్లకు (మరియు అమ్మే విక్రేతకు) ఒక్కొక్కటి ఒక్కసారి నోటిఫికేషన్ వస్తుంది. ఉత్పత్తులను నిర్వహించండిలో స్టాక్ ఫిల్టర్ (తక్కువ / స్టాక్ లేదు) ఉంది. ఉత్పత్తి కోసం వేచి ఉన్న సభ్యులకు మీరు స్టాక్ జోడించినప్పుడు తెలియజేయబడుతుంది.',
+        en: 'Stock alerts: when a sale takes a product to its warning level (5 unless you set one on the product — “Warn me when stock is at or below”), and again at zero, administrators (and the selling vendor) get a notification, once each. Manage products has a Stock filter (Low / Out of stock). Members waiting for a product are told when you add stock.',
+        te: 'స్టాక్ అలర్ట్‌లు: అమ్మకం వల్ల ఉత్పత్తి దాని హెచ్చరిక స్థాయికి (ఉత్పత్తిపై మీరు సెట్ చేయకపోతే 5 — “స్టాక్ ఇంత లేదా తక్కువకు వచ్చినప్పుడు నాకు చెప్పండి”) వచ్చినప్పుడు, సున్నాకు చేరినప్పుడు మళ్ళీ, అడ్మినిస్ట్రేటర్లకు (మరియు అమ్మే విక్రేతకు) ఒక్కొక్కటి ఒక్కసారి నోటిఫికేషన్ వస్తుంది. ఉత్పత్తులను నిర్వహించండిలో స్టాక్ ఫిల్టర్ (తక్కువ / స్టాక్ లేదు) ఉంది. ఉత్పత్తి కోసం వేచి ఉన్న సభ్యులకు మీరు స్టాక్ జోడించినప్పుడు తెలియజేయబడుతుంది.',
       },
       {
         en: 'Usage & questions (Insights & setup) shows the most opened screens, the help-assistant questions it could not answer (each is a missing FAQ — add it in help/faq.ts), how the tour ended and errors people hit. Only counts are kept, for 90 days.',

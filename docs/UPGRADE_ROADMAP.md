@@ -16,6 +16,7 @@ Written 2026-10-24 after a code review and a short round of research (Indian far
 | **Member home** | "Today" panel: membership days left, open cases, latest order, photo-your-problem. Order again. Printable receipt. | `TodayPanel.tsx`, `OrderReceiptPage.tsx` |
 | **Stock operations** | Low-stock and out-of-stock notifications (once, at the crossing); Stock filter; "Tell me when it is back" with notification on restock or cancel. | `stock-alerts.service.ts`, `StockWatchButton.tsx` |
 | **WhatsApp channel** | Built, opt-in per member, **off by default** (see 2). | `whatsapp.service.ts`, `WhatsAppOptIn.tsx` |
+| **Field use (round 2)** | New case is saved on the phone as you write (photos included) and, if there is no signal at Send, queued and sent by itself on reconnect; per-product low-stock warning level. | `draftStore.ts`, `caseSend.ts`, `PendingCaseNotice.tsx`, `Product.lowStockAt` |
 | **Quality** | 258+ backend tests; local-only end-to-end scripts; `check:help` now also in CI; test-data clean-up script. | `scripts/e2e`, `.github/workflows/ci.yml` |
 
 ## 2. Switched off or blocked until the owner decides or provides something
@@ -46,9 +47,9 @@ The Speak button uses the browser's own speech recognition, which exists on Chro
 ## 3. Next ideas, in order of expected value
 
 1. **Read the Usage & questions screen weekly** and turn each unanswered question into an FAQ entry — the cheapest way to make the assistant better.
-2. **Crop calendar / seasonal tips** on the Today panel (what to watch for this month for the member's crops) — needs agronomy content from the experts.
+2. ~~Crop calendar / seasonal tips on the Today panel~~ — **built 2026-10-24** (Content → Seasonal tips; member sees tips in season, optionally per crop). **Still needed from the experts: the actual content** — start by writing 3–5 tips for each main crop and the current month.
 3. **Mandi prices and weather** card — needs a data source and a decision on which markets.
 4. **Subscription boxes** for the HARIHARAA food products (repeat delivery) once the payment gateway exists.
 5. **Expert answer in Telugu audio** (an expert records a short voice reply) for members who cannot read well.
-6. **Per-product low-stock level** and reorder suggestions (today the line is one shop-wide figure of 5).
-7. **Offline drafts** for the New case form (photos taken in the field with no signal, sent when the signal returns).
+6. *(Per-product low-stock level — done 2026-10-24: each product can have its own warning level; reorder suggestions — done too: Manage products shows what to restock from the last 30 days of sales.)*
+7. *(Offline drafts for the New case form — done 2026-10-24: kept on the phone as you go, queued when there is no signal, sent automatically on reconnect.)*

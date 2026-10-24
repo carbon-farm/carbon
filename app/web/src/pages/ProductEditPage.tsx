@@ -61,6 +61,8 @@ export function ProductEditPage() {
           description: String(data.get('description') ?? ''),
           price: Number(data.get('price') ?? 0),
           unit: String(data.get('unit') ?? ''),
+          // an empty box puts the product back on the shop-wide default
+          lowStockAt: String(data.get('lowStockAt') ?? '').trim() === '' ? null : Number(data.get('lowStockAt')),
           // stock is changed in the Stock panel below (recorded), never by overwriting it here
           ...(String(data.get('categoryId') ?? '') ? { categoryId: String(data.get('categoryId')) } : {}),
         }),
@@ -148,6 +150,13 @@ export function ProductEditPage() {
               <label>
                 <Bi id="productUnitField" />
                 <input name="unit" defaultValue={product.unit} onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler} required />
+              </label>
+              <label>
+                <Bi id="lowStockAtField" />
+                <input name="lowStockAt" type="number" step="1" min="0" placeholder="5" defaultValue={product.lowStockAt ?? ''} />
+                <small className="hint">
+                  <Bi id="lowStockAtHint" />
+                </small>
               </label>
               <label>
                 <Bi id="categoryLabel" />

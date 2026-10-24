@@ -19,6 +19,7 @@ import { MediaModule } from './modules/media/media.module';
 import { HariharaaModule } from './modules/hariharaa/hariharaa.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
+import { SeasonalModule } from './modules/seasonal/seasonal.module';
 import { HealthController } from './health/health.controller';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
@@ -49,6 +50,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
     AddressesModule,
     MediaModule,
     TelemetryModule,
+    SeasonalModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

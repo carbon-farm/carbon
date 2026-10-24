@@ -215,6 +215,7 @@ export class MarketplaceService {
           unit: dto.unit.trim(),
           stockQuantity: dto.stockQuantity,
           categoryId: dto.categoryId,
+          lowStockAt: dto.lowStockAt ?? null,
           vendorId,
         },
         include: PRODUCT_INCLUDE,

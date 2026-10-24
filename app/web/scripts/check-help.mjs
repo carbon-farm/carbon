@@ -107,6 +107,11 @@ const cases = [
   ['ADMINISTRATOR', 'a member forgot their password what do I do', 'admin-temp-password'],
   ['ADMINISTRATOR', 'how will I know when stock is low', 'admin-low-stock'],
   ['ADMINISTRATOR', 'what questions could the assistant not answer', 'admin-usage'],
+  ['MEMBER', 'what if I have no signal', 'offline-case'],
+  ['MEMBER', 'what are the seasonal tips', 'seasonal-tips'],
+  ['ADMINISTRATOR', 'how do I add a seasonal tip', 'admin-seasonal'],
+  ['ADMINISTRATOR', 'how much should I reorder', 'admin-restock'],
+  ['ADMINISTRATOR', 'set a warning level for one product', 'admin-low-stock'],
 ];
 for (const [aud, q, want] of cases) {
   const got = answer(q, aud).best?.faq.id ?? null;

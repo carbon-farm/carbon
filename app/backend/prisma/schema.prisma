@@ -118,27 +118,27 @@ enum SoilSampleStatus {
 }
 
 model User {
-  id                String    @id @default(uuid())
-  mobileNumber      String    @unique
-  passwordHash      String
-  role              Role
-  name              String
-  preferredLanguage String    @default("te") // Telugu, per 01-Product/05-Target-Users.md
-  isActive          Boolean   @default(true)
+  id                 String    @id @default(uuid())
+  mobileNumber       String    @unique
+  passwordHash       String
+  role               Role
+  name               String
+  preferredLanguage  String    @default("te") // Telugu, per 01-Product/05-Target-Users.md
+  isActive           Boolean   @default(true)
   // Set when an Administrator issues a temporary password; the person must choose their own
   // before anything else works (see JwtAuthGuard). Cleared when they change it.
-  mustChangePassword Boolean  @default(false)
+  mustChangePassword Boolean   @default(false)
   // The member ticked "send my updates on WhatsApp" (see notifications/whatsapp.service.ts).
-  whatsappOptIn      Boolean  @default(false)
+  whatsappOptIn      Boolean   @default(false)
   // Set when an Administrator deactivates the account, so it is never mistaken
   // for a never-activated pending registration (which register() will resend).
-  deactivatedAt     DateTime?
+  deactivatedAt      DateTime?
   // Short, human-usable ID (HHC-0042 = customer #42) for people to say, write and
   // search by — the UUID above stays the internal key. Assigned once at creation,
   // never reused or changed; see common/user-code.ts.
-  userCode          String    @unique
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  userCode           String    @unique
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   // Membership fields apply to FARMER role only; left nullable for other roles.
   membershipTier   String?
@@ -401,9 +401,10 @@ model CropMaster {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
-  cases    Case[]
-  articles KnowledgeArticle[]
-  courses  Course[]
+  cases        Case[]
+  articles     KnowledgeArticle[]
+  courses      Course[]
+  seasonalTips SeasonalTip[]
 }
 
 model CaseCategoryMaster {
@@ -643,6 +644,8 @@ model Product {
   price         Float
   unit          String // e.g. "per kg", "per bag" — free text, not a controlled unit taxonomy
   stockQuantity Int                    @default(0)
+  // Warn when stock falls to this many or fewer; null = the shop-wide default (5).
+  lowStockAt    Int?
   imageUrls     String[]               @default([])
   categoryId    String?
   category      ProductCategoryMaster? @relation(fields: [categoryId], references: [id])
@@ -962,4 +965,24 @@ model StockWatch {
 
   @@unique([userId, productId])
   @@index([productId])
+}
+
+// "This month on your farm": short, bilingual tips an Administrator or Moderator writes for a
+// stretch of the year (and optionally one crop). Members with access see the ones in season on
+// their Today panel. startMonth > endMonth means the season wraps over the new year (Nov–Feb).
+model SeasonalTip {
+  id         String      @id @default(uuid())
+  titleEn    String
+  titleTe    String
+  bodyEn     String
+  bodyTe     String
+  startMonth Int // 1 = January … 12 = December
+  endMonth   Int
+  cropId     String? // only for members who grow this crop; empty = for everyone
+  crop       CropMaster? @relation(fields: [cropId], references: [id])
+  isActive   Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([isActive])
 }

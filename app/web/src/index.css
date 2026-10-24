@@ -2005,3 +2005,35 @@ button.chip-on {
     max-width: none !important;
   }
 }
+
+/* Seasonal tips on the Today panel */
+.today-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.today-tips h3 {
+  margin: 0;
+  font-size: 15px;
+}
+.today-tip {
+  padding: 12px 14px;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  border-radius: var(--radius-card);
+}
+.today-tip h4 {
+  margin: 0 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--font-heading);
+}
+.today-tip h4 .bi-te,
+.today-tip p .bi-te {
+  display: block;
+}
+.today-tip p {
+  margin: 0;
+}

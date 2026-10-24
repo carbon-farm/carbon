@@ -5,6 +5,7 @@ import { roleHomePath } from '../auth/roleHome';
 import { getUnreadCount } from '../api/notifications';
 import { getMe, type AdminUser } from '../api/admin';
 import { PaymentStrip } from './PaymentStrip';
+import { PendingCaseNotice } from './PendingCaseNotice';
 import { MainNav } from './MainNav';
 import { Tour } from '../tour/Tour';
 import { audienceFor } from '../tour/steps';
@@ -112,6 +113,7 @@ export function AppShell({ children, wide = false }: { children: ReactNode; wide
       </header>
 
       <PaymentStrip />
+      <PendingCaseNotice />
       <Tour audience={audienceFor(session?.role)} userId={session ? me?.id : null} ready={!session || (!!me && !session.mustChangePassword)} />
 
       <MainNav role={session ? session.role : 'GUEST'} />

@@ -60,6 +60,7 @@ export const NAV: Record<string, NavEntry[]> = {
       items: [
         { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
         { to: '/courses/manage', labelKey: 'coursesManageTitle' },
+        { to: '/admin/seasonal', labelKey: 'seasonalNavTitle' },
         { to: '/admin/media', labelKey: 'mediaNavTitle' },
       ],
     },
@@ -110,6 +111,7 @@ export const NAV: Record<string, NavEntry[]> = {
         { to: '/knowledge', labelKey: 'knowledgeEyebrow' },
         { to: '/courses/manage', labelKey: 'coursesManageTitle' },
         { to: '/soil-samples/manage', labelKey: 'sampleQueueTitle' },
+        { to: '/admin/seasonal', labelKey: 'seasonalNavTitle' },
         { to: '/admin/media', labelKey: 'mediaNavTitle' },
       ],
     },

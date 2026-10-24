@@ -41,6 +41,7 @@ export function ProductCreateForm({
         unit: String(data.get('unit') ?? '').trim(),
         stockQuantity: Number(data.get('stockQuantity') ?? 0),
         categoryId: String(data.get('categoryId') ?? '') || undefined,
+        ...(String(data.get('lowStockAt') ?? '').trim() !== '' ? { lowStockAt: Number(data.get('lowStockAt')) } : {}),
       });
       form.reset();
       onCreated(created);
@@ -78,6 +79,13 @@ export function ProductCreateForm({
           <label>
             <Bi id="productStockField" />
             <input name="stockQuantity" type="number" step="1" min="0" onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler} required />
+          </label>
+          <label>
+            <Bi id="lowStockAtField" />
+            <input name="lowStockAt" type="number" step="1" min="0" placeholder="5" />
+            <small className="hint">
+              <Bi id="lowStockAtHint" />
+            </small>
           </label>
           <label>
             <Bi id="categoryLabel" />

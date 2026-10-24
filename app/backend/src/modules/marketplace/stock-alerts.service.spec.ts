@@ -1,4 +1,4 @@
-import { LOW_STOCK_THRESHOLD, StockAlertsService, stockAlertKind } from './stock-alerts.service';
+import { LOW_STOCK_THRESHOLD, StockAlertsService, stockAlertKind, suggestReorder, thresholdFor } from './stock-alerts.service';
 
 describe('stockAlertKind', () => {
   it('alerts once, when stock first drops to the low line or to zero', () => {
@@ -12,6 +12,33 @@ describe('stockAlertKind', () => {
     expect(stockAlertKind(50, 45)).toBeNull();
     expect(stockAlertKind(0, 0)).toBeNull();
     expect(stockAlertKind(LOW_STOCK_THRESHOLD, LOW_STOCK_THRESHOLD - 1)).toBeNull();
+  });
+});
+
+describe('per-product level', () => {
+  it("uses the product's own level instead of the shop default", () => {
+    expect(stockAlertKind(30, 25, 25)).toBe('LOW');
+    expect(stockAlertKind(30, 28, 25)).toBeNull();
+    expect(stockAlertKind(8, 6, 0)).toBeNull(); // 0 = only warn when it is gone
+    expect(stockAlertKind(1, 0, 0)).toBe('OUT');
+    expect(thresholdFor(null)).toBe(LOW_STOCK_THRESHOLD);
+    expect(thresholdFor(undefined)).toBe(LOW_STOCK_THRESHOLD);
+    expect(thresholdFor(0)).toBe(0);
+    expect(thresholdFor(40)).toBe(40);
+  });
+});
+
+describe('suggestReorder', () => {
+  it('covers the next 30 days at the recent rate, plus a quarter, minus what is on hand', () => {
+    expect(suggestReorder(30, 5)).toBe(33); // 1 a day -> 30 x 1.25 = 37.5 -> 38, minus 5
+    expect(suggestReorder(60, 0)).toBe(75);
+  });
+  it('suggests nothing to order when there is already plenty', () => {
+    expect(suggestReorder(10, 100)).toBe(0);
+  });
+  it('gives no number when nothing sold lately', () => {
+    expect(suggestReorder(0, 0)).toBeNull();
+    expect(suggestReorder(-1, 3)).toBeNull();
   });
 });
 
@@ -61,6 +88,23 @@ describe('StockAlertsService', () => {
     const { service, prisma } = make();
     prisma.product.findUnique.mockRejectedValue(new Error('db down'));
     await expect(service.afterStockTaken('p1', 9, 1)).resolves.toBeUndefined();
+  });
+
+  it('lists low products with what they sold and a suggested restock', async () => {
+    const { service, prisma } = make();
+    (prisma as unknown as Record<string, unknown>).product = {
+      findUnique: jest.fn(),
+      findMany: jest.fn().mockResolvedValue([
+        { id: 'a', name: 'A', stockQuantity: 2, unit: 'kg', vendorId: null, lowStockAt: null },
+        { id: 'b', name: 'B', stockQuantity: 50, unit: 'kg', vendorId: null, lowStockAt: null },
+        { id: 'c', name: 'C', stockQuantity: 0, unit: 'kg', vendorId: null, lowStockAt: 0 },
+      ]),
+    };
+    (prisma as unknown as Record<string, unknown>).orderItem = { groupBy: jest.fn().mockResolvedValue([{ productId: 'a', _sum: { quantity: 30 } }]) };
+    const rows = await service.lowStock();
+    expect(rows.map((r) => r.id)).toEqual(['a', 'c']);
+    expect(rows[0]).toMatchObject({ soldLast30Days: 30, suggestedReorder: 36 });
+    expect(rows[1]).toMatchObject({ soldLast30Days: 0, suggestedReorder: null });
   });
 
   it('toggles a watch on and off', async () => {

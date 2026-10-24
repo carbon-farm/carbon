@@ -4,6 +4,7 @@ import { useAuth } from '../auth/AuthContext';
 import { useMembership } from '../auth/MembershipContext';
 import { listMyOrders, type Order } from '../api/marketplace';
 import { listMyCases, type Case } from '../api/cases';
+import { getCurrentTips, type CurrentTip } from '../api/seasonal';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings, orderStatusLabel, caseStatusLabel } from '../i18n/strings';
 
@@ -17,6 +18,7 @@ export function TodayPanel() {
   const { status } = useMembership();
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [cases, setCases] = useState<Case[] | null>(null);
+  const [tips, setTips] = useState<CurrentTip[]>([]);
 
   const hasAccess = status?.hasAccess ?? false;
 
@@ -37,6 +39,9 @@ export function TodayPanel() {
     listMyCases(session.accessToken)
       .then((c) => !cancelled && setCases(c))
       .catch(() => !cancelled && setCases([]));
+    getCurrentTips(session.accessToken)
+      .then((t) => !cancelled && setTips(t))
+      .catch(() => !cancelled && setTips([]));
     return () => {
       cancelled = true;
     };
@@ -106,6 +111,25 @@ export function TodayPanel() {
           </Link>
         )}
       </div>
+
+      {tips.length > 0 && (
+        <div className="today-tips">
+          <Bi id="seasonalPanelTitle" as="h3" />
+          {tips.map((t) => (
+            <article className="today-tip" key={t.id}>
+              <h4>
+                <span className="bi-en">{t.titleEn}</span>
+                <span className="bi-te">{t.titleTe}</span>
+                {t.cropName && <span className="priority-badge">{t.cropName}</span>}
+              </h4>
+              <p>
+                <span className="bi-en">{t.bodyEn}</span>
+                <span className="bi-te">{t.bodyTe}</span>
+              </p>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

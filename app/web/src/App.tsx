@@ -55,6 +55,7 @@ const AdminHariharaaSubscriptionsPage = lazy(() => import('./pages/hariharaa/Adm
 const AdminMembersPage = lazy(() => import('./pages/hariharaa/AdminMembersPage').then((m) => ({ default: m.AdminMembersPage })));
 const AdminMembershipPlansPage = lazy(() => import('./pages/hariharaa/AdminMembershipPlansPage').then((m) => ({ default: m.AdminMembershipPlansPage })));
 const OrderReceiptPage = lazy(() => import('./pages/OrderReceiptPage').then((m) => ({ default: m.OrderReceiptPage })));
+const AdminSeasonalTipsPage = lazy(() => import('./pages/AdminSeasonalTipsPage').then((m) => ({ default: m.AdminSeasonalTipsPage })));
 const AdminUsagePage = lazy(() => import('./pages/AdminUsagePage').then((m) => ({ default: m.AdminUsagePage })));
 const AdminHariharaaSettingsPage = lazy(() => import('./pages/hariharaa/AdminHariharaaSettingsPage').then((m) => ({ default: m.AdminHariharaaSettingsPage })));
 const ChangePasswordPage = lazy(() => import('./pages/ChangePasswordPage').then((m) => ({ default: m.ChangePasswordPage })));
@@ -251,6 +252,14 @@ export function App() {
             element={
               <ProtectedRoute roles={['ADMINISTRATOR']} wide>
                 <AdminAuditPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/seasonal"
+            element={
+              <ProtectedRoute roles={['ADMINISTRATOR', 'MODERATOR']}>
+                <AdminSeasonalTipsPage />
               </ProtectedRoute>
             }
           />

@@ -35,6 +35,13 @@ export class CreateProductDto {
   @IsOptional()
   @IsUUID()
   categoryId?: string;
+
+  // "Warn me when stock is at or below this many". Leave out to use the shop-wide default.
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(MAX_STOCK)
+  lowStockAt?: number;
 }
 
 export class UpdateProductDto {
@@ -49,6 +56,8 @@ export class UpdateProductDto {
 
   @IsOptional() @IsUUID() categoryId?: string;
   @IsOptional() @IsBoolean() isActive?: boolean;
+  // null puts the product back on the shop-wide default.
+  @IsOptional() @IsInt() @Min(0) @Max(MAX_STOCK) lowStockAt?: number | null;
 }
 
 export const STOCK_MODES = ['ADD', 'REDUCE', 'SET'] as const;

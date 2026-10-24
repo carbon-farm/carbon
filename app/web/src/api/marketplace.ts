@@ -48,6 +48,8 @@ export interface Product {
   price: number;
   unit: string;
   stockQuantity: number;
+  // Warn when stock is at or below this; null = the shop-wide default (5).
+  lowStockAt: number | null;
   imageUrls: string[];
   categoryId: string | null;
   category: { id: string; name: string } | null;
@@ -70,6 +72,23 @@ export function listMyStockWatches(token: string) {
 
 export function toggleStockWatch(token: string, productId: string) {
   return apiRequest<{ watching: boolean }>(`/marketplace/stock-watch/${productId}`, { method: 'POST', token });
+}
+
+export interface LowStockRow {
+  id: string;
+  name: string;
+  stockQuantity: number;
+  unit: string;
+  vendorId: string | null;
+  lowStockAt: number | null;
+  soldLast30Days: number;
+  // null = nothing sold lately, so no number is suggested
+  suggestedReorder: number | null;
+}
+
+// Administrator: products at or below their warning level, with recent sales and a restock suggestion.
+export function getLowStock(token: string) {
+  return apiRequest<LowStockRow[]>('/marketplace/alerts/low-stock', { token });
 }
 
 export interface CartItem {
@@ -203,7 +222,7 @@ export function verifyVendor(token: string, id: string, approve: boolean, reason
 
 export function createProduct(
   token: string,
-  data: { name: string; description: string; price: number; unit: string; stockQuantity: number; categoryId?: string },
+  data: { name: string; description: string; price: number; unit: string; stockQuantity: number; categoryId?: string; lowStockAt?: number },
 ) {
   return apiRequest<Product>('/marketplace/products', { method: 'POST', body: data, token });
 }
@@ -231,7 +250,7 @@ export function getProduct(token: string, id: string) {
 export function updateProduct(
   token: string,
   id: string,
-  data: Partial<{ name: string; description: string; price: number; unit: string; categoryId: string; isActive: boolean }>,
+  data: Partial<{ name: string; description: string; price: number; unit: string; categoryId: string; isActive: boolean; lowStockAt: number | null }>,
 ) {
   return apiRequest<Product>(`/marketplace/products/${id}`, { method: 'PATCH', body: data, token });
 }

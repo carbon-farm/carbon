@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { listAllProductsForAdmin, listCategories, type Product, type ProductCategory } from '../api/marketplace';
+import { RestockSuggestions } from '../components/RestockSuggestions';
 import { ProductCreateForm } from '../components/ProductCreateForm';
 import { ProductThumb } from '../components/ProductThumb';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
@@ -52,7 +53,7 @@ export function ProductsManagePage() {
     let rows = products;
     if (statusFilter) rows = rows.filter((p) => (statusFilter === 'active' ? p.isActive : !p.isActive));
     if (stockFilter === 'out') rows = rows.filter((p) => p.stockQuantity === 0);
-    if (stockFilter === 'low') rows = rows.filter((p) => p.stockQuantity <= LOW_STOCK_THRESHOLD);
+    if (stockFilter === 'low') rows = rows.filter((p) => p.stockQuantity <= (p.lowStockAt ?? LOW_STOCK_THRESHOLD));
     if (vendorFilter) rows = rows.filter((p) => (vendorFilter === 'platform' ? !p.vendorId : p.vendorId === vendorFilter));
     rows = [...rows];
     switch (sortMode) {
@@ -90,6 +91,8 @@ export function ProductsManagePage() {
       )}
 
       {error && <div className="error-banner">{error}</div>}
+
+      <RestockSuggestions />
 
       {!loading && products.length > 0 && (
         <div className="list-toolbar">

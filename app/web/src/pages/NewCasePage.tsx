@@ -4,15 +4,16 @@ import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { listFarms, type FarmLand } from '../api/farms';
 import { listCaseCategories, listCrops, type CaseCategory, type Crop } from '../api/configuration';
-import { createCaseDraft, submitCase, uploadCaseEvidence } from '../api/cases';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, caseCategoryLabel } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 import { SYMPTOMS } from '../help/caseSymptoms';
 import { VoiceInput } from '../components/VoiceInput';
-import { shrinkImage } from '../lib/image';
+import { buildDescription, isNetworkFailure, sendCase } from '../lib/caseSend';
+import { clearDraft, draftKeyFor, isEmptyDraft, loadDraft, saveDraft, type CaseDraftFields } from '../lib/draftStore';
 
 const MAX_PHOTOS = 6;
+const AUTOSAVE_MS = 700;
 
 interface Photo {
   id: string;
@@ -20,9 +21,13 @@ interface Photo {
   url: string;
 }
 
+const photoFrom = (file: File): Photo => ({ id: `${file.name}-${file.size}-${Math.random()}`, file, url: URL.createObjectURL(file) });
+
 // Describing a problem in the field is easiest with the phone's camera and the fewest keystrokes,
 // so the order is: photos first, then tap the symptoms you see (or speak / type it), then the
-// details. Photos are shrunk on the phone before upload.
+// details. Photos are shrunk on the phone before upload. Whatever is on the screen is kept on the
+// phone as you go, so a dropped signal or a closed page loses nothing — and if you press Send with
+// no connection, the case waits on the phone and is sent by itself when a connection returns.
 export function NewCasePage() {
   const { session, logout } = useAuth();
   const navigate = useNavigate();
@@ -38,7 +43,18 @@ export function NewCasePage() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [description, setDescription] = useState('');
+  const [farmLandId, setFarmLandId] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [cropId, setCropId] = useState('');
+  const [evidenceNotes, setEvidenceNotes] = useState('');
+  const [requestPriority, setRequestPriority] = useState(false);
   const [savedCaseId, setSavedCaseId] = useState<string | null>(null);
+  const [restored, setRestored] = useState(false);
+  const [queuedNotice, setQueuedNotice] = useState(false);
+  // Autosave only starts once any earlier draft has been read, so it cannot overwrite it.
+  const [ready, setReady] = useState(false);
+
+  const draftKey = session ? draftKeyFor(session.accessToken) : null;
 
   useEffect(() => {
     if (!session) return;
@@ -58,8 +74,48 @@ export function NewCasePage() {
       .finally(() => setLoading(false));
   }, [session, logout]);
 
+  // Pick up where the farmer left off.
+  useEffect(() => {
+    if (!draftKey) return;
+    let cancelled = false;
+    loadDraft(draftKey).then((d) => {
+      if (cancelled) return;
+      if (d) {
+        setFarmLandId(d.fields.farmLandId);
+        setCategoryId(d.fields.categoryId);
+        setCropId(d.fields.cropId);
+        setDescription(d.fields.description);
+        setEvidenceNotes(d.fields.evidenceNotes);
+        setRequestPriority(d.fields.requestPriority);
+        setSymptoms(d.fields.symptoms);
+        setPhotos(d.photos.map(photoFrom));
+        setRestored(!isEmptyDraft(d.fields, d.photos));
+      }
+      setReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [draftKey]);
+
   // Free the preview URLs when leaving.
   useEffect(() => () => photos.forEach((p) => URL.revokeObjectURL(p.url)), [photos]);
+
+  const fields: CaseDraftFields = useMemo(
+    () => ({ farmLandId, categoryId, cropId, description, evidenceNotes, requestPriority, symptoms }),
+    [farmLandId, categoryId, cropId, description, evidenceNotes, requestPriority, symptoms],
+  );
+
+  // Keep what is on the screen safe on the phone as it changes.
+  useEffect(() => {
+    if (!ready || !draftKey || busy || savedCaseId || queuedNotice) return;
+    const t = setTimeout(() => {
+      const files = photos.map((p) => p.file);
+      if (isEmptyDraft(fields, files)) void clearDraft(draftKey);
+      else void saveDraft(draftKey, { fields, photos: files, queued: false, thenSubmit: false, savedAt: Date.now() });
+    }, AUTOSAVE_MS);
+    return () => clearTimeout(t);
+  }, [ready, draftKey, fields, photos, busy, savedCaseId, queuedNotice]);
 
   function addFiles(list: FileList | null) {
     if (!list) return;
@@ -67,7 +123,7 @@ export function NewCasePage() {
     const chosen = Array.from(list)
       .filter((f) => f.type.startsWith('image/'))
       .slice(0, Math.max(0, room));
-    setPhotos((prev) => [...prev, ...chosen.map((file) => ({ id: `${file.name}-${file.size}-${Math.random()}`, file, url: URL.createObjectURL(file) }))]);
+    setPhotos((prev) => [...prev, ...chosen.map(photoFrom)]);
     if (cameraRef.current) cameraRef.current.value = '';
     if (galleryRef.current) galleryRef.current.value = '';
   }
@@ -84,24 +140,27 @@ export function NewCasePage() {
     setSymptoms((prev) => (prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]));
   }
 
-  // The expert reads English or Telugu, so each chosen symptom is written in both.
-  const symptomText = useMemo(
-    () =>
-      symptoms
-        .map((id) => SYMPTOMS.find((s) => s.id === id))
-        .filter((s): s is (typeof SYMPTOMS)[number] => !!s)
-        .map((s) => `${s.label.en} (${s.label.te})`)
-        .join('; '),
-    [symptoms],
-  );
+  function startOver() {
+    photos.forEach((p) => URL.revokeObjectURL(p.url));
+    setPhotos([]);
+    setSymptoms([]);
+    setDescription('');
+    setFarmLandId('');
+    setCategoryId('');
+    setCropId('');
+    setEvidenceNotes('');
+    setRequestPriority(false);
+    setRestored(false);
+    setQueuedNotice(false);
+    setError(null);
+    if (draftKey) void clearDraft(draftKey);
+  }
 
-  const fullDescription = [symptomText && `${strings.caseSymptomsPrefix.en} / ${strings.caseSymptomsPrefix.te}: ${symptomText}.`, description.trim()]
-    .filter(Boolean)
-    .join('\n');
+  const fullDescription = buildDescription(symptoms, description);
 
   async function handleAction(thenSubmit: boolean) {
     const form = formRef.current;
-    if (!session || !form) return;
+    if (!session || !form || !draftKey) return;
     if (!form.reportValidity()) return;
     if (fullDescription.length < 5) {
       setError(`${strings.describeProblemRequired.en} / ${strings.describeProblemRequired.te}`);
@@ -109,49 +168,36 @@ export function NewCasePage() {
     }
 
     setError(null);
+    setQueuedNotice(false);
     setBusy(thenSubmit ? 'submit' : 'draft');
+    const files = photos.map((p) => p.file);
 
-    const data = new FormData(form);
+    // No signal: keep it on the phone and let the app send it when a connection returns.
+    const queueIt = async () => {
+      await saveDraft(draftKey, { fields, photos: files, queued: true, thenSubmit, savedAt: Date.now() });
+      setQueuedNotice(true);
+    };
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      await queueIt();
+      setBusy(null);
+      return;
+    }
+
     try {
-      const created = await createCaseDraft(session.accessToken, {
-        farmLandId: String(data.get('farmLandId') ?? ''),
-        categoryId: String(data.get('categoryId') ?? ''),
-        cropId: String(data.get('cropId') ?? '') || undefined,
-        problemDescription: fullDescription,
-        evidenceNotes: String(data.get('evidenceNotes') ?? '') || undefined,
-        requestPriority: data.get('requestPriority') === 'on',
-      });
-      setSavedCaseId(created.id);
-
-      // Photos go on before the case is sent, so the expert sees them from the start.
-      let failed = 0;
-      for (const p of photos) {
-        try {
-          await uploadCaseEvidence(session.accessToken, created.id, await shrinkImage(p.file));
-        } catch {
-          failed += 1;
-        }
-      }
-      if (failed > 0) {
+      const result = await sendCase(session.accessToken, fields, files, thenSubmit);
+      setSavedCaseId(result.caseId);
+      await clearDraft(draftKey);
+      if (result.failedPhotos > 0) {
         setError(
-          `${strings.casePhotosFailed.en.replace('{n}', String(failed))} / ${strings.casePhotosFailed.te.replace('{n}', String(failed))}`,
+          `${strings.casePhotosFailed.en.replace('{n}', String(result.failedPhotos))} / ${strings.casePhotosFailed.te.replace('{n}', String(result.failedPhotos))}`,
         );
-        setBusy(null);
         return; // stay here: the case is saved, and the link below opens it so photos can be added
       }
-
-      if (thenSubmit) {
-        try {
-          await submitCase(session.accessToken, created.id);
-        } catch (err) {
-          setError(err instanceof ApiError ? err.message : `${strings.couldNotSubmitCase.en} / ${strings.couldNotSubmitCase.te}`);
-          navigate(`/cases/${created.id}`);
-          return;
-        }
-      }
-      navigate(`/cases/${created.id}`);
+      if (result.submitError) setError(result.submitError);
+      navigate(`/cases/${result.caseId}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : `${strings.couldNotCreateCase.en} / ${strings.couldNotCreateCase.te}`);
+      if (isNetworkFailure(err)) await queueIt();
+      else setError(err instanceof ApiError ? err.message : `${strings.couldNotCreateCase.en} / ${strings.couldNotCreateCase.te}`);
     } finally {
       setBusy(null);
     }
@@ -169,6 +215,19 @@ export function NewCasePage() {
         <Link to={`/cases/${savedCaseId}`} className="link-button">
           <Bi id="openMyCaseLink" />
         </Link>
+      )}
+      {queuedNotice && (
+        <div className="payment-strip" role="status">
+          <BiValue value={strings.caseQueuedNotice} />
+        </div>
+      )}
+      {restored && !queuedNotice && (
+        <div className="payment-strip" role="status">
+          <BiValue value={strings.caseDraftRestored} />{' '}
+          <button type="button" className="link-button" onClick={startOver}>
+            <Bi id="caseStartOver" />
+          </button>
+        </div>
       )}
 
       {loading ? (
@@ -258,7 +317,16 @@ export function NewCasePage() {
             <Bi id="caseDetailsHeading" as="h2" />
             <label>
               <Bi id="farmLandFieldLabel" />
-              <select name="farmLandId" required defaultValue="" onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler}>
+              <select
+                name="farmLandId"
+                required
+                value={farmLandId}
+                onChange={(e) => {
+                  setFarmLandId(e.target.value);
+                  clearCustomValidity(e);
+                }}
+                onInvalid={bilingualInvalidHandler}
+              >
                 <option value="" disabled>
                   {biInline('selectPlaceholder')}
                 </option>
@@ -272,7 +340,16 @@ export function NewCasePage() {
 
             <label>
               <Bi id="categoryFieldLabel" />
-              <select name="categoryId" required defaultValue="" onChange={clearCustomValidity} onInvalid={bilingualInvalidHandler}>
+              <select
+                name="categoryId"
+                required
+                value={categoryId}
+                onChange={(e) => {
+                  setCategoryId(e.target.value);
+                  clearCustomValidity(e);
+                }}
+                onInvalid={bilingualInvalidHandler}
+              >
                 <option value="" disabled>
                   {biInline('selectPlaceholder')}
                 </option>
@@ -289,7 +366,7 @@ export function NewCasePage() {
 
             <label>
               <Bi id="articleCropField" />
-              <select name="cropId" defaultValue="">
+              <select name="cropId" value={cropId} onChange={(e) => setCropId(e.target.value)}>
                 <option value="">{biInline('selectPlaceholder')}</option>
                 {crops.map((crop) => (
                   <option key={crop.id} value={crop.id}>
@@ -301,11 +378,11 @@ export function NewCasePage() {
 
             <label>
               <Bi id="evidenceNotesField" />
-              <textarea name="evidenceNotes" placeholder={biInline('evidenceNotesField')} rows={3} />
+              <textarea name="evidenceNotes" value={evidenceNotes} onChange={(e) => setEvidenceNotes(e.target.value)} placeholder={biInline('evidenceNotesField')} rows={3} />
             </label>
 
             <label className="checkbox-label">
-              <input type="checkbox" name="requestPriority" />
+              <input type="checkbox" name="requestPriority" checked={requestPriority} onChange={(e) => setRequestPriority(e.target.checked)} />
               <Bi id="requestPriorityLabel" />
             </label>
           </section>

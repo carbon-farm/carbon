@@ -4,15 +4,28 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { bi } from '../../common/i18n';
 
-// A product is "low" at or below this many units. It is a single shop-wide figure for now.
+// A product is "low" at or below this many units unless it has its own level (Product.lowStockAt).
 export const LOW_STOCK_THRESHOLD = 5;
+
+// The level that applies to one product.
+export const thresholdFor = (lowStockAt: number | null | undefined): number => lowStockAt ?? LOW_STOCK_THRESHOLD;
 
 // Is this movement one that should raise a low-stock / out-of-stock alert? Only the moment of
 // crossing the line, so the same product does not alert on every sale below it.
-export function stockAlertKind(before: number, after: number): 'OUT' | 'LOW' | null {
+export function stockAlertKind(before: number, after: number, threshold = LOW_STOCK_THRESHOLD): 'OUT' | 'LOW' | null {
   if (before > 0 && after === 0) return 'OUT';
-  if (before > LOW_STOCK_THRESHOLD && after <= LOW_STOCK_THRESHOLD && after > 0) return 'LOW';
+  if (before > threshold && after <= threshold && after > 0) return 'LOW';
   return null;
+}
+
+// How many to order to be covered for the next `days` days at the recent selling rate, with a
+// quarter extra as a cushion — or null when there is nothing to go on (no recent sales), because
+// guessing a quantity for something that has not sold would just be noise.
+export const SALES_WINDOW_DAYS = 30;
+export function suggestReorder(soldInWindow: number, inStock: number, windowDays = SALES_WINDOW_DAYS, coverDays = SALES_WINDOW_DAYS): number | null {
+  if (soldInWindow <= 0) return null;
+  const perDay = soldInWindow / windowDays;
+  return Math.max(0, Math.ceil(perDay * coverDays * 1.25) - inStock);
 }
 
 // Tells people about stock changes: administrators (and the selling vendor) when something runs
@@ -29,11 +42,11 @@ export class StockAlertsService {
 
   // `before`/`after` are the product's stock around one change that took stock away.
   async afterStockTaken(productId: string, before: number, after: number): Promise<void> {
-    const kind = stockAlertKind(before, after);
-    if (!kind) return;
     try {
       const product = await this.prisma.product.findUnique({ where: { id: productId }, include: { vendor: { select: { userId: true } } } });
       if (!product) return;
+      const kind = stockAlertKind(before, after, thresholdFor(product.lowStockAt));
+      if (!kind) return;
       const title = kind === 'OUT' ? bi('Out of stock', 'స్టాక్ అయిపోయింది') : bi('Running low on stock', 'స్టాక్ తక్కువగా ఉంది');
       const body =
         kind === 'OUT'
@@ -88,10 +101,25 @@ export class StockAlertsService {
 
   // Products at or below the low-stock line (active ones), lowest first — for the administrator's alert list.
   async lowStock() {
-    return this.prisma.product.findMany({
-      where: { isActive: true, stockQuantity: { lte: LOW_STOCK_THRESHOLD } },
+    // Each product has its own line, so compare in code (the catalogue is small).
+    const products = await this.prisma.product.findMany({
+      where: { isActive: true },
       orderBy: [{ stockQuantity: 'asc' }, { name: 'asc' }],
-      select: { id: true, name: true, stockQuantity: true, unit: true, vendorId: true },
+      select: { id: true, name: true, stockQuantity: true, unit: true, vendorId: true, lowStockAt: true },
+    });
+    const low = products.filter((p) => p.stockQuantity <= thresholdFor(p.lowStockAt));
+    if (low.length === 0) return [];
+    // What each has sold lately (cancelled orders do not count), to suggest how much to restock.
+    const since = new Date(Date.now() - SALES_WINDOW_DAYS * 86_400_000);
+    const sold = await this.prisma.orderItem.groupBy({
+      by: ['productId'],
+      where: { productId: { in: low.map((p) => p.id) }, order: { createdAt: { gte: since }, status: { not: 'CANCELLED' } } },
+      _sum: { quantity: true },
+    });
+    const soldBy = new Map(sold.map((s) => [s.productId, s._sum.quantity ?? 0]));
+    return low.map((p) => {
+      const soldRecently = soldBy.get(p.id) ?? 0;
+      return { ...p, soldLast30Days: soldRecently, suggestedReorder: suggestReorder(soldRecently, p.stockQuantity) };
     });
   }
 }
