@@ -643,6 +643,32 @@ export const FAQS: Faq[] = [
     keywords: ['store phone', 'store number', 'phone number of store', 'contact store', 'call the store', 'whatsapp number', 'contact number', 'helpline', 'స్టోర్ ఫోన్', 'స్టోర్ నంబర్', 'సంప్రదించ'],
   },
   {
+    id: 'add-more-items',
+    audience: GUEST_MEMBER,
+    q: { en: 'How do I add several items to my cart?', te: 'కార్ట్‌కు అనేక వస్తువులను ఎలా జోడించాలి?' },
+    a: [
+      {
+        en: 'In the shop, every product has its own quantity box and an “Add to cart” button — choose how many and tap it; you stay on the shop page and see “2 in your cart”. “View cart (n)” at the top shows how many different items are in the cart. In the cart, tap “Add more items” or “Continue shopping” to go back.',
+        te: 'షాప్‌లో ప్రతి వస్తువుకు దాని స్వంత పరిమాణం బాక్స్, “కార్ట్‌కు జోడించండి” బటన్ ఉంటాయి — ఎన్ని కావాలో ఎంచుకుని తాకండి; మీరు షాప్ పేజీలోనే ఉంటారు, “మీ కార్ట్‌లో 2 ఉన్నాయి” కనిపిస్తుంది. పైన “కార్ట్‌ను చూడండి (n)” కార్ట్‌లో ఎన్ని వేర్వేరు వస్తువులు ఉన్నాయో చూపిస్తుంది. కార్ట్‌లో “మరిన్ని వస్తువులు జోడించండి” లేదా “షాపింగ్ కొనసాగించండి” తాకి వెనక్కి వెళ్ళండి.',
+      },
+    ],
+    keywords: ['add more items', 'add items to cart', 'several items', 'multiple items', 'continue shopping', 'add another product', 'more products in cart', 'కార్ట్‌కు జోడించ', 'మరిన్ని వస్తువులు', 'షాపింగ్ కొనసాగించ'],
+    link: { to: '/marketplace', label: { en: 'Open the shop', te: 'షాప్ తెరవండి' } },
+  },
+  {
+    id: 'speak-problem-check',
+    audience: MEMBER,
+    q: { en: 'Can I listen to my recording and record again?', te: 'నా రికార్డింగ్‌ను వినవచ్చా, మళ్లీ రికార్డ్ చేయవచ్చా?' },
+    a: [
+      {
+        en: 'Yes. In Report a problem, tap Speak, say the problem, then tap Stop. A “Check your recording” box opens: play your recording, fix any words we heard wrongly, then tap “Use this” to add it to the description — or “Record again” as many times as you like, or Discard. The recording stays on your phone only for playback; only the words you use are kept. If your phone cannot play it back, the words are still shown.',
+        te: 'అవును. సమస్యను నివేదించండిలో మాట్లాడండి తాకి, సమస్య చెప్పి, ఆపండి తాకండి. “మీ రికార్డింగ్‌ను చూడండి” బాక్స్ తెరుచుకుంటుంది: మీ రికార్డింగ్ వినండి, తప్పుగా విన్న మాటలను సరిచేయండి, తరువాత “దీన్ని ఉపయోగించండి” తాకి వివరణకు జోడించండి — లేదా ఎన్నిసార్లైనా “మళ్లీ రికార్డ్ చేయండి”, లేదా వద్దు తాకండి. రికార్డింగ్ వినడానికి మాత్రమే మీ ఫోన్‌లో ఉంటుంది; మీరు ఉపయోగించిన మాటలు మాత్రమే భద్రపరచబడతాయి. మీ ఫోన్ ప్లే చేయలేకపోతే మాటలు ఇంకా కనిపిస్తాయి.',
+      },
+    ],
+    keywords: ['listen to recording', 'record again', 'recording', 'speak problem', 'voice', 'microphone', 'speak', 'రికార్డ్', 'మాట్లాడ', 'వినవచ్చా'],
+    link: { to: '/cases/new', label: { en: 'Report a problem', te: 'సమస్యను నివేదించండి' } },
+  },
+  {
     id: 'dashboard-advice',
     audience: MEMBER,
     q: { en: 'What is “Recent advice” on my dashboard?', te: 'నా డాష్‌బోర్డ్‌లోని “ఇటీవలి సలహా” ఏమిటి?' },

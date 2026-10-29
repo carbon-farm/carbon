@@ -2150,3 +2150,27 @@ button.chip-on {
 .parcel-soil { display: flex; flex-direction: column; gap: 4px; margin: 10px 0; padding-top: 10px; border-top: 1px solid rgba(127, 127, 127, 0.25); }
 .plain-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
 .button-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Testimonial video: a picture with a play button until tapped (so only one plays at a time) */
+.video-tile {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  padding: 0;
+  border-radius: var(--radius-control);
+  overflow: hidden;
+  background: var(--accent-deep);
+  border: 1px solid var(--card-border);
+  cursor: pointer;
+}
+.video-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* "How many?" + Add to cart on a product in the shop list */
+.quick-add { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.quick-add .qty-stepper { margin-top: 0; }
+.in-cart-note { color: var(--accent-deep); font-weight: 600; }
+
+/* Recording check (Speak your problem) */
+.voice-review { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.voice-review audio { width: 100%; }

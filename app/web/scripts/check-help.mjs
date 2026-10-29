@@ -113,6 +113,8 @@ const cases = [
   ['MEMBER', 'how do I change the crops on my parcel', 'edit-parcel'],
   ['MEMBER', 'how do I ask for a soil test for one parcel', 'parcel-soil-test'],
   ['MEMBER', 'the advice did not work what now', 'advice-did-not-work'],
+  ['MEMBER', 'how do I add several items to my cart', 'add-more-items'],
+  ['MEMBER', 'can I listen to my recording and record again', 'speak-problem-check'],
   ['MEMBER', 'what is the store phone number', 'store-phone'],
   ['EXPERT', 'where can I see my earlier advice on a disputed case', 'expert-history'],
   ['MEMBER', 'what are the seasonal tips', 'seasonal-tips'],

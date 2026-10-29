@@ -6,7 +6,6 @@ import {
   getProduct,
   getCatalogProduct,
   getCatalogReviews,
-  setCartItem,
   toggleWishlist,
   listWishlist,
   getReviews,
@@ -14,7 +13,7 @@ import {
   type Product,
   type ReviewsSummary,
 } from '../api/marketplace';
-import { setGuestCartItem } from '../cart/guestCart';
+import { useCartQuantities } from '../cart/useCartQuantities';
 import { readGuestWishlist, toggleGuestWishlist } from '../cart/guestWishlist';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
@@ -29,6 +28,8 @@ export function ProductDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
+  const cart = useCartQuantities();
+  const [justAdded, setJustAdded] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
   const [wishlistBusy, setWishlistBusy] = useState(false);
   const [reviews, setReviews] = useState<ReviewsSummary | null>(null);
@@ -80,9 +81,10 @@ export function ProductDetailPage() {
     setAddingToCart(true);
     setError(null);
     try {
-      if (session) await setCartItem(session.accessToken, id, quantity);
-      else setGuestCartItem(id, quantity); // signed out: the cart lives in this browser until they sign in
-      navigate('/marketplace/cart');
+      // adds to what is already in the cart; a visitor's cart lives in this browser until they sign in
+      await cart.addMore(id, quantity, product?.stockQuantity ?? quantity);
+      setQuantity(1);
+      setJustAdded(true);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.couldNotAddToCart.en} / ${strings.couldNotAddToCart.te}`);
     } finally {
@@ -178,6 +180,17 @@ export function ProductDetailPage() {
                 <button type="button" onClick={handleAddToCart} disabled={addingToCart}>
                   {addingToCart ? <BiValue value={strings.addingToCart} /> : <Bi id="addToCartButton" />}
                 </button>
+                {justAdded && (
+                  <div className="payment-strip" role="status">
+                    ✓ <BiValue value={strings.addedToCartNotice} />{' '}
+                    <button type="button" className="link-button" onClick={() => navigate('/marketplace/cart')}>
+                      <Bi id="viewCartButton" />
+                    </button>{' · '}
+                    <button type="button" className="link-button" onClick={() => navigate('/marketplace')}>
+                      <Bi id="continueShoppingButton" />
+                    </button>
+                  </div>
+                )}
               </>
             )}
             {canShop && (

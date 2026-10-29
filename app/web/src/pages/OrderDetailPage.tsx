@@ -302,7 +302,7 @@ export function OrderDetailPage() {
           })}
           {(isOwner || isStaff) && (
             <div className="stat-row no-print">
-              {isOwner && (
+              {isOwner && !(order.status === 'PLACED' && order.paymentMethod === 'UPI' && order.paymentStatus !== 'PAID') && (
                 <button type="button" onClick={handleReorder} disabled={reordering}>
                   {reordering ? <BiValue value={strings.addingToCart} /> : <Bi id="reorderButton" />}
                 </button>

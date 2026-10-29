@@ -68,6 +68,7 @@ export function ParcelCard({
     }
   }
 
+  const addedOn = new Date(farm.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   const mine = [...samples].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   return (
@@ -75,6 +76,9 @@ export function ParcelCard({
       {editing ? (
         <form onSubmit={save}>
           {error && <div className="error-banner">{error}</div>}
+          <small className="hint">
+            {strings.parcelAddedOn.en.replace('{date}', addedOn)} / {strings.parcelAddedOn.te.replace('{date}', addedOn)}
+          </small>
           <label>
             <Bi id="parcelLabelField" />
             <input value={label} onChange={(e) => setLabel(e.target.value)} minLength={2} required />
@@ -105,6 +109,9 @@ export function ParcelCard({
           <div className="label">{farm.label}</div>
           <div className="meta">
             {farm.address} · {farm.landSizeAcres} acres · {farm.primaryCrops.join(', ')}
+          </div>
+          <div className="meta">
+            {strings.parcelAddedOn.en.replace('{date}', addedOn)} / {strings.parcelAddedOn.te.replace('{date}', addedOn)}
           </div>
           {farm.latitude != null && farm.longitude != null && (
             <a href={`https://www.google.com/maps?q=${farm.latitude},${farm.longitude}`} target="_blank" rel="noopener noreferrer" className="link-button">

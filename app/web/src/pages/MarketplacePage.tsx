@@ -12,6 +12,8 @@ import {
 } from '../api/marketplace';
 import { readGuestWishlist, toggleGuestWishlist } from '../cart/guestWishlist';
 import { ProductThumb } from '../components/ProductThumb';
+import { QuickAdd } from '../components/QuickAdd';
+import { useCartQuantities } from '../cart/useCartQuantities';
 import { TodayPanel } from '../components/TodayPanel';
 import { buildCategoryTree, categoryName } from '../catalog/categoryTree';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
@@ -29,6 +31,7 @@ export function MarketplacePage() {
   // Hearts: a signed-in member's saved wishlist, or — for a visitor — the ones kept in this browser.
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(() => new Set(readGuestWishlist()));
   const canHeart = !session || session.role === 'MEMBER';
+  const cart = useCartQuantities();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [departmentId, setDepartmentId] = useState('');
@@ -148,7 +151,7 @@ export function MarketplacePage() {
         </div>
         <Link to="/marketplace/cart">
           <button type="button" className="secondary">
-            <Bi id="viewCartButton" />
+            {cart.lines > 0 ? <BiValue value={{ en: strings.viewCartCount.en.replace('{n}', String(cart.lines)), te: strings.viewCartCount.te.replace('{n}', String(cart.lines)) }} /> : <Bi id="viewCartButton" />}
           </button>
         </Link>
       </div>
@@ -255,6 +258,9 @@ export function MarketplacePage() {
               </div>
               {p.stockQuantity === 0 && <BiValue value={strings.outOfStockNotice} as="div" className="status-line" />}
             </Link>
+            {cart.canShop && p.stockQuantity > 0 && (
+              <QuickAdd stock={p.stockQuantity} inCart={cart.quantities[p.id] ?? 0} onAdd={(n) => cart.addMore(p.id, n, p.stockQuantity)} />
+            )}
             {canHeart && (
               <button
                 type="button"
