@@ -40,32 +40,37 @@
   --radius-card: 16px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #131E18;
-    --bg-elevated: #1B2921;
-    --bg-sunk: #1B2921;
-    --card: #23342B;
-    --card-border: #2F4338;
-    --ink: #E2F5E8;
-    --ink-soft: #A7C0B0;
-    --ink-faint: #7E9388;
-    --rule: #2F4338;
-    --accent: #5FA37E;
-    --accent-deep: #487F62;
-    --accent-ink: #EAF3ED;
-    --accent-soft: #223A2D;
-    --warning: #E08A5E;
-    --warning-soft: #3A2A1E;
-    --info: #7FB3AE;
-    --info-soft: #1E3330;
-    --danger: #E08066;
-    --danger-soft: #3A241E;
+/* Light is the default for everyone, whatever the phone/computer's own setting is. The dark palette
+   below is only used if a page is explicitly marked data-theme="dark". */
+:root {
+  color-scheme: light;
+}
 
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
-    --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.45);
-  }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #131E18;
+  --bg-elevated: #1B2921;
+  --bg-sunk: #1B2921;
+  --card: #23342B;
+  --card-border: #2F4338;
+  --ink: #E2F5E8;
+  --ink-soft: #A7C0B0;
+  --ink-faint: #7E9388;
+  --rule: #2F4338;
+  --accent: #5FA37E;
+  --accent-deep: #487F62;
+  --accent-ink: #EAF3ED;
+  --accent-soft: #223A2D;
+  --warning: #E08A5E;
+  --warning-soft: #3A2A1E;
+  --info: #7FB3AE;
+  --info-soft: #1E3330;
+  --danger: #E08066;
+  --danger-soft: #3A241E;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.45);
 }
 
 * {
@@ -1340,12 +1345,34 @@ button.case-item:hover:not(:disabled) {
   flex-direction: column;
   gap: 2px;
 }
+/* The card is the box (picture, name, price, then "How many? / Add to cart" at the bottom), so the
+   buttons always sit inside it and line up across a row. */
 .product-card {
   position: relative;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-control);
+  padding: 12px 14px;
+  background: var(--card);
+  transition: box-shadow 0.15s var(--ease), border-color 0.15s var(--ease);
+}
+.product-card:hover {
+  box-shadow: var(--shadow-md);
 }
 .product-card .product-tile {
-  height: 100%;
+  flex: 1;
+  border: 0;
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+}
+.product-card .quick-add {
+  margin-top: auto;
 }
 .heart-btn {
   position: absolute;
