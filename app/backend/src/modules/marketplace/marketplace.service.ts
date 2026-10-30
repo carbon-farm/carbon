@@ -627,6 +627,7 @@ export class MarketplaceService {
               productId: item.productId,
               vendorId: item.product.vendorId,
               productName: item.product.name,
+              unit: item.product.unit,
               unitPrice: item.product.price,
               quantity: item.quantity,
               lineTotal,

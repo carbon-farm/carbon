@@ -510,8 +510,8 @@ export const FAQS: Faq[] = [
     q: { en: 'I cannot type well — how else can I describe the problem?', te: 'నేను బాగా టైప్ చేయలేను — సమస్యను ఇంకెలా వివరించాలి?' },
     a: [
       {
-        en: 'Tap the symptom pictures on the New case screen (yellow leaves, spots, wilting, insects, and more). Everything you tap is written into your case in English and Telugu for you. Add photos, and speak a few words if you like.',
-        te: 'కొత్త కేసు స్క్రీన్‌లోని లక్షణాల చిత్రాలను తాకండి (పసుపు ఆకులు, మచ్చలు, వాడిపోవడం, పురుగులు, ఇంకా). మీరు తాకినవన్నీ మీ కోసం ఇంగ్లీష్, తెలుగులో మీ కేసులో రాయబడతాయి. ఫోటోలు జోడించండి, కావాలంటే కొన్ని మాటలు మాట్లాడండి.',
+        en: 'On the “Tell us your problem” screen, tap the questions that match what you see (yellow leaves, spots, wilting, insects, and more), then tap an answer for your soil, weeds, water and how you have farmed so far — tap an answer again to clear it. Everything you tap is written into your case in English and Telugu for you. Add photos, and speak a few words if you like.',
+        te: '“మీ సమస్యను తెలియజేయండి” స్క్రీన్‌లో, మీకు కనిపించేదానికి సరిపోయే ప్రశ్నలను తాకండి (పసుపు ఆకులు, మచ్చలు, వాడిపోవడం, పురుగులు, ఇంకా), తరువాత మీ నేల, కలుపు, నీరు, ఇప్పటివరకు సాగు విధానం కోసం ఒక సమాధానం తాకండి — సమాధానాన్ని మళ్ళీ తాకితే తొలగుతుంది. మీరు తాకినవన్నీ మీ కోసం ఇంగ్లీష్, తెలుగులో మీ కేసులో రాయబడతాయి. ఫోటోలు జోడించండి, కావాలంటే కొన్ని మాటలు మాట్లాడండి.',
       },
     ],
     keywords: ['cannot type', "can't type", 'cant type', 'not able to type', 'symptom', 'symptoms', 'describe problem', 'low literacy', 'టైప్ చేయలేను', 'లక్షణాలు', 'వివరించాలి'],

@@ -273,7 +273,8 @@ export function OrderDetailPage() {
               <div className="farm-item" key={item.id}>
                 <div className="label">{item.productName}</div>
                 <div className="meta">
-                  {item.quantity} × ₹{item.unitPrice.toFixed(2)} = ₹{item.lineTotal.toFixed(2)}
+                  {item.quantity} × ₹{item.unitPrice.toFixed(2)}
+                  {item.unit ? ` ${item.unit}` : ''} = ₹{item.lineTotal.toFixed(2)}
                 </div>
                 <div className="status-line">
                   {itemStatus.en} / {itemStatus.te}

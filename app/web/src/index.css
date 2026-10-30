@@ -1362,7 +1362,8 @@ button.case-item:hover:not(:disabled) {
 .product-card:hover {
   box-shadow: var(--shadow-md);
 }
-.product-card .product-tile {
+.product-card .product-tile,
+.product-card a.product-tile:hover {
   flex: 1;
   border: 0;
   padding: 0;

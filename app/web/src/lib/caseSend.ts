@@ -1,19 +1,27 @@
 import { ApiError } from '../api/client';
 import { createCaseDraft, submitCase, uploadCaseEvidence } from '../api/cases';
-import { SYMPTOMS } from '../help/caseSymptoms';
+import { CHOICE_QUESTIONS, LEGACY_SYMPTOM_LABELS, SYMPTOMS } from '../help/caseSymptoms';
 import { strings } from '../i18n/strings';
 import { shrinkImage } from './image';
 import type { CaseDraftFields } from './draftStore';
 
-// The text sent to the expert: the ticked symptoms (written in English and Telugu) then the
-// farmer's own words.
-export function buildDescription(symptomIds: string[], description: string): string {
+// The text sent to the expert: the ticked symptoms, the answers to the pick-one questions (all
+// written in English and Telugu), then the farmer's own words.
+export function buildDescription(symptomIds: string[], answers: Record<string, string>, description: string): string {
   const symptomText = symptomIds
-    .map((id) => SYMPTOMS.find((s) => s.id === id))
-    .filter((s): s is (typeof SYMPTOMS)[number] => !!s)
-    .map((s) => `${s.label.en} (${s.label.te})`)
+    .map((id) => SYMPTOMS.find((s) => s.id === id)?.label ?? LEGACY_SYMPTOM_LABELS[id])
+    .filter((label): label is NonNullable<typeof label> => !!label)
+    .map((label) => `${label.en} (${label.te})`)
     .join('; ');
-  return [symptomText && `${strings.caseSymptomsPrefix.en} / ${strings.caseSymptomsPrefix.te}: ${symptomText}.`, description.trim()]
+  const answerText = CHOICE_QUESTIONS.flatMap((q) => {
+    const option = q.options.find((o) => o.id === answers[q.id]);
+    return option ? [`${q.summary.en} / ${q.summary.te}: ${option.label.en} (${option.label.te})`] : [];
+  }).join('; ');
+  return [
+    symptomText && `${strings.caseSymptomsPrefix.en} / ${strings.caseSymptomsPrefix.te}: ${symptomText}.`,
+    answerText && `${strings.caseAnswersPrefix.en} / ${strings.caseAnswersPrefix.te}: ${answerText}.`,
+    description.trim(),
+  ]
     .filter(Boolean)
     .join('\n');
 }
@@ -41,7 +49,7 @@ export async function sendCase(token: string, fields: CaseDraftFields, photos: F
     cropId: fields.cropId || undefined,
     cropName: !fields.cropId && fields.cropName?.trim() ? fields.cropName.trim() : undefined,
     relatedCaseId: fields.relatedCaseId || undefined,
-    problemDescription: buildDescription(fields.symptoms, fields.description),
+    problemDescription: buildDescription(fields.symptoms, fields.answers ?? {}, fields.description),
     evidenceNotes: fields.evidenceNotes || undefined,
     requestPriority: fields.requestPriority,
   });

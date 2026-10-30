@@ -109,6 +109,8 @@ export interface OrderItemEntry {
   id: string;
   productId: string;
   productName: string;
+  // "per kg", "per bag" … as sold; missing on very old orders
+  unit?: string | null;
   unitPrice: number;
   quantity: number;
   lineTotal: number;

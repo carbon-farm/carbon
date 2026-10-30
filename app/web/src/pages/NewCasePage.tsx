@@ -8,7 +8,8 @@ import { listCaseCategories, listCrops, type CaseCategory, type Crop } from '../
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, caseCategoryLabel } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
-import { SYMPTOMS } from '../help/caseSymptoms';
+import { FIELD_QUESTIONS, LEGACY_SYMPTOM_LABELS, SOIL_QUESTIONS, SYMPTOMS } from '../help/caseSymptoms';
+import { ChoiceQuestions } from '../components/ChoiceQuestions';
 import { VoiceInput } from '../components/VoiceInput';
 import { buildDescription, isNetworkFailure, sendCase } from '../lib/caseSend';
 import { clearDraft, draftKeyFor, isEmptyDraft, loadDraft, saveDraft, type CaseDraftFields } from '../lib/draftStore';
@@ -48,6 +49,7 @@ export function NewCasePage() {
   const [busy, setBusy] = useState<'draft' | 'submit' | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [symptoms, setSymptoms] = useState<string[]>([]);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [description, setDescription] = useState('');
   const [farmLandId, setFarmLandId] = useState('');
   const [categoryId, setCategoryId] = useState('');
@@ -95,10 +97,14 @@ export function NewCasePage() {
         setCropId(d.fields.cropId);
         setCropName(d.fields.cropName ?? '');
         setOtherCrop(!!d.fields.cropName?.trim());
-        setDescription(d.fields.description);
         setEvidenceNotes(d.fields.evidenceNotes);
         setRequestPriority(d.fields.requestPriority);
-        setSymptoms(d.fields.symptoms);
+        // a draft kept from before some buttons were reworded may name ones that no longer exist:
+        // weeds became a question, and the soil button is now written into the description
+        setSymptoms(d.fields.symptoms.filter((id) => SYMPTOMS.some((s) => s.id === id)));
+        setAnswers({ ...(d.fields.symptoms.includes('weeds') ? { weeds: 'high' } : {}), ...(d.fields.answers ?? {}) });
+        const soil = d.fields.symptoms.includes('soil') ? `${LEGACY_SYMPTOM_LABELS.soil.en} / ${LEGACY_SYMPTOM_LABELS.soil.te}` : '';
+        setDescription(soil && !d.fields.description.includes(soil) ? [d.fields.description, soil].filter(Boolean).join('\n') : d.fields.description);
         setPhotos(d.photos.map(photoFrom));
         setRestored(!isEmptyDraft(d.fields, d.photos));
       }
@@ -151,8 +157,8 @@ export function NewCasePage() {
   useEffect(() => () => photos.forEach((p) => URL.revokeObjectURL(p.url)), [photos]);
 
   const fields: CaseDraftFields = useMemo(
-    () => ({ farmLandId, categoryId, cropId, cropName, relatedCaseId, description, evidenceNotes, requestPriority, symptoms }),
-    [farmLandId, categoryId, cropId, cropName, relatedCaseId, description, evidenceNotes, requestPriority, symptoms],
+    () => ({ farmLandId, categoryId, cropId, cropName, relatedCaseId, description, evidenceNotes, requestPriority, symptoms, answers }),
+    [farmLandId, categoryId, cropId, cropName, relatedCaseId, description, evidenceNotes, requestPriority, symptoms, answers],
   );
 
   // Keep what is on the screen safe on the phone as it changes.
@@ -189,10 +195,21 @@ export function NewCasePage() {
     setSymptoms((prev) => (prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]));
   }
 
+  // Tap an answer to choose it, tap it again to clear it.
+  function pickAnswer(questionId: string, optionId: string) {
+    setAnswers((prev) => {
+      const next = { ...prev };
+      if (next[questionId] === optionId) delete next[questionId];
+      else next[questionId] = optionId;
+      return next;
+    });
+  }
+
   function startOver() {
     photos.forEach((p) => URL.revokeObjectURL(p.url));
     setPhotos([]);
     setSymptoms([]);
+    setAnswers({});
     setDescription('');
     setFarmLandId('');
     setCategoryId('');
@@ -207,7 +224,8 @@ export function NewCasePage() {
     if (draftKey) void clearDraft(draftKey);
   }
 
-  const fullDescription = buildDescription(symptoms, description);
+  // The field answers alone do not describe a problem: a symptom or some words are still needed.
+  const fullDescription = buildDescription(symptoms, {}, description);
 
   async function handleAction(thenSubmit: boolean) {
     const form = formRef.current;
@@ -344,11 +362,13 @@ export function NewCasePage() {
                   <span className="symptom-icon" aria-hidden="true">
                     {s.icon}
                   </span>
-                  <span className="bi-en">{s.label.en}</span>
-                  <span className="bi-te">{s.label.te}</span>
+                  <span className="bi-en">{s.question.en}</span>
+                  <span className="bi-te">{s.question.te}</span>
                 </button>
               ))}
             </div>
+
+            <ChoiceQuestions questions={SOIL_QUESTIONS} answers={answers} onPick={pickAnswer} />
 
             <label>
               <Bi id="problemDescriptionField" />
@@ -371,6 +391,7 @@ export function NewCasePage() {
 
           <section className="card case-step">
             <Bi id="caseDetailsHeading" as="h2" />
+            <ChoiceQuestions questions={FIELD_QUESTIONS} answers={answers} onPick={pickAnswer} />
             <label>
               <Bi id="farmLandFieldLabel" />
               <select

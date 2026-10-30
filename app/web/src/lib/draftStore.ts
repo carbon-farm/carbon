@@ -18,6 +18,8 @@ export interface CaseDraftFields {
   evidenceNotes: string;
   requestPriority: boolean;
   symptoms: string[];
+  // Answers to the pick-one questions (soil, weeds, water, farming so far): question id → option id.
+  answers?: Record<string, string>;
 }
 
 export interface CaseDraft {
@@ -93,5 +95,5 @@ export async function clearDraft(key: string): Promise<void> {
 
 // True when there is nothing worth keeping.
 export function isEmptyDraft(f: CaseDraftFields, photos: File[]): boolean {
-  return !f.description.trim() && !f.evidenceNotes.trim() && f.symptoms.length === 0 && photos.length === 0 && !f.farmLandId && !f.categoryId && !f.cropId && !f.cropName?.trim();
+  return !f.description.trim() && !f.evidenceNotes.trim() && f.symptoms.length === 0 && Object.keys(f.answers ?? {}).length === 0 && photos.length === 0 && !f.farmLandId && !f.categoryId && !f.cropId && !f.cropName?.trim();
 }

@@ -816,6 +816,8 @@ model OrderItem {
   product        Product        @relation(fields: [productId], references: [id])
   vendorId       String?
   productName    String
+  // "per kg", "per bag" … as it was on the product when ordered (null on orders from before this existed)
+  unit           String?
   unitPrice      Float
   quantity       Int
   lineTotal      Float

@@ -103,7 +103,10 @@ export function OrderReceiptPage() {
                 <tr key={i.id}>
                   <td>{i.productName}</td>
                   <td>{i.quantity}</td>
-                  <td>₹{i.unitPrice.toFixed(2)}</td>
+                  <td>
+                    ₹{i.unitPrice.toFixed(2)}
+                    {i.unit ? ` ${i.unit}` : ''}
+                  </td>
                   <td>₹{i.lineTotal.toFixed(2)}</td>
                 </tr>
               ))}

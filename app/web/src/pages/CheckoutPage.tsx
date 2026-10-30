@@ -168,6 +168,10 @@ export function CheckoutPage() {
                 <div className="summary-line" key={item.id}>
                   <span>
                     {item.product.name} × {item.quantity}
+                    <small className="hint">
+                      {' '}
+                      (₹{item.product.price.toFixed(2)} {item.product.unit})
+                    </small>
                   </span>
                   <span>₹{(item.product.price * item.quantity).toFixed(2)}</span>
                 </div>

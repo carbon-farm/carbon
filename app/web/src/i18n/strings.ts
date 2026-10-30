@@ -197,7 +197,7 @@ const stringsDef = {
 
   // New Case form
   newCaseEyebrow: { en: 'New case', te: 'కొత్త కేసు' },
-  newCaseTitle: { en: 'Report a problem', te: 'సమస్యను నివేదించండి' },
+  newCaseTitle: { en: 'Tell us your problem', te: 'మీ సమస్యను తెలియజేయండి' },
   farmLandFieldLabel: { en: 'Which parcel?', te: 'ఏ స్థలం?' },
   categoryFieldLabel: { en: 'What kind of problem?', te: 'ఎలాంటి సమస్య?' },
   selectPlaceholder: { en: 'Select…', te: 'ఎంచుకోండి…' },
@@ -1144,7 +1144,7 @@ const stringsDef = {
   usageScreenColumn: { en: 'Screen', te: 'స్క్రీన్' },
   usageAnswerColumn: { en: 'Answer (FAQ id)', te: 'సమాధానం (FAQ id)' },
   usageTourColumn: { en: 'Outcome', te: 'ఫలితం' },
-  casePhotosHeading: { en: '1. Take photos', te: '1. ఫోటోలు తీయండి' },
+  casePhotosHeading: { en: '1. Take photos of your problem and upload them', te: '1. మీ సమస్య ఫోటోలు తీసి అప్‌లోడ్ చేయండి' },
   casePhotosHint: {
     en: 'Photos of the leaves, fruit or soil let an expert see the problem. Up to 6. Take a close photo of the worst part and one of the whole plant.',
     te: 'ఆకులు, కాయలు లేదా నేల ఫోటోలు నిపుణుడికి సమస్యను చూపిస్తాయి. 6 వరకు. ఎక్కువ దెబ్బతిన్న భాగం యొక్క దగ్గరి ఫోటో, మొత్తం మొక్క ఫోటో తీయండి.',
@@ -1157,13 +1157,14 @@ const stringsDef = {
     te: 'మీ కేసు సేవ్ అయింది, కానీ {n} ఫోటో(లు) అప్‌లోడ్ కాలేదు. వాటిని మళ్ళీ జోడించడానికి కేసును తెరవండి.',
   },
   openMyCaseLink: { en: 'Open my case', te: 'నా కేసును తెరవండి' },
-  caseSymptomsHeading: { en: '2. What do you see?', te: '2. మీకు ఏమి కనిపిస్తోంది?' },
+  caseSymptomsHeading: { en: '2. Select your problems', te: '2. మీ సమస్యలను ఎంచుకోండి' },
   caseSymptomsHint: {
     en: 'Tap everything that fits, then add words if you like — type it, or tap the microphone and speak.',
     te: 'సరిపోయినవన్నీ తాకండి, కావాలంటే మాటలు జోడించండి — టైప్ చేయండి, లేదా మైక్రోఫోన్ తాకి మాట్లాడండి.',
   },
   caseSymptomsPrefix: { en: 'Symptoms', te: 'లక్షణాలు' },
-  caseDetailsHeading: { en: '3. Details', te: '3. వివరాలు' },
+  caseAnswersPrefix: { en: 'About the field', te: 'పొలం గురించి' },
+  caseDetailsHeading: { en: '3. More details we need', te: '3. మాకు మరికొన్ని వివరాలు చెప్పండి' },
   describeProblemRequired: {
     en: 'Tap at least one symptom or describe the problem in a few words.',
     te: 'కనీసం ఒక లక్షణాన్ని తాకండి లేదా సమస్యను కొన్ని మాటల్లో వివరించండి.',
