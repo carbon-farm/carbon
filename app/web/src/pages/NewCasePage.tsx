@@ -11,6 +11,8 @@ import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation
 import { FIELD_QUESTIONS, LEGACY_SYMPTOM_LABELS, SOIL_QUESTIONS, SYMPTOMS } from '../help/caseSymptoms';
 import { ChoiceQuestions } from '../components/ChoiceQuestions';
 import { VoiceInput } from '../components/VoiceInput';
+import { CropSelect } from '../components/CropSelect';
+import { cropLabel } from '../lib/crops';
 import { buildDescription, isNetworkFailure, sendCase } from '../lib/caseSend';
 import { clearDraft, draftKeyFor, isEmptyDraft, loadDraft, saveDraft, type CaseDraftFields } from '../lib/draftStore';
 
@@ -452,18 +454,20 @@ export function NewCasePage() {
                     const on = (cropId && crops.find((c) => c.id === cropId)?.name.toLowerCase() === name.trim().toLowerCase()) || (!cropId && cropName.trim().toLowerCase() === name.trim().toLowerCase());
                     return (
                       <button key={name} type="button" className={on ? 'chip-on' : 'secondary'} aria-pressed={!!on} onClick={() => pickParcelCrop(name)}>
-                        {name}
+                        {cropLabel(crops.find((c) => c.name.trim().toLowerCase() === name.trim().toLowerCase()) ?? { name })}
                       </button>
                     );
                   })}
                 </div>
               )}
-              <select
+              <CropSelect
+                crops={crops}
                 name="cropId"
-                aria-label={biInline('articleCropField')}
+                ariaLabel={biInline('articleCropField')}
                 value={cropSelectValue}
-                onChange={(e) => {
-                  const v = e.target.value;
+                emptyLabel={biInline('selectPlaceholder')}
+                extraOptions={[{ value: OTHER_CROP, label: biInline('cropOtherOption') }]}
+                onChange={(v) => {
                   if (v === OTHER_CROP) {
                     setCropId('');
                     setOtherCrop(true);
@@ -473,15 +477,7 @@ export function NewCasePage() {
                     setOtherCrop(false);
                   }
                 }}
-              >
-                <option value="">{biInline('selectPlaceholder')}</option>
-                {crops.map((crop) => (
-                  <option key={crop.id} value={crop.id}>
-                    {crop.name}
-                  </option>
-                ))}
-                <option value={OTHER_CROP}>{biInline('cropOtherOption')}</option>
-              </select>
+              />
               {cropSelectValue === OTHER_CROP && (
                 <input
                   type="text"

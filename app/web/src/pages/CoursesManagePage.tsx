@@ -4,6 +4,7 @@ import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { listAllCoursesForStaff, createCourse, publishCourse, unpublishCourse, type Course } from '../api/learning';
 import { listCrops, type Crop } from '../api/configuration';
+import { CropSelect } from '../components/CropSelect';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, courseStatusLabel } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
@@ -125,14 +126,7 @@ export function CoursesManagePage() {
             </label>
             <label>
               <Bi id="articleCropField" />
-              <select name="cropId" defaultValue="">
-                <option value="">{biInline('selectPlaceholder')}</option>
-                {crops.map((crop) => (
-                  <option key={crop.id} value={crop.id}>
-                    {crop.name}
-                  </option>
-                ))}
-              </select>
+              <CropSelect crops={crops} name="cropId" emptyLabel={biInline('selectPlaceholder')} ariaLabel={biInline('articleCropField')} />
             </label>
             <button type="button" onClick={handleCreate} disabled={creating}>
               {creating ? <BiValue value={strings.creatingCourse} /> : <Bi id="createCourseButton" />}

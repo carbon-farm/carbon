@@ -4,6 +4,7 @@ import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { getArticle, updateArticleDraft, submitArticle, type Article } from '../api/knowledge';
 import { listCrops, listTags, type Crop, type Tag } from '../api/configuration';
+import { CropSelect } from '../components/CropSelect';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, articleStatusLabel } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
@@ -146,14 +147,7 @@ export function ArticleEditPage() {
               </label>
               <label>
                 <Bi id="articleCropField" />
-                <select name="cropId" defaultValue={article.cropId ?? ''}>
-                  <option value="">{biInline('selectPlaceholder')}</option>
-                  {crops.map((crop) => (
-                    <option key={crop.id} value={crop.id}>
-                      {crop.name}
-                    </option>
-                  ))}
-                </select>
+                <CropSelect crops={crops} name="cropId" defaultValue={article.cropId ?? ''} emptyLabel={biInline('selectPlaceholder')} ariaLabel={biInline('articleCropField')} />
               </label>
               <label>
                 <Bi id="articleSymptomsField" />

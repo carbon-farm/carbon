@@ -669,6 +669,19 @@ export const FAQS: Faq[] = [
     link: { to: '/cases/new', label: { en: 'Report a problem', te: 'సమస్యను నివేదించండి' } },
   },
   {
+    id: 'find-my-crop',
+    audience: MEMBER,
+    q: { en: 'How do I find my crop in the long list?', te: 'పొడవైన జాబితాలో నా పంటను ఎలా కనుగొనాలి?' },
+    a: [
+      {
+        en: 'Crops are grouped — vegetables, field crops, pulses, oil seeds, flowers, fruit plants, medicinal plants and more — and each is shown in English and Telugu, like “Tomato / టమోటా”. Type a few letters of the crop’s name in English or Telugu in the search box above the list and the list narrows down. When you add a parcel, the crops sit in folded groups: tap a group to open it, or just search. Your chosen crops stay at the top. If your crop is not there, type its name in the box below and tap Add.',
+        te: 'పంటలు సమూహాలుగా ఉంటాయి — కూరగాయలు, పొల పంటలు, పప్పు ధాన్యాలు, నూనె గింజలు, పూలు, పండ్ల మొక్కలు, ఔషధ మొక్కలు ఇంకా — ప్రతి పంట “Tomato / టమోటా” లాగా ఇంగ్లీష్, తెలుగులో కనిపిస్తుంది. జాబితా పైన ఉన్న వెతుకు బాక్స్‌లో పంట పేరులోని కొన్ని అక్షరాలను ఇంగ్లీష్ లేదా తెలుగులో టైప్ చేయండి, జాబితా తగ్గుతుంది. స్థలాన్ని జోడించేటప్పుడు పంటలు మడతపెట్టిన సమూహాలలో ఉంటాయి: ఒక సమూహాన్ని తాకి తెరవండి, లేదా వెతకండి. ఎంచుకున్న పంటలు పైన ఉంటాయి. మీ పంట లేకపోతే, క్రింద ఉన్న బాక్స్‌లో దాని పేరు టైప్ చేసి జోడించండి తాకండి.',
+      },
+    ],
+    keywords: ['find my crop', 'crop list', 'search crop', 'crop not in list', 'which crops', 'crop group', 'crop telugu name', 'పంట దొరకలేదు', 'పంటల జాబితా', 'పంట వెతకండి', 'నా పంటను', 'పంటను ఎలా కనుగొనాలి', 'పొడవైన జాబితాలో', 'జాబితాలో నా పంట', 'పంటను కనుగొనాలి'],
+    link: { to: '/dashboard', label: { en: 'Open my parcels', te: 'నా స్థలాలను తెరవండి' } },
+  },
+  {
     id: 'dashboard-advice',
     audience: MEMBER,
     q: { en: 'What is “Recent advice” on my dashboard?', te: 'నా డాష్‌బోర్డ్‌లోని “ఇటీవలి సలహా” ఏమిటి?' },

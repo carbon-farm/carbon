@@ -1,8 +1,11 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { ConfigurationService } from './configuration.service';
 import { CreateTaxonomyItemDto } from './dto/create-taxonomy-item.dto';
 import { CreateRegionDto } from './dto/create-region.dto';
+import { CreateCropDto } from './dto/create-crop.dto';
+import { UpdateCropDto } from './dto/update-crop.dto';
+import { CreateCropCategoryDto, UpdateCropCategoryDto } from './dto/crop-category.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -22,8 +25,31 @@ export class ConfigurationController {
 
   @Roles(Role.ADMINISTRATOR)
   @Post('crops')
-  createCrop(@Body() dto: CreateTaxonomyItemDto, @CurrentUser() user: AuthenticatedUser) {
+  createCrop(@Body() dto: CreateCropDto, @CurrentUser() user: AuthenticatedUser) {
     return this.configurationService.createCrop(dto, user.userId);
+  }
+
+  @Roles(Role.ADMINISTRATOR)
+  @Patch('crops/:id')
+  updateCrop(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateCropDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.configurationService.updateCrop(id, dto, user.userId);
+  }
+
+  @Get('crop-categories')
+  listCropCategories() {
+    return this.configurationService.listCropCategories();
+  }
+
+  @Roles(Role.ADMINISTRATOR)
+  @Post('crop-categories')
+  createCropCategory(@Body() dto: CreateCropCategoryDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.configurationService.createCropCategory(dto, user.userId);
+  }
+
+  @Roles(Role.ADMINISTRATOR)
+  @Patch('crop-categories/:id')
+  updateCropCategory(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateCropCategoryDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.configurationService.updateCropCategory(id, dto, user.userId);
   }
 
   @Get('case-categories')

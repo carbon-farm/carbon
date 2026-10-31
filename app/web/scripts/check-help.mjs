@@ -114,6 +114,7 @@ const cases = [
   ['MEMBER', 'how do I ask for a soil test for one parcel', 'parcel-soil-test'],
   ['MEMBER', 'the advice did not work what now', 'advice-did-not-work'],
   ['MEMBER', 'how do I add several items to my cart', 'add-more-items'],
+  ['MEMBER', 'how do I find my crop in the long list', 'find-my-crop'],
   ['MEMBER', 'can I listen to my recording and record again', 'speak-problem-check'],
   ['MEMBER', 'what is the store phone number', 'store-phone'],
   ['EXPERT', 'where can I see my earlier advice on a disputed case', 'expert-history'],

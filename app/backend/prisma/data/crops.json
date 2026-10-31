@@ -1,0 +1,1254 @@
+[
+  {
+    "name": "Acorus",
+    "nameTe": "వచ",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Agakarakaya",
+    "nameTe": "ఆగాకరకాయ",
+    "categories": [
+      "veg-gourds"
+    ]
+  },
+  {
+    "name": "Agarwood",
+    "nameTe": "అగర్‌వుడ్",
+    "categories": [
+      "hardwood"
+    ]
+  },
+  {
+    "name": "Ajwain",
+    "nameTe": "వాము",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Almond",
+    "nameTe": "బాదం",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Aloe Vera",
+    "nameTe": "కలబంద",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Amaranthus",
+    "nameTe": "తోటకూర",
+    "categories": [
+      "veg-leafy"
+    ]
+  },
+  {
+    "name": "Annona Reticulata",
+    "nameTe": "రామఫలం",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Apple",
+    "nameTe": "ఆపిల్",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Ash Gourd",
+    "nameTe": "బూడిద గుమ్మడికాయ",
+    "categories": [
+      "veg-gourds"
+    ]
+  },
+  {
+    "name": "Ashwagandha",
+    "nameTe": "అశ్వగంధ",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Avocado",
+    "nameTe": "అవకాడో",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Bael",
+    "nameTe": "మారేడు",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Bael Fruit",
+    "nameTe": "బిల్వం",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Bamboo",
+    "nameTe": "వెదురు",
+    "categories": [
+      "commercial"
+    ]
+  },
+  {
+    "name": "Banana",
+    "nameTe": "అరటి",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Barnyard Millet",
+    "nameTe": "ఊదలు",
+    "categories": [
+      "field"
+    ]
+  },
+  {
+    "name": "Beetroot",
+    "nameTe": "బీట్‌రూట్",
+    "categories": [
+      "veg-root"
+    ]
+  },
+  {
+    "name": "Ber",
+    "nameTe": "రేగు",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Bhringraj",
+    "nameTe": "భృంగరాజు",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Bitter Gourd",
+    "nameTe": "కాకరకాయ",
+    "categories": [
+      "veg-gourds"
+    ]
+  },
+  {
+    "name": "Black Cumin",
+    "nameTe": "నల్ల జీలకర్ర",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Black Gram",
+    "nameTe": "మినుము",
+    "categories": [
+      "pulses"
+    ]
+  },
+  {
+    "name": "Black Pepper",
+    "nameTe": "మిరియాలు",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Black Sesame",
+    "nameTe": "నల్ల నువ్వులు",
+    "categories": [
+      "oilseeds"
+    ]
+  },
+  {
+    "name": "Bottle Gourd",
+    "nameTe": "సొరకాయ",
+    "categories": [
+      "veg-gourds"
+    ]
+  },
+  {
+    "name": "Brahmi",
+    "nameTe": "బ్రాహ్మి",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Brinjal",
+    "nameTe": "వంకాయ",
+    "categories": [
+      "veg-fruiting"
+    ]
+  },
+  {
+    "name": "Broad Beans",
+    "nameTe": "చిక్కుడు",
+    "categories": [
+      "veg-beans"
+    ]
+  },
+  {
+    "name": "Broccoli",
+    "nameTe": "బ్రొక్కోలి",
+    "categories": [
+      "veg-cole"
+    ]
+  },
+  {
+    "name": "Browntop Millet",
+    "nameTe": "అండ్రు కొర్రలు",
+    "categories": [
+      "field"
+    ]
+  },
+  {
+    "name": "Cabbage",
+    "nameTe": "క్యాబేజీ",
+    "categories": [
+      "veg-cole"
+    ]
+  },
+  {
+    "name": "Capsicum",
+    "nameTe": "క్యాప్సికం",
+    "categories": [
+      "veg-fruiting"
+    ]
+  },
+  {
+    "name": "Carrot",
+    "nameTe": "క్యారెట్",
+    "categories": [
+      "veg-root"
+    ]
+  },
+  {
+    "name": "Cashew Apple",
+    "nameTe": "జీడిమామిడి",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Castor",
+    "nameTe": "ఆముదం",
+    "categories": [
+      "oilseeds"
+    ]
+  },
+  {
+    "name": "Cauliflower",
+    "nameTe": "కాలీఫ్లవర్",
+    "categories": [
+      "veg-cole"
+    ]
+  },
+  {
+    "name": "Cedar",
+    "nameTe": "సీడార్",
+    "categories": [
+      "hardwood"
+    ]
+  },
+  {
+    "name": "Chakravarthi Kura",
+    "nameTe": "చక్రవర్తి కూర",
+    "categories": [
+      "veg-leafy"
+    ]
+  },
+  {
+    "name": "Cherry",
+    "nameTe": "చెర్రీ",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Chickpea",
+    "nameTe": "శనగలు",
+    "categories": [
+      "pulses"
+    ]
+  },
+  {
+    "name": "Chilli",
+    "nameTe": "మిర్చి",
+    "categories": [
+      "veg-fruiting"
+    ]
+  },
+  {
+    "name": "Chirayata",
+    "nameTe": "నేల వేము",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Chrysanthemum",
+    "nameTe": "చామంతి",
+    "categories": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Chukka Kura",
+    "nameTe": "చుక్కకూర",
+    "categories": [
+      "veg-leafy"
+    ]
+  },
+  {
+    "name": "Cinnamon",
+    "nameTe": "దాల్చిన చెక్క",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Cloves",
+    "nameTe": "లవంగాలు",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Cluster Beans",
+    "nameTe": "గోరుచిక్కుడు",
+    "categories": [
+      "veg-beans"
+    ]
+  },
+  {
+    "name": "Cocoa",
+    "nameTe": "కోకో",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Coconut",
+    "nameTe": "కొబ్బరి",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Coriander (leaf)",
+    "nameTe": "కొత్తిమీర",
+    "categories": [
+      "veg-leafy"
+    ]
+  },
+  {
+    "name": "Coriander (seed)",
+    "nameTe": "ధనియాలు",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Cotton",
+    "nameTe": "పత్తి",
+    "categories": [
+      "commercial"
+    ]
+  },
+  {
+    "name": "Crossandra",
+    "nameTe": "కంకాంబరాలు",
+    "categories": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Cucumber",
+    "nameTe": "దోసకాయ / కీరదోస",
+    "categories": [
+      "veg-gourds"
+    ]
+  },
+  {
+    "name": "Cumin",
+    "nameTe": "జీలకర్ర",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Curry Leaves",
+    "nameTe": "కరివేపాకు",
+    "categories": [
+      "veg-leafy",
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Custard Apple",
+    "nameTe": "సీతాఫలం",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Date Palm",
+    "nameTe": "ఖర్జూరం",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Datura",
+    "nameTe": "ఉమ్మెత్త",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Dragon Fruit",
+    "nameTe": "డ్రాగన్ ఫ్రూట్",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Drumstick",
+    "nameTe": "మునగకాడ",
+    "categories": [
+      "veg-fruiting"
+    ]
+  },
+  {
+    "name": "Dry Ginger",
+    "nameTe": "శొంఠి",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Eucalyptus",
+    "nameTe": "నేలగిరి",
+    "categories": [
+      "aromatic"
+    ]
+  },
+  {
+    "name": "Fennel",
+    "nameTe": "సోంపు",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Fenugreek (leaf)",
+    "nameTe": "మెంతి",
+    "categories": [
+      "veg-leafy"
+    ]
+  },
+  {
+    "name": "Fenugreek (seed)",
+    "nameTe": "మెంతులు",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Fig",
+    "nameTe": "అత్తి",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Finger Millet",
+    "nameTe": "రాగులు",
+    "categories": [
+      "field"
+    ]
+  },
+  {
+    "name": "Foxtail Millet",
+    "nameTe": "కొర్ర",
+    "categories": [
+      "field"
+    ]
+  },
+  {
+    "name": "French Beans",
+    "nameTe": "బీన్స్",
+    "categories": [
+      "veg-beans"
+    ]
+  },
+  {
+    "name": "Garlic",
+    "nameTe": "వెల్లుల్లి",
+    "categories": [
+      "veg-root",
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Geranium",
+    "nameTe": "జెరేనియం",
+    "categories": [
+      "aromatic"
+    ]
+  },
+  {
+    "name": "Ginger",
+    "nameTe": "అల్లం",
+    "categories": [
+      "veg-root",
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Gmelina",
+    "nameTe": "గుమ్మడి టేకు",
+    "categories": [
+      "hardwood"
+    ]
+  },
+  {
+    "name": "Grapes",
+    "nameTe": "ద్రాక్ష",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Green Gram",
+    "nameTe": "పెసర",
+    "categories": [
+      "pulses"
+    ]
+  },
+  {
+    "name": "Green Sorghum",
+    "nameTe": "పచ్చ జొన్న",
+    "categories": [
+      "field"
+    ]
+  },
+  {
+    "name": "Groundnut",
+    "nameTe": "వేరుశనగ",
+    "categories": [
+      "oilseeds"
+    ]
+  },
+  {
+    "name": "Guava",
+    "nameTe": "జామ",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Guduchi",
+    "nameTe": "గుడూచి",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Guggul",
+    "nameTe": "గుగ్గులు",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Henna",
+    "nameTe": "గోరింటాకు",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Holy Basil",
+    "nameTe": "తులసి",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Hyacinth Bean",
+    "nameTe": "అవరకాయ",
+    "categories": [
+      "veg-beans"
+    ]
+  },
+  {
+    "name": "Indian Gooseberry",
+    "nameTe": "ఉసిరి",
+    "categories": [
+      "medicinal",
+      "fruit"
+    ]
+  },
+  {
+    "name": "Isabgol",
+    "nameTe": "ఇసబ్గోల్",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Ivy Gourd",
+    "nameTe": "దొండకాయ",
+    "categories": [
+      "veg-gourds"
+    ]
+  },
+  {
+    "name": "Jackfruit",
+    "nameTe": "పనస",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Jasmine",
+    "nameTe": "మల్లెపూలు",
+    "categories": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Jatamansi",
+    "nameTe": "జటామాంసి",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Java Plum",
+    "nameTe": "జామున్",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Kalmegh",
+    "nameTe": "కల్మేఘ్",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Karonda",
+    "nameTe": "కరొండా",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Kiwi",
+    "nameTe": "కివి",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Kodo Millet",
+    "nameTe": "అరికెలు",
+    "categories": [
+      "field"
+    ]
+  },
+  {
+    "name": "Kondapindi Aku",
+    "nameTe": "కొండపిండి ఆకు / పిండికూర",
+    "categories": [
+      "veg-leafy"
+    ]
+  },
+  {
+    "name": "Lemon",
+    "nameTe": "నిమ్మ",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Lemon Grass",
+    "nameTe": "లెమన్ గ్రాస్",
+    "categories": [
+      "aromatic"
+    ]
+  },
+  {
+    "name": "Lettuce",
+    "nameTe": "లెట్యూస్",
+    "categories": [
+      "veg-leafy"
+    ]
+  },
+  {
+    "name": "Licorice",
+    "nameTe": "అతిమధురం",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Lily",
+    "nameTe": "లిల్లీ",
+    "categories": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Litchi",
+    "nameTe": "లిచీ",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Little Millet",
+    "nameTe": "సామలు",
+    "categories": [
+      "field"
+    ]
+  },
+  {
+    "name": "Long Pepper",
+    "nameTe": "పిప్పలి",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Loquat",
+    "nameTe": "లోకాట్",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Mahogany",
+    "nameTe": "మహాగని",
+    "categories": [
+      "hardwood"
+    ]
+  },
+  {
+    "name": "Maize",
+    "nameTe": "మొక్కజొన్న",
+    "categories": [
+      "field"
+    ]
+  },
+  {
+    "name": "Malabar Spinach",
+    "nameTe": "బచ్చలి కూర",
+    "categories": [
+      "veg-leafy"
+    ]
+  },
+  {
+    "name": "Mango",
+    "nameTe": "మామిడి",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Marigold",
+    "nameTe": "బంతి",
+    "categories": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Melia Dubia",
+    "nameTe": "మెలియా డుబియా",
+    "categories": [
+      "hardwood"
+    ]
+  },
+  {
+    "name": "Mint",
+    "nameTe": "పుదీనా",
+    "categories": [
+      "veg-leafy"
+    ]
+  },
+  {
+    "name": "Miracle Leaf",
+    "nameTe": "రణపాల",
+    "categories": [
+      "veg-leafy"
+    ]
+  },
+  {
+    "name": "Moringa",
+    "nameTe": "మునగాకు",
+    "categories": [
+      "veg-leafy"
+    ]
+  },
+  {
+    "name": "Muskmelon",
+    "nameTe": "కర్బూజ",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Neem",
+    "nameTe": "వేప",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Niger Seeds",
+    "nameTe": "వలిసెలు",
+    "categories": [
+      "oilseeds"
+    ]
+  },
+  {
+    "name": "Okra",
+    "nameTe": "బెండకాయ",
+    "categories": [
+      "veg-fruiting"
+    ]
+  },
+  {
+    "name": "Onion",
+    "nameTe": "ఉల్లిపాయ",
+    "categories": [
+      "veg-root",
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Orange",
+    "nameTe": "నారింజ",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Paddy",
+    "nameTe": "వరి",
+    "categories": [
+      "field"
+    ]
+  },
+  {
+    "name": "Papaya",
+    "nameTe": "బొప్పాయి",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Peach",
+    "nameTe": "పీచ్",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Pear",
+    "nameTe": "పియర్",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Pearl Millet (Bajra)",
+    "nameTe": "సజ్జలు",
+    "categories": [
+      "field"
+    ]
+  },
+  {
+    "name": "Peas",
+    "nameTe": "బఠానీ",
+    "categories": [
+      "veg-beans"
+    ]
+  },
+  {
+    "name": "Phalsa",
+    "nameTe": "ఫాల్సా",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Phyllanthus",
+    "nameTe": "నేల ఉసిరి",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Pineapple",
+    "nameTe": "అనాస",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Pistachio",
+    "nameTe": "పిస్తా",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Plum",
+    "nameTe": "ప్లమ్",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Pomegranate",
+    "nameTe": "దానిమ్మ",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Ponnaganti Kura",
+    "nameTe": "పొన్నగంటి కూర",
+    "categories": [
+      "veg-leafy"
+    ]
+  },
+  {
+    "name": "Potato",
+    "nameTe": "బంగాళాదుంప",
+    "categories": [
+      "veg-root"
+    ]
+  },
+  {
+    "name": "Proso Millet",
+    "nameTe": "వరిగలు",
+    "categories": [
+      "field"
+    ]
+  },
+  {
+    "name": "Pumpkin",
+    "nameTe": "గుమ్మడికాయ",
+    "categories": [
+      "veg-gourds"
+    ]
+  },
+  {
+    "name": "Punarnava",
+    "nameTe": "పునర్నవ ఆకు/తెల్ల గలిజేరు",
+    "categories": [
+      "veg-leafy"
+    ]
+  },
+  {
+    "name": "Purslane",
+    "nameTe": "పాయల కూర/గంగవల్లి కూర",
+    "categories": [
+      "veg-leafy"
+    ]
+  },
+  {
+    "name": "Radish",
+    "nameTe": "ముల్లంగి",
+    "categories": [
+      "veg-root"
+    ]
+  },
+  {
+    "name": "Red Gram",
+    "nameTe": "కంది",
+    "categories": [
+      "pulses"
+    ]
+  },
+  {
+    "name": "Red Sandalwood",
+    "nameTe": "ఎర్రచందనం",
+    "categories": [
+      "hardwood"
+    ]
+  },
+  {
+    "name": "Ridge Gourd",
+    "nameTe": "బీరకాయ",
+    "categories": [
+      "veg-gourds"
+    ]
+  },
+  {
+    "name": "Rose",
+    "nameTe": "గులాబీ",
+    "categories": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Roselle Leaves",
+    "nameTe": "గోంగూర",
+    "categories": [
+      "veg-leafy"
+    ]
+  },
+  {
+    "name": "Rubber Fruit",
+    "nameTe": "రబ్బర్ ఫ్రూట్",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Safed Musli",
+    "nameTe": "తెల్ల ముసలి",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Safflower",
+    "nameTe": "కుసుమ",
+    "categories": [
+      "oilseeds"
+    ]
+  },
+  {
+    "name": "Sandalwood",
+    "nameTe": "శ్రీగంధం",
+    "categories": [
+      "hardwood"
+    ]
+  },
+  {
+    "name": "Sapota",
+    "nameTe": "సపోటా",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Sarpagandha",
+    "nameTe": "సర్పగంధి",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Semi Cedar",
+    "nameTe": "సెమీ సీడార్",
+    "categories": [
+      "hardwood"
+    ]
+  },
+  {
+    "name": "Shatavari",
+    "nameTe": "శతావరి",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Snake Gourd",
+    "nameTe": "పొట్లకాయ",
+    "categories": [
+      "veg-gourds"
+    ]
+  },
+  {
+    "name": "Soybean",
+    "nameTe": "సోయా",
+    "categories": [
+      "field"
+    ]
+  },
+  {
+    "name": "Spinach",
+    "nameTe": "పాలకూర",
+    "categories": [
+      "veg-leafy"
+    ]
+  },
+  {
+    "name": "Spring Onion",
+    "nameTe": "ఉల్లి కాడలు",
+    "categories": [
+      "veg-root"
+    ]
+  },
+  {
+    "name": "Star Fruit",
+    "nameTe": "కమ్రఖ్",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Stevia",
+    "nameTe": "స్టీవియా",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Strawberry",
+    "nameTe": "స్ట్రాబెర్రీ",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Sugarcane",
+    "nameTe": "చెరకు",
+    "categories": [
+      "commercial"
+    ]
+  },
+  {
+    "name": "Sunflower",
+    "nameTe": "పొద్దుతిరుగుడు",
+    "categories": [
+      "oilseeds"
+    ]
+  },
+  {
+    "name": "Sweet Lime",
+    "nameTe": "బత్తాయి",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Sweet Potato",
+    "nameTe": "చిలగడదుంప",
+    "categories": [
+      "veg-root"
+    ]
+  },
+  {
+    "name": "Tamarind",
+    "nameTe": "చింత",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Tapioca Root",
+    "nameTe": "కర్ర పెండలం",
+    "categories": [
+      "veg-root"
+    ]
+  },
+  {
+    "name": "Taro Root",
+    "nameTe": "చామగడ్డ",
+    "categories": [
+      "veg-root"
+    ]
+  },
+  {
+    "name": "Teak",
+    "nameTe": "టేకు",
+    "categories": [
+      "hardwood"
+    ]
+  },
+  {
+    "name": "Tobacco",
+    "nameTe": "పొగాకు",
+    "categories": [
+      "commercial"
+    ]
+  },
+  {
+    "name": "Tomato",
+    "nameTe": "టమోటా",
+    "categories": [
+      "veg-fruiting"
+    ]
+  },
+  {
+    "name": "Turmeric",
+    "nameTe": "పసుపు",
+    "categories": [
+      "veg-root",
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Vasaka",
+    "nameTe": "వాస",
+    "categories": [
+      "medicinal"
+    ]
+  },
+  {
+    "name": "Vetiver",
+    "nameTe": "వట్టి వేరు",
+    "categories": [
+      "aromatic"
+    ]
+  },
+  {
+    "name": "Walnut",
+    "nameTe": "వాల్‌నట్",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "Watermelon",
+    "nameTe": "పుచ్చకాయ",
+    "categories": [
+      "fruit"
+    ]
+  },
+  {
+    "name": "White Sesame",
+    "nameTe": "తెల్ల నువ్వులు",
+    "categories": [
+      "oilseeds"
+    ]
+  },
+  {
+    "name": "White Sorghum",
+    "nameTe": "తెల్ల జొన్న",
+    "categories": [
+      "field"
+    ]
+  },
+  {
+    "name": "Yam",
+    "nameTe": "కంద",
+    "categories": [
+      "veg-root"
+    ]
+  }
+]

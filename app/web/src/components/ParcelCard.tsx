@@ -7,20 +7,21 @@ import type { SoilSample } from '../api/soilLab';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings, sampleStatusLabel } from '../i18n/strings';
 import { CropChips } from './CropChips';
+import type { Crop } from '../api/configuration';
 
 // One parcel on the dashboard: its details (editable in place), the crops it grows, its soil tests
 // with a one-tap request for another, and Delete.
 export function ParcelCard({
   farm,
   samples,
-  cropOptions,
+  crops: cropList,
   removing,
   onUpdated,
   onDelete,
 }: {
   farm: FarmLand;
   samples: SoilSample[];
-  cropOptions: string[];
+  crops: Crop[];
   removing: boolean;
   onUpdated: (farm: FarmLand) => void;
   onDelete: (farm: FarmLand) => void;
@@ -93,7 +94,7 @@ export function ParcelCard({
           </label>
           <div>
             <Bi id="cropsPickLabel" />
-            <CropChips options={cropOptions} value={crops} onChange={setCrops} />
+            <CropChips crops={cropList} value={crops} onChange={setCrops} />
           </div>
           <div className="button-row">
             <button type="submit" disabled={saving}>

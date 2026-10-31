@@ -4,7 +4,6 @@ import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import {
   listCrops,
-  createCrop,
   listCaseCategories,
   createCaseCategory,
   listTags,
@@ -17,6 +16,8 @@ import {
   type Region,
 } from '../api/configuration';
 import { ProductCategoryEditor } from '../components/ProductCategoryEditor';
+import { CropsAdminSection } from '../components/CropsAdminSection';
+import { CropGroupsAdminSection } from '../components/CropGroupsAdminSection';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, type StringKey } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
@@ -159,17 +160,8 @@ export function AdminTaxonomyPage() {
         <BiValue value={strings.loading} as="p" className="hint" />
       ) : (
         <>
-          <SimpleListSection
-            headingKey="cropsHeading"
-            items={crops}
-            onAdd={(name) =>
-              guarded(async () => {
-                if (!session) return;
-                const created = await createCrop(session.accessToken, name);
-                setCrops((prev) => [...prev, created]);
-              })
-            }
-          />
+          <CropsAdminSection crops={crops} onChange={setCrops} />
+          <CropGroupsAdminSection crops={crops} />
           <SimpleListSection
             headingKey="categoriesHeading"
             items={categories}

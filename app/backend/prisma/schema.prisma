@@ -436,7 +436,12 @@ model OtpVerification {
 
 model CropMaster {
   id        String   @id @default(uuid())
-  name      String   @unique
+  name      String   @unique // English; parcels, tips and articles match crops by this name
+  // Shown beside the English name ("Tomato / టమోటా"); null for crops that have none yet.
+  nameTe    String?
+  // Which picker groups the crop appears under (keys of CropCategoryMaster, always a group with no
+  // sub-groups of its own); a crop can be in several (turmeric is a root vegetable and a medicinal plant).
+  categories String[] @default([])
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
@@ -444,6 +449,19 @@ model CropMaster {
   articles     KnowledgeArticle[]
   courses      Course[]
   seasonalTips SeasonalTip[]
+}
+
+// The groups crops are filed under in the pickers: categories, and sub-categories (parentKey).
+// Crops point at a group by key (CropMaster.categories); a group is switched off, never deleted.
+model CropCategoryMaster {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  parentKey String?
+  nameEn    String
+  nameTe    String
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 }
 
 model CaseCategoryMaster {

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { listCrops, type Crop } from '../api/configuration';
+import { CropSelect } from '../components/CropSelect';
 import {
   createSeasonalTip,
   currentMonthIst,
@@ -208,14 +209,7 @@ export function AdminSeasonalTipsPage() {
             </label>
             <label className="span-2">
               <Bi id="seasonalCrop" />
-              <select name="cropId" defaultValue={editing === 'new' ? '' : editing.cropId ?? ''}>
-                <option value="">{biInline('seasonalEveryone')}</option>
-                {crops.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              <CropSelect crops={crops} name="cropId" defaultValue={editing === 'new' ? '' : editing.cropId ?? ''} emptyLabel={biInline('seasonalEveryone')} ariaLabel={biInline('seasonalCrop')} />
               <small className="hint">
                 <Bi id="seasonalCropHint" />
               </small>
@@ -252,15 +246,14 @@ export function AdminSeasonalTipsPage() {
           </label>
           <label>
             <Bi id="seasonalCrop" />
-            <select value={cropFilter} onChange={(e) => setCropFilter(e.target.value)}>
-              <option value="">{biInline('allOption')}</option>
-              <option value="none">{biInline('seasonalEveryone')}</option>
-              {crops.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            <CropSelect
+              crops={crops}
+              value={cropFilter}
+              ariaLabel={biInline('seasonalCrop')}
+              onChange={setCropFilter}
+              emptyLabel={biInline('allOption')}
+              extraOptions={[{ value: 'none', label: biInline('seasonalEveryone') }]}
+            />
           </label>
         </div>
       )}

@@ -5,7 +5,7 @@ import { ApiError } from '../api/client';
 import { createFarm, deleteFarm, listFarms, type FarmLand } from '../api/farms';
 import { listMyCases, type Case } from '../api/cases';
 import { listMySamples, type SoilSample } from '../api/soilLab';
-import { listCrops } from '../api/configuration';
+import { listCrops, type Crop } from '../api/configuration';
 import { ParcelCard } from '../components/ParcelCard';
 import { ListBar } from '../components/ListBar';
 import { CropChips } from '../components/CropChips';
@@ -31,7 +31,7 @@ export function DashboardPage() {
   const [parcelSearch, setParcelSearch] = useState('');
   const [parcelSort, setParcelSort] = useState('newest');
   const [samples, setSamples] = useState<SoilSample[]>([]);
-  const [cropNames, setCropNames] = useState<string[]>([]);
+  const [cropList, setCropList] = useState<Crop[]>([]);
   const [newCrops, setNewCrops] = useState<string[]>([]);
   const [advice, setAdvice] = useState<ForMeResult | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
@@ -46,7 +46,7 @@ export function DashboardPage() {
     if (!session) return;
     // The soil tests and the crop list only decorate the parcels: if either fails the dashboard still works.
     listMySamples(session.accessToken).then(setSamples).catch(() => undefined);
-    listCrops(session.accessToken).then((c) => setCropNames(c.map((x) => x.name))).catch(() => undefined);
+    listCrops(session.accessToken).then(setCropList).catch(() => undefined);
     Promise.all([listFarms(session.accessToken), listMyCases(session.accessToken), getAdviceForMe(session.accessToken)])
       .then(([farmsResult, casesResult, adviceResult]) => {
         setFarms(farmsResult);
@@ -259,7 +259,7 @@ export function DashboardPage() {
               </label>
               <div>
                 <Bi id="cropsPickLabel" />
-                <CropChips options={cropNames} value={newCrops} onChange={setNewCrops} />
+                <CropChips crops={cropList} value={newCrops} onChange={setNewCrops} />
               </div>
               <div>
                 {coords ? (
@@ -308,7 +308,7 @@ export function DashboardPage() {
               key={farm.id}
               farm={farm}
               samples={samples.filter((x) => x.farmLandId === farm.id)}
-              cropOptions={cropNames}
+              crops={cropList}
               removing={removingId === farm.id}
               onUpdated={(updated) => {
                 setFarms((prev) => prev.map((f) => (f.id === updated.id ? updated : f)));

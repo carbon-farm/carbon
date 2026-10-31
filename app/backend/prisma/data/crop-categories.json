@@ -1,0 +1,114 @@
+[
+  {
+    "key": "vegetables",
+    "parent": null,
+    "en": "Vegetables",
+    "te": "కూరగాయలు",
+    "sortOrder": 10
+  },
+  {
+    "key": "veg-fruiting",
+    "parent": "vegetables",
+    "en": "Fruiting vegetables",
+    "te": "కాయ కూరగాయలు",
+    "sortOrder": 20
+  },
+  {
+    "key": "veg-gourds",
+    "parent": "vegetables",
+    "en": "Gourds (creepers)",
+    "te": "తీగ కూరగాయలు",
+    "sortOrder": 30
+  },
+  {
+    "key": "veg-beans",
+    "parent": "vegetables",
+    "en": "Beans",
+    "te": "చిక్కుడు జాతి",
+    "sortOrder": 40
+  },
+  {
+    "key": "veg-leafy",
+    "parent": "vegetables",
+    "en": "Leafy vegetables",
+    "te": "ఆకు కూరలు",
+    "sortOrder": 50
+  },
+  {
+    "key": "veg-root",
+    "parent": "vegetables",
+    "en": "Root & tuber vegetables",
+    "te": "దుంప కూరగాయలు",
+    "sortOrder": 60
+  },
+  {
+    "key": "veg-cole",
+    "parent": "vegetables",
+    "en": "Cole crops",
+    "te": "క్యాబేజీ జాతి",
+    "sortOrder": 70
+  },
+  {
+    "key": "field",
+    "parent": null,
+    "en": "Field crops",
+    "te": "పొల పంటలు",
+    "sortOrder": 80
+  },
+  {
+    "key": "pulses",
+    "parent": null,
+    "en": "Pulses",
+    "te": "పప్పు ధాన్యాలు",
+    "sortOrder": 90
+  },
+  {
+    "key": "oilseeds",
+    "parent": null,
+    "en": "Oil seeds",
+    "te": "నూనె గింజలు",
+    "sortOrder": 100
+  },
+  {
+    "key": "flowers",
+    "parent": null,
+    "en": "Flowers",
+    "te": "పూలు",
+    "sortOrder": 110
+  },
+  {
+    "key": "aromatic",
+    "parent": null,
+    "en": "Aromatic oil crops",
+    "te": "సుగంధ నూనె పంటలు",
+    "sortOrder": 120
+  },
+  {
+    "key": "commercial",
+    "parent": null,
+    "en": "Commercial field crops",
+    "te": "వాణిజ్య పంటలు",
+    "sortOrder": 130
+  },
+  {
+    "key": "hardwood",
+    "parent": null,
+    "en": "Hardwood plants",
+    "te": "గట్టి కలప మొక్కలు",
+    "sortOrder": 140
+  },
+  {
+    "key": "medicinal",
+    "parent": null,
+    "en": "Medicinal plants",
+    "te": "ఔషధ మొక్కలు",
+    "sortOrder": 150
+  },
+  {
+    "key": "fruit",
+    "parent": null,
+    "en": "Fruit plants",
+    "te": "పండ్ల మొక్కలు",
+    "sortOrder": 160
+  }
+]
