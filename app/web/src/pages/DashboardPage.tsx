@@ -245,6 +245,24 @@ export function DashboardPage() {
                   required
                 />
               </label>
+              {/* optional: the place is saved with the parcel and shown right here once captured */}
+              <div className="location-row">
+                {coords ? (
+                  <>
+                    <BiValue value={strings.locationCapturedNotice} as="p" className="hint" />
+                    <p className="location-value">
+                      <Bi id="locationCapturedLabel" />: <strong>{coords.latitude.toFixed(5)}, {coords.longitude.toFixed(5)}</strong>
+                    </p>
+                    <button type="button" className="secondary" onClick={() => setCoords(null)}>
+                      <Bi id="removeLocationButton" />
+                    </button>
+                  </>
+                ) : (
+                  <button type="button" className="secondary" onClick={handleUseLocation} disabled={locating}>
+                    {locating ? <BiValue value={strings.locatingButton} /> : <Bi id="useLocationButton" />}
+                  </button>
+                )}
+              </div>
               <label>
                 <Bi id="landSizeField" />
                 <input
@@ -260,20 +278,6 @@ export function DashboardPage() {
               <div>
                 <Bi id="cropsPickLabel" />
                 <CropChips crops={cropList} value={newCrops} onChange={setNewCrops} />
-              </div>
-              <div>
-                {coords ? (
-                  <>
-                    <BiValue value={strings.locationCapturedNotice} as="p" className="hint" />
-                    <button type="button" className="secondary" onClick={() => setCoords(null)}>
-                      <Bi id="removeLocationButton" />
-                    </button>
-                  </>
-                ) : (
-                  <button type="button" className="secondary" onClick={handleUseLocation} disabled={locating}>
-                    {locating ? <BiValue value={strings.locatingButton} /> : <Bi id="useLocationButton" />}
-                  </button>
-                )}
               </div>
               <button type="submit">
                 <Bi id="saveParcelButton" />

@@ -8,7 +8,7 @@ import { ClaimPaymentDto } from './dto/claim-payment.dto';
 import { ReviewClaimDto } from './dto/review-claim.dto';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
 import { buildUpiLink } from './upi-link';
-import { computeAccess, daysLeft, memberLabel, parseGrantUntil, renewalStart } from './membership-access';
+import { computeAccess, daysLeft, DEFAULT_RENEWAL_WINDOW_DAYS, memberLabel, parseGrantUntil, renewalOpensAt, renewalStart } from './membership-access';
 import { GrantFreeAccessDto } from './dto/grant-free-access.dto';
 import { MembershipPlansService } from './membership-plans.service';
 import { MembershipRemindersService } from './membership-reminders.service';
@@ -114,6 +114,11 @@ export class HariharaaService {
     return settings;
   }
 
+  private async getRenewalWindowDays(): Promise<number> {
+    const settings = await this.prisma.hariharaaSettings.findUnique({ where: { id: SETTINGS_ID } });
+    return settings?.renewalWindowDays ?? DEFAULT_RENEWAL_WINDOW_DAYS;
+  }
+
   // ---------- Customer: status ----------
 
   // What the Pay page needs, derived on the server so the UI never guesses: access
@@ -124,8 +129,13 @@ export class HariharaaService {
       this.prisma.hariharaaSubscription.findUnique({ where: { userId } }),
       this.prisma.hariharaaPayment.findFirst({ where: { userId }, orderBy: { createdAt: 'desc' } }),
     ]);
-    const [membershipRequired, plans] = await Promise.all([this.plans.isMembershipRequired(), this.plans.listPublicPlans()]);
+    const [membershipRequired, plans, renewalWindowDays] = await Promise.all([
+      this.plans.isMembershipRequired(),
+      this.plans.listPublicPlans(),
+      this.getRenewalWindowDays(),
+    ]);
     const access = computeAccess(subscription);
+    const renewalOpensOn = membershipRequired ? renewalOpensAt(subscription, renewalWindowDays) : null;
 
     // Opening the membership status is the moment a member most needs to hear that access is
     // about to end — send the notice now rather than wait for the hourly sweep (which a sleeping
@@ -147,6 +157,9 @@ export class HariharaaService {
       membershipRequired,
       // Whole days of access left, so the screens can say "ends in 2 days" (null when none).
       daysLeft: membershipRequired ? daysLeft(subscription) : null,
+      // Paying opens this many days before access ends; until then renewalOpensOn says when.
+      renewalWindowDays,
+      renewalOpensOn,
       plans,
       activeUntil: access.until, // when current access ends (or when the last one ended)
       freeNote: access.kind === 'FREE' ? subscription?.complimentaryNote ?? null : null,
@@ -195,6 +208,19 @@ export class HariharaaService {
       throw new BadRequestException(
         bi('Your payment is already waiting for verification', 'మీ చెల్లింపు ఇప్పటికే ధృవీకరణ కోసం వేచి ఉంది'),
       );
+    }
+
+    // Renewal opens only shortly before access ends; the Pay page hides the button, and this keeps
+    // the same rule when the API is called directly. Someone with no access can always pay.
+    if (await this.plans.isMembershipRequired()) {
+      const subscription = await this.prisma.hariharaaSubscription.findUnique({ where: { userId } });
+      const opens = renewalOpensAt(subscription, settings.renewalWindowDays ?? DEFAULT_RENEWAL_WINDOW_DAYS);
+      if (opens) {
+        const date = opens.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
+        throw new BadRequestException(
+          bi(`Renewal opens on ${date}. You can pay then.`, `పునరుద్ధరణ ${date} న తెరుచుకుంటుంది. అప్పుడు చెల్లించవచ్చు.`),
+        );
+      }
     }
 
     let payment = await this.prisma.hariharaaPayment.findFirst({

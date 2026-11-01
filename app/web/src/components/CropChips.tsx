@@ -44,15 +44,26 @@ export function CropChips({ crops, value, onChange }: { crops: Crop[]; value: st
     setOther('');
   }
 
-  const group = (node: GroupNode, nested: boolean) => (
-    <details key={node.key} className={nested ? 'crop-group nested' : 'crop-group'}>
-      <summary>
-        {node.title} ({countCrops(node, (c) => !has(c.name))})
-      </summary>
-      {node.crops.length > 0 && <div className="chip-row">{chips(node.crops)}</div>}
-      {node.children.map((child) => group(child, true))}
-    </details>
-  );
+  // One group open at a time within each level: opening a group closes the others beside it.
+  // (parent group key, or '' for the top level) -> the key of its open child
+  const [openGroup, setOpenGroup] = useState<Record<string, string | null>>({});
+  const group = (node: GroupNode, parentKey: string) => {
+    const isOpen = openGroup[parentKey] === node.key;
+    return (
+      <details key={node.key} className={parentKey ? 'crop-group nested' : 'crop-group'} open={isOpen}>
+        <summary
+          onClick={(e) => {
+            e.preventDefault(); // the open state is kept here, so the browser must not flip it too
+            setOpenGroup((prev) => ({ ...prev, [parentKey]: prev[parentKey] === node.key ? null : node.key }));
+          }}
+        >
+          {node.title} ({countCrops(node, (c) => !has(c.name))})
+        </summary>
+        {node.crops.length > 0 && <div className="chip-row">{chips(node.crops)}</div>}
+        {node.children.map((child) => group(child, node.key))}
+      </details>
+    );
+  };
 
   return (
     <div className="field-group">
@@ -98,7 +109,7 @@ export function CropChips({ crops, value, onChange }: { crops: Crop[]; value: st
             </div>
           ) : (
             <div className="crop-groups" role="group" aria-label={biInline('cropsPickLabel')}>
-              {buildGroups(crops, categories).map((node) => group(node, false))}
+              {buildGroups(crops, categories).map((node) => group(node, ''))}
             </div>
           )}
         </>

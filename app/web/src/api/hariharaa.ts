@@ -39,6 +39,7 @@ export interface AdminSettings {
   secondaryUpiId: string | null;
   upiAid: string | null;
   contactPhone: string | null;
+  renewalWindowDays: number;
   vendorProfileId: string | null;
 }
 
@@ -48,6 +49,8 @@ export interface MySubscription {
   accessKind: 'PAID' | 'FREE' | 'NONE' | 'OPEN';
   membershipRequired: boolean;
   daysLeft: number | null; // whole days of access left, when there is access
+  renewalWindowDays: number; // paying opens this many days before access ends
+  renewalOpensOn: string | null; // set while paying is not open yet (access still has plenty of time)
   plans: PublicPlan[];
   freeNote: string | null;
   activeUntil: string | null;
@@ -104,6 +107,7 @@ export function updateSettings(
     vendorProfileId?: string;
     upiAid?: string;
     contactPhone?: string; // empty removes it
+    renewalWindowDays?: number;
   },
 ) {
   return apiRequest<AdminSettings>('/hariharaa/settings', { method: 'PATCH', body: data, token });

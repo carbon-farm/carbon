@@ -196,9 +196,24 @@ export function Tour({ audience, userId, ready }: { audience: Audience; userId?:
         <div className="tour-dim" />
       )}
       <div className="tour-card" ref={cardRef} style={cardStyle}>
-        <div className="tour-count">
-          {strings.tourStepOf.en.replace('{n}', String(index + 1)).replace('{total}', String(steps.length))} /{' '}
-          {strings.tourStepOf.te.replace('{n}', String(index + 1)).replace('{total}', String(steps.length))}
+        <div className="tour-head">
+          <div className="tour-count">
+            {strings.tourStepOf.en.replace('{n}', String(index + 1)).replace('{total}', String(steps.length))} /{' '}
+            {strings.tourStepOf.te.replace('{n}', String(index + 1)).replace('{total}', String(steps.length))}
+          </div>
+          {/* the cross does what "Skip tour" does — it is just easier to find */}
+          <button
+            type="button"
+            className="tour-close"
+            aria-label={`${strings.tourSkip.en} / ${strings.tourSkip.te}`}
+            title={`${strings.tourSkip.en} / ${strings.tourSkip.te}`}
+            onClick={() => {
+              track('tour', `${audience}: skipped at step ${index + 1}`);
+              close();
+            }}
+          >
+            <span aria-hidden="true">✕</span>
+          </button>
         </div>
         <p className="tour-text">
           <span className="bi-en">{step.en}</span>

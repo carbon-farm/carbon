@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import { MembershipProvider } from './auth/MembershipContext';
 import { OpenRoute, ProtectedRoute } from './components/ProtectedRoute';
@@ -62,6 +62,7 @@ const ChangePasswordPage = lazy(() => import('./pages/ChangePasswordPage').then(
 const MediaLibraryPage = lazy(() => import('./pages/MediaLibraryPage').then((m) => ({ default: m.MediaLibraryPage })));
 const DispatchQueuePage = lazy(() => import('./pages/hariharaa/DispatchQueuePage').then((m) => ({ default: m.DispatchQueuePage })));
 const HelpChat = lazy(() => import('./components/HelpChat').then((m) => ({ default: m.HelpChat })));
+const TestersBoardPage = lazy(() => import('./pages/TestersBoardPage').then((m) => ({ default: m.TestersBoardPage })));
 import { strings } from './i18n/strings';
 import { ErrorBoundary } from './telemetry/ErrorBoundary';
 import { PageTracker } from './telemetry/PageTracker';
@@ -78,6 +79,13 @@ function RouteFallback() {
   );
 }
 
+// The farmers' help button has no place on the testers' board.
+function HelpChatUnlessBoard() {
+  const { pathname } = useLocation();
+  if (pathname.startsWith('/testers/')) return null;
+  return <HelpChat />;
+}
+
 export function App() {
   return (
     <AuthProvider>
@@ -88,6 +96,8 @@ export function App() {
         <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          {/* needs no sign-in: the secret in the address is the key */}
+          <Route path="/testers/:key" element={<TestersBoardPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -539,7 +549,7 @@ export function App() {
         </ErrorBoundary>
         {/* The help assistant: one round button on every screen, including log in and register. */}
         <Suspense fallback={null}>
-          <HelpChat />
+          <HelpChatUnlessBoard />
         </Suspense>
         </MembershipProvider>
       </BrowserRouter>

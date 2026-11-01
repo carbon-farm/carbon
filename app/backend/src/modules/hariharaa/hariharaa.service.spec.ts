@@ -106,6 +106,19 @@ describe('HariharaaService', () => {
       setup(null, null);
       expect((await service.getMyStatus('u1')).daysLeft).toBeNull();
     });
+    it('says when renewal opens while it is not open yet, and null once it is', async () => {
+      setup(days(20), { status: S.VERIFIED });
+      const early = await service.getMyStatus('u1');
+      expect(early.renewalWindowDays).toBe(5);
+      expect(early.renewalOpensOn).toBeInstanceOf(Date);
+      const daysToOpen = (early.renewalOpensOn!.getTime() - Date.now()) / DAY;
+      expect(daysToOpen).toBeGreaterThan(14); // opens at the start of an Indian day, so up to a day earlier than 15
+      expect(daysToOpen).toBeLessThanOrEqual(15);
+      setup(days(3), { status: S.VERIFIED });
+      expect((await service.getMyStatus('u1')).renewalOpensOn).toBeNull();
+      setup(days(-1), { status: S.VERIFIED });
+      expect((await service.getMyStatus('u1')).renewalOpensOn).toBeNull();
+    });
     it('REJECTED when the last payment was rejected', async () => {
       setup(null, { status: S.REJECTED, rejectionReason: 'Amount mismatch' });
       expect(await service.getMyStatus('u1')).toMatchObject({ state: 'REJECTED', latestPayment: { rejectionReason: 'Amount mismatch' } });
@@ -143,6 +156,62 @@ describe('HariharaaService', () => {
     it('refuses to start another while one is already awaiting verification', async () => {
       prisma.hariharaaPayment.findFirst.mockResolvedValueOnce(payment({ status: S.CLAIMED }));
       await expect(service.startPayment('u1')).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    describe('renewal window', () => {
+      const paidUntil = (d: Date | null, extra: Record<string, unknown> = {}) =>
+        prisma.hariharaaSubscription.findUnique.mockResolvedValue(d ? { activeUntil: d, ...extra } : null);
+      beforeEach(() => prisma.hariharaaPayment.create.mockResolvedValue(payment()));
+
+      it('refuses to start a payment 6 days before access ends (default window is 5 days)', async () => {
+        paidUntil(days(6));
+        await expect(service.startPayment('u1')).rejects.toBeInstanceOf(BadRequestException);
+        expect(prisma.hariharaaPayment.create).not.toHaveBeenCalled();
+      });
+      it('allows it on day 5 and day 4', async () => {
+        paidUntil(days(5));
+        await expect(service.startPayment('u1')).resolves.toMatchObject({ paymentId: 'p1' });
+        paidUntil(days(4));
+        await expect(service.startPayment('u1')).resolves.toMatchObject({ paymentId: 'p1' });
+      });
+      it('always allows someone whose access has ended, and someone who never paid', async () => {
+        paidUntil(days(-2));
+        await expect(service.startPayment('u1')).resolves.toBeDefined();
+        paidUntil(null);
+        await expect(service.startPayment('u1')).resolves.toBeDefined();
+      });
+      it('follows the window the Administrator set', async () => {
+        prisma.hariharaaSettings.findUnique.mockResolvedValue({ ...settings, renewalWindowDays: 10 });
+        paidUntil(days(9));
+        await expect(service.startPayment('u1')).resolves.toBeDefined();
+        paidUntil(days(11));
+        await expect(service.startPayment('u1')).rejects.toBeInstanceOf(BadRequestException);
+      });
+      it('works with the smallest window (3 days)', async () => {
+        prisma.hariharaaSettings.findUnique.mockResolvedValue({ ...settings, renewalWindowDays: 3 });
+        paidUntil(days(4));
+        await expect(service.startPayment('u1')).rejects.toBeInstanceOf(BadRequestException);
+        paidUntil(days(3));
+        await expect(service.startPayment('u1')).resolves.toBeDefined();
+        paidUntil(days(-1));
+        await expect(service.startPayment('u1')).resolves.toBeDefined();
+      });
+      it('counts an Administrator free grant that runs longer than paid days', async () => {
+        paidUntil(days(2), { complimentaryUntil: days(40) });
+        await expect(service.startPayment('u1')).rejects.toBeInstanceOf(BadRequestException);
+      });
+      it('does not apply when membership is switched off by the Administrator', async () => {
+        plans.isMembershipRequired.mockResolvedValue(false);
+        paidUntil(days(20));
+        await expect(service.startPayment('u1')).resolves.toBeDefined();
+      });
+      it('names the opening date in English and Telugu', async () => {
+        paidUntil(days(20));
+        const err = await service.startPayment('u1').catch((e) => e);
+        const msg = JSON.stringify(err.getResponse());
+        expect(msg).toContain('Renewal opens on');
+        expect(msg).toContain('పునరుద్ధరణ');
+      });
     });
   });
 

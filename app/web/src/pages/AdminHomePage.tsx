@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
+import { TesterBoardLinkCard } from '../components/TesterBoardLinkCard';
 
 export function AdminHomePage() {
   return (
@@ -34,6 +35,8 @@ export function AdminHomePage() {
         <BiValue value={strings.reportsLinkTitle} as="div" className="label" />
         <BiValue value={strings.reportsLinkDesc} as="div" className="meta" />
       </Link>
+
+      <TesterBoardLinkCard />
     </>
   );
 }

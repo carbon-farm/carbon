@@ -1223,6 +1223,41 @@ button.case-item:hover:not(:disabled) {
     width: auto;
   }
 }
+.location-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.location-row p {
+  margin: 0;
+}
+.tour-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tour-close {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  min-height: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--card-border);
+  border-radius: 50%;
+}
+.tour-close:hover {
+  color: var(--ink);
+  border-color: var(--ink-soft);
+}
 .tour-count {
   font-size: 12px;
   font-weight: 700;
@@ -2175,6 +2210,9 @@ button.chip-on {
 .crop-groups { display: flex; flex-direction: column; gap: 4px; }
 .crop-group { border: 1px solid var(--card-border); border-radius: var(--radius-sm); padding: 6px 10px; background: var(--card); }
 .crop-group summary { cursor: pointer; font-weight: 600; min-height: 36px; display: flex; align-items: center; }
+.testers-board { display: flex; flex-direction: column; gap: 12px; }
+.board-detail { display: flex; flex-direction: column; gap: 8px; }
+.board-reply { border-left: 3px solid var(--card-border); padding-left: 8px; }
 .crop-group.nested { margin-top: 6px; background: transparent; }
 .crop-select { gap: 6px; }
 .chip-add { display: flex; gap: 8px; align-items: stretch; }

@@ -300,8 +300,8 @@ export const FAQS: Faq[] = [
     q: { en: 'When does my membership end, and how do I renew?', te: 'నా సభ్యత్వం ఎప్పుడు ముగుస్తుంది, ఎలా పునరుద్ధరించాలి?' },
     a: [
       {
-        en: 'My subscription shows the end date. In the last 3 days a strip under the top bar and a bell notification remind you once. Renew from the same page — early renewal is never wasted, because new days are added after the days you already have.',
-        te: 'నా సభ్యత్వం ముగింపు తేదీని చూపిస్తుంది. చివరి 3 రోజుల్లో పై బార్ కింద ఒక స్ట్రిప్, బెల్ నోటిఫికేషన్ ఒకసారి గుర్తు చేస్తాయి. అదే పేజీ నుండి పునరుద్ధరించండి — ముందే పునరుద్ధరించినా వృధా కాదు, కొత్త రోజులు మీకు ఇప్పటికే ఉన్న రోజుల తర్వాత చేరతాయి.',
+        en: 'My subscription shows the end date and how many days are left. In the last 3 days a strip under the top bar and a bell notification remind you once. Renewal opens 5 days before the end date (the store can change this); until then My subscription shows the date it opens, and once it has ended you can pay any time. Renew from the same page — early renewal is never wasted, because new days are added after the days you already have.',
+        te: 'నా సభ్యత్వం ముగింపు తేదీని, ఎన్ని రోజులు మిగిలి ఉన్నాయో చూపిస్తుంది. చివరి 3 రోజుల్లో పై బార్ కింద ఒక స్ట్రిప్, బెల్ నోటిఫికేషన్ ఒకసారి గుర్తు చేస్తాయి. ముగింపు తేదీకి 5 రోజుల ముందు పునరుద్ధరణ తెరుచుకుంటుంది (స్టోర్ దీన్ని మార్చవచ్చు); అప్పటివరకు నా సభ్యత్వంలో అది తెరిచే తేదీ కనిపిస్తుంది, ముగిసిన తర్వాత ఎప్పుడైనా చెల్లించవచ్చు. అదే పేజీ నుండి పునరుద్ధరించండి — ముందే పునరుద్ధరించినా వృధా కాదు, కొత్త రోజులు మీకు ఇప్పటికే ఉన్న రోజుల తర్వాత చేరతాయి.',
       },
     ],
     keywords: ['renew', 'renewal', 'expire', 'expiry', 'expires', 'expired', 'end date', 'how long', 'validity', 'ends in', 'గడువు', 'పునరుద్ధరణ', 'పునరుద్ధరించ', 'ముగుస్తుంది'],

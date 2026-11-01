@@ -1,4 +1,4 @@
-import { accessEnd, computeAccess, daysLeft, memberLabel, parseGrantUntil, reminderDue, renewalStart } from './membership-access';
+import { accessEnd, computeAccess, daysLeft, memberLabel, parseGrantUntil, reminderDue, renewalOpensAt, renewalStart, startOfIstDay } from './membership-access';
 
 const DAY = 864e5;
 const at = (n: number) => new Date(Date.now() + n * DAY);
@@ -109,5 +109,25 @@ describe('expiry reminders', () => {
     expect(daysLeft(dates(2.2, null))).toBe(3);
     expect(daysLeft(dates(-1, null))).toBeNull();
     expect(daysLeft(null)).toBeNull();
+  });
+
+  describe('renewalOpensAt — opens at the start of an Indian day', () => {
+    const until = new Date('2026-11-10T12:30:00Z'); // 10 Nov, 18:00 IST
+    const sub = { activeUntil: until, complimentaryUntil: null };
+    it('startOfIstDay gives midnight in India', () => {
+      expect(startOfIstDay(new Date('2026-11-05T09:00:00Z')).toISOString()).toBe('2026-11-04T18:30:00.000Z');
+    });
+    it('opens at 00:00 IST on the fifth day before, not at the hour access ends', () => {
+      const opens = renewalOpensAt(sub, 5, new Date('2026-11-01T00:00:00Z'));
+      expect(opens?.toISOString()).toBe('2026-11-04T18:30:00.000Z'); // 5 Nov 00:00 IST
+    });
+    it('is open all of that day, from midnight', () => {
+      expect(renewalOpensAt(sub, 5, new Date('2026-11-04T18:31:00Z'))).toBeNull();
+      expect(renewalOpensAt(sub, 5, new Date('2026-11-04T18:29:00Z'))).not.toBeNull();
+    });
+    it('is null with no access (new or lapsed)', () => {
+      expect(renewalOpensAt(null, 5)).toBeNull();
+      expect(renewalOpensAt({ activeUntil: at(-1), complimentaryUntil: null }, 5)).toBeNull();
+    });
   });
 });

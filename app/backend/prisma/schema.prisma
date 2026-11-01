@@ -993,6 +993,9 @@ model HariharaaSettings {
   // The master switch: when false nobody needs a membership (checkout and farm advice are open
   // to every signed-in member). Defaults to on.
   membershipRequired   Boolean        @default(true)
+  // Renewal opens this many days before the current access ends (0 = only once it has ended).
+  // Someone with no access can always pay.
+  renewalWindowDays    Int            @default(5)
   vendorProfileId      String?
   vendorProfile        VendorProfile? @relation(fields: [vendorProfileId], references: [id])
   updatedByUserId      String?
@@ -1047,4 +1050,60 @@ model SeasonalTip {
   updatedAt  DateTime    @updatedAt
 
   @@index([isActive])
+}
+
+// --- Testers' board: the page testers use to post requirements, errors and feedback without
+// signing in (it replaced the shared sheet). Reached only through a secret link (TesterAccess.key).
+
+enum TesterFeedbackKind {
+  BUG
+  REQUIREMENT
+  FEEDBACK
+  QUESTION
+}
+
+enum TesterFeedbackStatus {
+  NEW
+  SEEN
+  IN_PROGRESS
+  DONE
+  WONT_DO
+}
+
+model TesterFeedback {
+  id          String               @id @default(uuid())
+  number      Int                  @unique @default(autoincrement())
+  kind        TesterFeedbackKind
+  location    String? // where in the app, e.g. "Dashboard → Farm advice → New case"
+  description String
+  expected    String?
+  authorName  String // typed by the tester; there is no sign-in on the board
+  status      TesterFeedbackStatus @default(NEW)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  comments TesterFeedbackComment[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model TesterFeedbackComment {
+  id         String         @id @default(uuid())
+  feedbackId String
+  feedback   TesterFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  authorName String
+  body       String
+  // a line the board wrote itself ("Status: New → Done (by Vamshi)") rather than something typed
+  isSystem   Boolean        @default(false)
+  createdAt  DateTime       @default(now())
+
+  @@index([feedbackId])
+}
+
+// One row: the secret in the testers' board link. An Administrator can replace it (the old link then stops working).
+model TesterAccess {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  rotatedAt DateTime @default(now())
 }

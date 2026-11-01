@@ -38,6 +38,22 @@ export function renewalStart(dates: AccessDates | null, now: Date = new Date()):
   return new Date(Math.max(now.getTime(), dates?.activeUntil?.getTime() ?? 0, dates?.complimentaryUntil?.getTime() ?? 0));
 }
 
+// Renewal opens `windowDays` before access ends. Returns when it opens, or null when the member can
+// pay now — which is always so for someone with no access (new, or already lapsed).
+export const DEFAULT_RENEWAL_WINDOW_DAYS = 5;
+
+// Renewal opens at the START of a day in India (the date the screens show), so "opens on 5 Nov"
+// means payment works from midnight, not from the hour the access happens to end.
+const IST_OFFSET_MS = 5.5 * 36e5;
+export const startOfIstDay = (d: Date) => new Date(Math.floor((d.getTime() + IST_OFFSET_MS) / 864e5) * 864e5 - IST_OFFSET_MS);
+
+export function renewalOpensAt(dates: AccessDates | null, windowDays: number, now: Date = new Date()): Date | null {
+  const access = computeAccess(dates, now);
+  if (!access.hasAccess || !access.until) return null;
+  const opens = startOfIstDay(new Date(access.until.getTime() - windowDays * 864e5));
+  return opens > now ? opens : null;
+}
+
 // The label an Administrator sees for a member on the Members list.
 export type MemberLabel = 'PAID' | 'FREE' | 'AWAITING' | 'EXPIRED' | 'UNPAID';
 

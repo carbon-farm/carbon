@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString, Matches, Min, ValidateIf } from 'class-validator';
+import { IsInt, IsNumber, IsOptional, IsString, Matches, Max, Min, ValidateIf } from 'class-validator';
 
 // A UPI ID (VPA) looks like name@bank: letters, digits, dot, dash or underscore, an @, then the
 // bank/app handle. Checked here so a typo cannot be saved and then break every payment link.
@@ -47,4 +47,12 @@ export class UpdateSettingsDto {
   @ValidateIf((o) => o.contactPhone !== '')
   @Matches(/^[0-9+\-\s]{7,20}$/, { message: 'Phone number can only have digits, spaces, + and -' })
   contactPhone?: string;
+
+  // How many days before access ends the member can renew. At least 3, because the expiry reminder
+  // goes out 3 days before the end and tells the member to renew.
+  @IsOptional()
+  @IsInt()
+  @Min(3)
+  @Max(60)
+  renewalWindowDays?: number;
 }

@@ -50,6 +50,7 @@ export function AdminHariharaaSettingsPage() {
     const upiAid = String(formData.get('upiAid') ?? '').trim();
     const vendorProfileId = String(formData.get('vendorProfileId') ?? '').trim();
     const contactPhone = String(formData.get('contactPhone') ?? '').trim();
+    const renewalWindowRaw = String(formData.get('renewalWindowDays') ?? '').trim();
     const newPrimary = primary.trim();
 
     // Changing where the money goes deserves a second look.
@@ -70,6 +71,7 @@ export function AdminHariharaaSettingsPage() {
         upiAid, // empty removes it
         vendorProfileId, // empty removes it
         contactPhone, // empty removes it
+        ...(renewalWindowRaw !== '' ? { renewalWindowDays: Number(renewalWindowRaw) } : {}),
         ...(payeeName ? { payeeName } : {}),
       });
       setSettings(updated);
@@ -170,6 +172,13 @@ export function AdminHariharaaSettingsPage() {
               <Bi id="storeContactHint" />
             </div>
             <input name="contactPhone" type="tel" inputMode="tel" defaultValue={settings?.contactPhone ?? ''} placeholder="+91 98765 43210" />
+          </label>
+          <label>
+            <Bi id="hariharaaRenewalWindowField" />
+            <div className="hint">
+              <Bi id="hariharaaRenewalWindowHint" />
+            </div>
+            <input name="renewalWindowDays" type="number" inputMode="numeric" min={3} max={60} step={1} defaultValue={settings?.renewalWindowDays ?? 5} />
           </label>
           <label>
             <Bi id="hariharaaPayeeNameField" />

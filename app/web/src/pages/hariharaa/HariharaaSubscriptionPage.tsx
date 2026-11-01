@@ -81,6 +81,25 @@ export function HariharaaSubscriptionPage() {
   const plans = status?.plans ?? [];
   const awaiting = state === 'AWAITING_VERIFICATION';
   const isRenewal = state === 'ACTIVE' || state === 'EXPIRED' || state === 'FREE';
+  const daysLeft = status?.membershipRequired ? status.daysLeft : null;
+  // Paying opens shortly before access ends; the server refuses earlier payments too.
+  const renewalOpensOn = status?.renewalOpensOn ? new Date(status.renewalOpensOn) : null;
+  const daysLeftText = (n: number) => (n === 1 ? strings.hariharaaDayLeftValue : { en: strings.hariharaaDaysLeftValue.en.replace('{n}', String(n)), te: strings.hariharaaDaysLeftValue.te.replace('{n}', String(n)) });
+  const renewDueNotice =
+    daysLeft === null
+      ? null
+      : daysLeft === 1
+        ? strings.hariharaaRenewDueOneNotice
+        : { en: strings.hariharaaRenewDueNotice.en.replace('{n}', String(daysLeft)), te: strings.hariharaaRenewDueNotice.te.replace('{n}', String(daysLeft)) };
+  const opensNotice = renewalOpensOn
+    ? (() => {
+        const tpl = strings.hariharaaRenewOpensNotice;
+        // an Indian calendar date, the same one the server uses in its own message
+        const date = renewalOpensOn.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
+        const window = String(status?.renewalWindowDays ?? 0);
+        return { en: tpl.en.replace('{date}', date).replace('{window}', window), te: tpl.te.replace('{date}', date).replace('{window}', window) };
+      })()
+    : null;
 
   return (
     <>
@@ -134,6 +153,15 @@ export function HariharaaSubscriptionPage() {
                 )}
               </div>
             )}
+
+            {daysLeft !== null && daysLeft > 0 && (
+              <div>
+                <div className="field-label">
+                  <Bi id="hariharaaDaysLeftLabel" />
+                </div>
+                <BiValue value={daysLeftText(daysLeft)} as="div" />
+              </div>
+            )}
           </div>
 
           {open && <BiValue value={strings.membershipOpenNotice} as="p" className="hint" />}
@@ -146,8 +174,11 @@ export function HariharaaSubscriptionPage() {
             <div className="card">
               <Bi id={isRenewal ? 'hariharaaRenewHeading' : 'hariharaaPayHeading'} as="h2" />
 
-              {!payment ? (
+              {opensNotice ? (
+                <BiValue value={opensNotice} as="p" className="hint" />
+              ) : !payment ? (
                 <>
+                  {renewDueNotice && <BiValue value={renewDueNotice} as="p" className="hint" />}
                   {plans.length === 0 ? (
                     <BiValue value={strings.noPlansAvailableNotice} as="p" className="hint" />
                   ) : (
