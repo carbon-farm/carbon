@@ -34,8 +34,17 @@ export class ReleasesService implements OnApplicationBootstrap {
     for (const note of notes) {
       const already = await this.prisma.auditLog.findFirst({ where: { action: ANNOUNCED, entityType: 'Release', entityId: note.id }, select: { id: true } });
       if (already) continue;
-      await this.notifications.notifyRole(Role.ADMINISTRATOR, 'release.update', note.title, note.body, note.linkPath);
+      // with no active Administrator yet, leave it unannounced so the next one added still hears it
+      if ((await this.prisma.user.count({ where: { role: Role.ADMINISTRATOR, isActive: true } })) === 0) continue;
+      // claim it first: a second server starting at the same moment, or a failure after sending,
+      // then cannot make the notice go out twice
       await this.audit.log({ action: ANNOUNCED, entityType: 'Release', entityId: note.id });
+      try {
+        await this.notifications.notifyRole(Role.ADMINISTRATOR, 'release.update', note.title, note.body, note.linkPath);
+      } catch (err) {
+        await this.prisma.auditLog.deleteMany({ where: { action: ANNOUNCED, entityType: 'Release', entityId: note.id } }); // try again next start
+        throw err;
+      }
       sent.push(note.id);
       this.logger.log(`Announced update ${note.id} to the administrators`);
     }

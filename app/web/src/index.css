@@ -2296,3 +2296,33 @@ button.chip-on {
   display: flex;
   align-items: center;
 }
+
+/* ✕ on an uploaded photo/video: a full-size touch target that sits on the corner, clear of the thumbnail's own link */
+.evidence-media-grid {
+  padding: 10px 10px 0 0;
+  gap: 14px;
+}
+.evidence-item .photo-remove {
+  top: -10px;
+  right: -10px;
+  width: 44px;
+  height: 44px;
+  font-size: 18px;
+  border: 2px solid var(--card-bg, #fff);
+}
+.evidence-item .link-button {
+  padding-right: 40px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.case-facts-problem,
+.address-text {
+  white-space: pre-line;
+}
+.category-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}

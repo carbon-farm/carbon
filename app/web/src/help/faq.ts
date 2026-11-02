@@ -420,7 +420,7 @@ export const FAQS: Faq[] = [
     a: [
       {
         en: 'Open My cases → New case (or tap “Photo your problem” on the shop home). First take up to 6 photos, then tap the symptoms you see — or speak or type a few words — and choose your land and the crop. Say how you have farmed the land so far (chemical, organic, natural farming, or transitioning to organic). You do not need to pick a problem category — the moderator sorts that. A moderator passes it to the right expert. You get a bell notification when they answer, and you can reply if they need more detail.',
-        te: 'నా కేసులు → కొత్త కేసు తెరవండి (లేదా షాప్ హోమ్‌లో “సమస్య ఫోటో తీయండి” తాకండి). మొదట 6 వరకు ఫోటోలు తీయండి, తర్వాత మీకు కనిపించే లక్షణాలను తాకండి — లేదా కొన్ని మాటలు మాట్లాడండి లేదా టైప్ చేయండి — మీ భూమి, పంటను ఎంచుకోండి. ఇప్పటి వరకు ఈ భూమిలో ఎలా సాగు చేశారో (రసాయనిక, సేంద్రియ, ప్రకృతి, లేదా సేంద్రీయ మార్పు దిశగా) చెప్పండి. సమస్య వర్గాన్ని ఎంచుకోవాల్సిన అవసరం లేదు — మోడరేటర్ దాన్ని నిర్ణయిస్తారు. మోడరేటర్ దాన్ని సరైన నిపుణుడికి పంపుతారు. వారు సమాధానం ఇచ్చినప్పుడు బెల్ నోటిఫికేషన్ వస్తుంది; మరిన్ని వివరాలు అడిగితే మీరు బదులివ్వవచ్చు.',
+        te: 'నా కేసులు → కొత్త కేసు తెరవండి (లేదా షాప్ హోమ్‌లో “సమస్య ఫోటో తీయండి” తాకండి). మొదట 6 వరకు ఫోటోలు తీయండి, తర్వాత మీకు కనిపించే లక్షణాలను తాకండి — లేదా కొన్ని మాటలు మాట్లాడండి లేదా టైప్ చేయండి — మీ భూమి, పంటను ఎంచుకోండి. ఇప్పటి వరకు ఈ భూమిలో ఎలా సాగు చేశారో (రసాయనిక, సేంద్రియ, ప్రకృతి, లేదా సేంద్రియ మార్పు దిశగా) చెప్పండి. సమస్య వర్గాన్ని ఎంచుకోవాల్సిన అవసరం లేదు — మోడరేటర్ దాన్ని నిర్ణయిస్తారు. మోడరేటర్ దాన్ని సరైన నిపుణుడికి పంపుతారు. వారు సమాధానం ఇచ్చినప్పుడు బెల్ నోటిఫికేషన్ వస్తుంది; మరిన్ని వివరాలు అడిగితే మీరు బదులివ్వవచ్చు.',
       },
     ],
     keywords: ['నిపుణుడిని ఎలా అడగాలి', 'పొలంలోని సమస్య', 'case', 'cases', 'ask expert', 'ask an expert', 'crop problem', 'disease', 'pest', 'problem in my field', 'advice', 'photo', 'కేసు', 'నిపుణుడు', 'పంట సమస్య', 'తెగులు', 'సలహా', 'samasya'],
@@ -472,8 +472,8 @@ export const FAQS: Faq[] = [
     q: { en: 'How do I add photos to my case?', te: 'నా కేసుకు ఫోటోలు ఎలా జోడించాలి?' },
     a: [
       {
-        en: 'On the New case screen, step 1 is photos: tap “Take a photo” to use the camera, or “Choose from gallery”. You can add up to 6. They are made smaller on your phone before sending, so they upload quickly even on a slow connection. A close photo of the worst part and one of the whole plant help the expert most. Added the wrong one? Open the case and tap the ✕ on that photo or video to remove it (not possible once the case is closed).',
-        te: 'కొత్త కేసు స్క్రీన్‌లో 1వ దశ ఫోటోలు: కెమెరా వాడటానికి “ఫోటో తీయండి” తాకండి, లేదా “గ్యాలరీ నుండి ఎంచుకోండి”. 6 వరకు జోడించవచ్చు. పంపే ముందు అవి మీ ఫోన్‌లోనే చిన్నవిగా చేయబడతాయి, కాబట్టి నెమ్మదైన కనెక్షన్‌లో కూడా త్వరగా అప్‌లోడ్ అవుతాయి. ఎక్కువ దెబ్బతిన్న భాగం యొక్క దగ్గరి ఫోటో, మొత్తం మొక్క ఫోటో నిపుణుడికి ఎక్కువగా సహాయపడతాయి. తప్పుది జోడించారా? కేసు తెరిచి ఆ ఫోటో లేదా వీడియోపై ఉన్న ✕ ను తాకి తొలగించండి (కేసు ముగిసిన తర్వాత కుదరదు).',
+        en: 'On the New case screen, step 1 is photos: tap “Take a photo” to use the camera, or “Choose from gallery”. You can add up to 6. They are made smaller on your phone before sending, so they upload quickly even on a slow connection. A close photo of the worst part and one of the whole plant help the expert most. Added the wrong one? Open the case and tap the ✕ on that photo or video to remove it (not possible once the case is closed). If an expert is already assigned, they are told.',
+        te: 'కొత్త కేసు స్క్రీన్‌లో 1వ దశ ఫోటోలు: కెమెరా వాడటానికి “ఫోటో తీయండి” తాకండి, లేదా “గ్యాలరీ నుండి ఎంచుకోండి”. 6 వరకు జోడించవచ్చు. పంపే ముందు అవి మీ ఫోన్‌లోనే చిన్నవిగా చేయబడతాయి, కాబట్టి నెమ్మదైన కనెక్షన్‌లో కూడా త్వరగా అప్‌లోడ్ అవుతాయి. ఎక్కువ దెబ్బతిన్న భాగం యొక్క దగ్గరి ఫోటో, మొత్తం మొక్క ఫోటో నిపుణుడికి ఎక్కువగా సహాయపడతాయి. తప్పుది జోడించారా? కేసు తెరిచి ఆ ఫోటో లేదా వీడియోపై ఉన్న ✕ ను తాకి తొలగించండి (కేసు ముగిసిన తర్వాత కుదరదు). నిపుణుడు ఇప్పటికే కేటాయించబడి ఉంటే వారికి తెలియజేయబడుతుంది.',
       },
     ],
     keywords: ['remove photo', 'delete photo', 'wrong photo', 'delete picture', 'photo', 'photos', 'picture', 'camera', 'upload photo', 'add photo', 'add photos', 'take photo', 'ఫోటో', 'ఫోటోలు', 'కెమెరా', 'photo ela'],
@@ -711,8 +711,8 @@ export const FAQS: Faq[] = [
     q: { en: 'Where do I add my postal address?', te: 'నా తపాలా చిరునామాను ఎక్కడ జోడించాలి?' },
     a: [
       {
-        en: 'Open Account (in the top bar). Under “Your postal address” type your full address — house or plot number, street, village, mandal, district and PIN code — and tap Save address. It is optional. Only you and the store’s administrators can see it. We do not ask for your Aadhaar number.',
-        te: 'ఖాతా (పై బార్‌లో) తెరవండి. “మీ తపాలా చిరునామా” కింద మీ పూర్తి చిరునామా — ఇంటి లేదా ప్లాట్ నంబర్, వీధి, గ్రామం, మండలం, జిల్లా, పిన్ కోడ్ — టైప్ చేసి చిరునామా సేవ్ చేయండి తాకండి. ఇది ఐచ్ఛికం. మీకు మరియు స్టోర్ అడ్మినిస్ట్రేటర్లకు మాత్రమే కనిపిస్తుంది. మేము మీ ఆధార్ నంబర్ అడగము.',
+        en: 'Open Account (in the top bar). Under “Your postal address” type your full address — house or plot number, street, village, mandal, district and PIN code — and tap Save address. It is optional. Only you and the store’s administrators can see it (administrators find it under Members). We do not ask for your Aadhaar number.',
+        te: 'ఖాతా (పై బార్‌లో) తెరవండి. “మీ తపాలా చిరునామా” కింద మీ పూర్తి చిరునామా — ఇంటి లేదా ప్లాట్ నంబర్, వీధి, గ్రామం, మండలం, జిల్లా, పిన్ కోడ్ — టైప్ చేసి చిరునామా సేవ్ చేయండి తాకండి. ఇది ఐచ్ఛికం. మీకు మరియు స్టోర్ అడ్మినిస్ట్రేటర్లకు మాత్రమే కనిపిస్తుంది (అడ్మినిస్ట్రేటర్లు దీన్ని సభ్యుల పేజీలో చూస్తారు). మేము మీ ఆధార్ నంబర్ అడగము.',
       },
     ],
     keywords: ['postal address', 'my address', 'full address', 'add address', 'aadhaar', 'aadhar', 'pin code', 'profile address', 'తపాలా చిరునామా', 'పూర్తి చిరునామా', 'ఆధార్', 'chirunama'],
@@ -1042,8 +1042,8 @@ export const FAQS: Faq[] = [
     q: { en: 'How do I start answering cases?', te: 'కేసులకు సమాధానం ఇవ్వడం ఎలా ప్రారంభించాలి?' },
     a: [
       {
-        en: 'Submit your qualifications first; once an administrator verifies you, cases can be assigned to you. Open a case: it shows everything the farmer gave — the parcel’s address, size and location, every crop with its age, the problem, notes and photos. Then answer or ask the farmer for more detail. Closed cases become draft articles you can edit and send for review.',
-        te: 'ముందు మీ అర్హతలను సమర్పించండి; అడ్మినిస్ట్రేటర్ ధృవీకరించిన తర్వాత మీకు కేసులు కేటాయించబడతాయి. కేసు తెరవండి: రైతు ఇచ్చిన అన్నీ — స్థలం చిరునామా, పరిమాణం, ప్రదేశం, ప్రతి పంట దాని వయస్సుతో, సమస్య, గమనికలు, ఫోటోలు — కనిపిస్తాయి. తర్వాత సమాధానం ఇవ్వండి లేదా రైతును మరిన్ని వివరాలు అడగండి. ముగిసిన కేసులు మీరు సవరించి సమీక్షకు పంపగల డ్రాఫ్ట్ వ్యాసాలు అవుతాయి.',
+        en: 'Submit your qualifications first; once an administrator verifies you, cases can be assigned to you. Open a case: it shows everything the farmer gave — the parcel’s address, size and location, every crop with its age, the problem, notes and photos. Set the right category (new cases start as Unknown Problem), then answer or ask the farmer for more detail. Closed cases become draft articles you can edit and send for review.',
+        te: 'ముందు మీ అర్హతలను సమర్పించండి; అడ్మినిస్ట్రేటర్ ధృవీకరించిన తర్వాత మీకు కేసులు కేటాయించబడతాయి. కేసు తెరవండి: రైతు ఇచ్చిన అన్నీ — స్థలం చిరునామా, పరిమాణం, ప్రదేశం, ప్రతి పంట దాని వయస్సుతో, సమస్య, గమనికలు, ఫోటోలు — కనిపిస్తాయి. సరైన వర్గాన్ని సెట్ చేయండి (కొత్త కేసులు తెలియని సమస్యగా మొదలవుతాయి), తర్వాత సమాధానం ఇవ్వండి లేదా రైతును మరిన్ని వివరాలు అడగండి. ముగిసిన కేసులు మీరు సవరించి సమీక్షకు పంపగల డ్రాఫ్ట్ వ్యాసాలు అవుతాయి.',
       },
     ],
     keywords: ['answer case', 'cases', 'qualification', 'credentials', 'article', 'draft', 'కేసు', 'సమాధానం', 'వ్యాసం'],
@@ -1068,8 +1068,8 @@ export const FAQS: Faq[] = [
     q: { en: 'What do I do as a moderator?', te: 'మోడరేటర్‌గా నేను ఏం చేయాలి?' },
     a: [
       {
-        en: 'Assign new cases to a verified expert (case queue — tap “Show full details” under a case to see the parcel, crops with age, problem and photos first), approve, reject or return articles with notes (article review — a rejection needs a reason), build and publish courses (a course needs at least one lesson), and move soil samples through each stage to the report.',
-        te: 'కొత్త కేసులను ధృవీకరించిన నిపుణుడికి కేటాయించండి (కేసు క్యూ — ముందుగా స్థలం, వయస్సుతో పంటలు, సమస్య, ఫోటోలు చూడటానికి కేసు కింద “పూర్తి వివరాలు చూపండి” తాకండి), వ్యాసాలను ఆమోదించండి, తిరస్కరించండి లేదా నోట్స్‌తో తిరిగి పంపండి (వ్యాసాల సమీక్ష — తిరస్కరణకు కారణం అవసరం), కోర్సులను తయారు చేసి ప్రచురించండి (కోర్సుకు కనీసం ఒక పాఠం కావాలి), నేల నమూనాలను ప్రతి దశ ద్వారా నివేదిక వరకు తరలించండి.',
+        en: 'Assign new cases to a verified expert (case queue — tap “Show full details” under a case to see the parcel, crops with age, problem and photos first; set the case category, because new cases start as Unknown Problem), approve, reject or return articles with notes (article review — a rejection needs a reason), build and publish courses (a course needs at least one lesson), and move soil samples through each stage to the report.',
+        te: 'కొత్త కేసులను ధృవీకరించిన నిపుణుడికి కేటాయించండి (కేసు క్యూ — ముందుగా స్థలం, వయస్సుతో పంటలు, సమస్య, ఫోటోలు చూడటానికి కేసు కింద “పూర్తి వివరాలు చూపండి” తాకండి; కొత్త కేసులు తెలియని సమస్యగా మొదలవుతాయి కాబట్టి కేసు వర్గాన్ని సెట్ చేయండి), వ్యాసాలను ఆమోదించండి, తిరస్కరించండి లేదా నోట్స్‌తో తిరిగి పంపండి (వ్యాసాల సమీక్ష — తిరస్కరణకు కారణం అవసరం), కోర్సులను తయారు చేసి ప్రచురించండి (కోర్సుకు కనీసం ఒక పాఠం కావాలి), నేల నమూనాలను ప్రతి దశ ద్వారా నివేదిక వరకు తరలించండి.',
       },
     ],
     keywords: ['moderator', 'assign case', 'review article', 'publish course', 'soil queue', 'queue', 'మోడరేటర్', 'క్యూ'],

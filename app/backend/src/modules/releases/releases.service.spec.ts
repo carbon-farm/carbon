@@ -5,7 +5,11 @@ import { RELEASE_NOTES } from './release-notes';
 describe('ReleasesService', () => {
   const make = (alreadyAnnounced: string[] = []) => {
     const prisma = {
-      auditLog: { findFirst: jest.fn().mockImplementation(async ({ where }) => (alreadyAnnounced.includes(where.entityId) ? { id: 'x' } : null)) },
+      auditLog: {
+        findFirst: jest.fn().mockImplementation(async ({ where }) => (alreadyAnnounced.includes(where.entityId) ? { id: 'x' } : null)),
+        deleteMany: jest.fn().mockResolvedValue({ count: 1 }),
+      },
+      user: { count: jest.fn().mockResolvedValue(2) },
     };
     const audit = { log: jest.fn().mockResolvedValue(undefined) };
     const notifications = { notifyRole: jest.fn().mockResolvedValue(undefined) };
@@ -33,6 +37,22 @@ describe('ReleasesService', () => {
     const { service, notifications } = make(['a', 'b']);
     expect(await service.announceNew(notes)).toEqual([]);
     expect(notifications.notifyRole).not.toHaveBeenCalled();
+  });
+
+  it('does not mark an update as told when there is no active Administrator to tell', async () => {
+    const { service, prisma, notifications, audit } = make();
+    prisma.user.count.mockResolvedValue(0);
+    expect(await service.announceNew(notes)).toEqual([]);
+    expect(notifications.notifyRole).not.toHaveBeenCalled();
+    expect(audit.log).not.toHaveBeenCalled();
+  });
+
+  it('records the update as told before sending, and takes the record back if sending fails', async () => {
+    const { service, prisma, notifications, audit } = make();
+    notifications.notifyRole.mockRejectedValue(new Error('boom'));
+    await expect(service.announceNew([notes[0]])).rejects.toThrow('boom');
+    expect(audit.log).toHaveBeenCalledTimes(1);
+    expect(prisma.auditLog.deleteMany).toHaveBeenCalledWith({ where: { action: 'release.announced', entityType: 'Release', entityId: 'a' } });
   });
 
   it('a failure while announcing never stops the server starting', async () => {

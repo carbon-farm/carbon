@@ -70,15 +70,15 @@ export class FarmsService {
   }
 
   private datesAfterChange(existing: { cropAddedAt?: unknown; primaryCrops?: string[]; createdAt?: Date }, crops: string[], now: Date) {
-    const before = existing.cropAddedAt && typeof existing.cropAddedAt === 'object' ? (existing.cropAddedAt as Record<string, string>) : {};
+    const stored = existing.cropAddedAt && typeof existing.cropAddedAt === 'object' ? (existing.cropAddedAt as Record<string, string>) : {};
+    const before = new Map(Object.entries(stored)); // a Map, so names like "constructor" are only names
     const wasThere = new Set((existing.primaryCrops ?? []).map(cropKey));
     const parcelDate = existing.createdAt ?? now;
-    const out: Record<string, string> = {};
-    for (const name of crops) {
+    const entries = crops.map((name): [string, string] => {
       const key = cropKey(name);
-      out[key] = before[key] ?? (wasThere.has(key) ? parcelDate.toISOString() : now.toISOString());
-    }
-    return out;
+      return [key, before.get(key) ?? (wasThere.has(key) ? parcelDate.toISOString() : now.toISOString())];
+    });
+    return Object.fromEntries(entries);
   }
 
   // A parcel nobody has used is simply deleted. One that has cases or soil samples is hidden

@@ -158,7 +158,7 @@ export const FIELD_QUESTIONS: ChoiceQuestion[] = [
     options: [
       { id: 'chemical', label: { en: 'Chemical', te: 'రసాయనిక' } },
       { id: 'organic', label: { en: 'Organic', te: 'సేంద్రియ' } },
-      { id: 'transitioning', label: { en: 'Transitioning to Organic', te: 'సేంద్రీయ మార్పు దిశగా' } },
+      { id: 'transitioning', label: { en: 'Transitioning to Organic', te: 'సేంద్రియ మార్పు దిశగా' } },
       { id: 'natural', label: { en: 'Natural farming', te: 'ప్రకృతి' } },
     ],
   },

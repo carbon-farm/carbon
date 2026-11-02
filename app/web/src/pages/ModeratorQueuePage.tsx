@@ -6,6 +6,7 @@ import { listVerifiedExperts, type VerifiedExpert } from '../api/experts';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, caseCategoryLabel, caseStatusLabel } from '../i18n/strings';
 import { CaseFacts } from '../components/CaseFacts';
+import { CaseCategoryEditor } from '../components/CaseCategoryEditor';
 
 type SortMode = 'priority' | 'newest' | 'oldest' | 'status';
 
@@ -173,6 +174,7 @@ export function ModeratorQueuePage() {
                   </summary>
                   <CaseFacts theCase={c} />
                 </details>
+                <CaseCategoryEditor theCase={c} onChanged={(updated) => setCases((prev) => prev.map((x) => (x.id === updated.id ? updated : x)))} />
 
                 {c.status === 'SUBMITTED' && (
                   <button type="button" onClick={() => handleStartReview(c.id)} disabled={isBusy}>

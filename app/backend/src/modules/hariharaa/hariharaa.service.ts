@@ -439,7 +439,7 @@ export class HariharaaService {
     const [users, claimed] = await Promise.all([
       this.prisma.user.findMany({
         where: { role: { in: MEMBER_ROLES } },
-        select: { id: true, userCode: true, name: true, mobileNumber: true, isActive: true, createdAt: true, hariharaaSubscription: true },
+        select: { id: true, userCode: true, name: true, mobileNumber: true, postalAddress: true, isActive: true, createdAt: true, hariharaaSubscription: true },
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.hariharaaPayment.findMany({ where: { status: HariharaaPaymentStatus.CLAIMED }, select: { userId: true } }),

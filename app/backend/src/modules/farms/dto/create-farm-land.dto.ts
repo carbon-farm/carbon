@@ -1,4 +1,4 @@
-import { ArrayMinSize, IsArray, IsLatitude, IsLongitude, IsNumber, IsOptional, IsPositive, IsString, MinLength } from 'class-validator';
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsLatitude, IsLongitude, IsNumber, IsOptional, IsPositive, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreateFarmLandDto {
   @IsString()
@@ -15,7 +15,9 @@ export class CreateFarmLandDto {
 
   @IsArray()
   @ArrayMinSize(1)
+  @ArrayMaxSize(50)
   @IsString({ each: true })
+  @MaxLength(60, { each: true })
   primaryCrops!: string[];
 
   // Optional GPS pin from the browser's Geolocation API — either both are

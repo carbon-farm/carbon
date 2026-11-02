@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { updatePostalAddress } from '../api/admin';
-import { Bi, BiValue, biInline } from '../i18n/Bi';
+import { Bi, BiValue } from '../i18n/Bi';
 import { strings } from '../i18n/strings';
 
 // A member's full postal address, kept on their profile (optional). Only they and the account
@@ -45,7 +45,6 @@ export function PostalAddressCard({ initial }: { initial: string }) {
             setValue(e.target.value);
             setSaved(false);
           }}
-          placeholder={biInline('postalAddressField')}
           autoComplete="street-address"
         />
       </label>
@@ -53,7 +52,7 @@ export function PostalAddressCard({ initial }: { initial: string }) {
       <button type="submit" disabled={busy}>
         {busy ? <BiValue value={strings.saving} /> : <Bi id="postalAddressSave" />}
       </button>
-      {saved && <div className="success-banner">{strings.settingsSavedNotice.en} / {strings.settingsSavedNotice.te}</div>}
+      {saved && <div className="success-banner" role="status">{strings.settingsSavedNotice.en} / {strings.settingsSavedNotice.te}</div>}
       {error && <div className="error-banner">{error}</div>}
     </form>
   );

@@ -118,9 +118,15 @@ describe('UsersService.updatePostalAddress', () => {
   it('tidies the spacing, saves it and never returns the password hash', async () => {
     const { service, prisma, audit } = make();
     const r = await service.updatePostalAddress('u1', '  4-12,  Main Road,\n Guntur  522001 ');
-    expect(prisma.user.update).toHaveBeenCalledWith({ where: { id: 'u1' }, data: { postalAddress: '4-12, Main Road, Guntur 522001' } });
+    expect(prisma.user.update).toHaveBeenCalledWith({ where: { id: 'u1' }, data: { postalAddress: '4-12, Main Road,\nGuntur 522001' } });
     expect(r).not.toHaveProperty('passwordHash');
     expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ action: 'user.address_update' }));
+  });
+
+  it('strips control and invisible characters that Postgres or readers would trip on', async () => {
+    const { service, prisma } = make();
+    await service.updatePostalAddress('u1', 'Main\u0000 Road\u200B, Gun\u202Etur');
+    expect(prisma.user.update).toHaveBeenCalledWith({ where: { id: 'u1' }, data: { postalAddress: 'Main Road, Guntur' } });
   });
 
   it('clears the address when it is empty', async () => {

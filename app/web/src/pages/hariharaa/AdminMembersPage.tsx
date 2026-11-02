@@ -226,7 +226,10 @@ export function AdminMembersPage() {
                     <td>
                       <strong>{m.userCode}</strong>
                     </td>
-                    <td>{m.name}</td>
+                    <td>
+                      {m.name}
+                      {m.postalAddress && <div className="hint address-text">{m.postalAddress}</div>}
+                    </td>
                     <td>{m.mobileNumber}</td>
                     <td>
                       {strings[LABEL_KEYS[m.label]].en} / {strings[LABEL_KEYS[m.label]].te}

@@ -46,7 +46,9 @@ function buildCase(overrides: Partial<Case> = {}): Case {
 
 describe('CasesService', () => {
   let prisma: {
-    case: { create: jest.Mock; update: jest.Mock; findUnique: jest.Mock; findMany: jest.Mock; count: jest.Mock };
+    case: { create: jest.Mock; update: jest.Mock; findUnique: jest.Mock; findUniqueOrThrow: jest.Mock; findMany: jest.Mock; count: jest.Mock };
+    $executeRaw: jest.Mock;
+    caseCategoryMaster: { findUnique: jest.Mock };
     farmLand: { findUnique: jest.Mock };
     user: { findUnique: jest.Mock };
   };
@@ -59,7 +61,9 @@ describe('CasesService', () => {
 
   beforeEach(() => {
     prisma = {
-      case: { create: jest.fn(), update: jest.fn(), findUnique: jest.fn(), findMany: jest.fn(), count: jest.fn().mockResolvedValue(0) },
+      case: { create: jest.fn(), update: jest.fn(), findUnique: jest.fn(), findUniqueOrThrow: jest.fn(), findMany: jest.fn(), count: jest.fn().mockResolvedValue(0) },
+      $executeRaw: jest.fn(),
+      caseCategoryMaster: { findUnique: jest.fn() },
       user: { findUnique: jest.fn().mockResolvedValue({ userCode: 'HHC-0003' }) },
       farmLand: { findUnique: jest.fn() },
     };
@@ -146,9 +150,12 @@ describe('CasesService', () => {
 
     it('takes only the named photo off the case and logs it', async () => {
       prisma.case.findUnique.mockResolvedValue(buildCase({ status: CaseStatus.SUBMITTED, evidenceMediaUrls: [a, b] }));
-      prisma.case.update.mockResolvedValue(buildCase({ evidenceMediaUrls: [b] }));
-      await service.removeEvidenceMedia('case-1', 'farmer-1', a);
-      expect(prisma.case.update).toHaveBeenCalledWith(expect.objectContaining({ data: { evidenceMediaUrls: [b] } }));
+      prisma.$executeRaw.mockResolvedValue(1);
+      prisma.case.findUniqueOrThrow.mockResolvedValue(buildCase({ evidenceMediaUrls: [b] }));
+      const r = await service.removeEvidenceMedia('case-1', 'farmer-1', a);
+      expect(prisma.$executeRaw).toHaveBeenCalledTimes(1);
+      expect(prisma.case.update).not.toHaveBeenCalled(); // never rewrites the whole list from a stale read
+      expect(r.evidenceMediaUrls).toEqual([b]);
       expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ action: 'case.evidence.remove', metadata: { url: a } }));
     });
 
@@ -163,9 +170,49 @@ describe('CasesService', () => {
       await expect(service.removeEvidenceMedia('case-1', 'farmer-1', a)).rejects.toThrow(BadRequestException);
     });
 
+    it('refuses when the case was closed between the read and the write', async () => {
+      prisma.case.findUnique.mockResolvedValue(buildCase({ status: CaseStatus.SUBMITTED, evidenceMediaUrls: [a] }));
+      prisma.$executeRaw.mockResolvedValue(0);
+      await expect(service.removeEvidenceMedia('case-1', 'farmer-1', a)).rejects.toThrow(BadRequestException);
+      expect(audit.log).not.toHaveBeenCalled();
+    });
+
     it('refuses a farmer who does not own the case', async () => {
       prisma.case.findUnique.mockResolvedValue(buildCase({ farmerId: 'someone-else', evidenceMediaUrls: [a] }));
       await expect(service.removeEvidenceMedia('case-1', 'farmer-1', a)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('tells the assigned expert when an attachment is removed from their case', async () => {
+      prisma.case.findUnique.mockResolvedValue(buildCase({ status: CaseStatus.EXPERT_WORKING, assignedExpertId: 'expert-1', caseNumber: 'C-1', evidenceMediaUrls: [a] }));
+      prisma.$executeRaw.mockResolvedValue(1);
+      prisma.case.findUniqueOrThrow.mockResolvedValue(buildCase({ evidenceMediaUrls: [] }));
+      await service.removeEvidenceMedia('case-1', 'farmer-1', a);
+      expect(notifications.create).toHaveBeenCalledWith('expert-1', 'case.evidence.removed', expect.any(String), expect.stringContaining('C-1'), '/expert/cases/case-1');
+    });
+  });
+
+  describe('setCategory', () => {
+    it('lets a moderator set the category on an open case and records it', async () => {
+      prisma.case.findUnique.mockResolvedValue(buildCase({ status: CaseStatus.UNDER_REVIEW, categoryId: 'unknown' }));
+      prisma.caseCategoryMaster.findUnique.mockResolvedValue({ id: 'pest' });
+      prisma.case.update.mockResolvedValue(buildCase({ categoryId: 'pest' }));
+      await service.setCategory('case-1', { userId: 'mod-1', role: Role.MODERATOR }, 'pest');
+      expect(prisma.case.update).toHaveBeenCalledWith(expect.objectContaining({ data: { categoryId: 'pest' } }));
+      expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ action: 'case.category.change', metadata: { from: 'unknown', to: 'pest' } }));
+    });
+
+    it('lets only the assigned expert do it', async () => {
+      prisma.case.findUnique.mockResolvedValue(buildCase({ status: CaseStatus.EXPERT_WORKING, assignedExpertId: 'expert-1' }));
+      await expect(service.setCategory('case-1', { userId: 'expert-2', role: Role.EXPERT }, 'pest')).rejects.toThrow(ForbiddenException);
+      expect(prisma.case.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses a closed or draft case and an unknown category', async () => {
+      prisma.case.findUnique.mockResolvedValue(buildCase({ status: CaseStatus.CLOSED }));
+      await expect(service.setCategory('case-1', { userId: 'mod-1', role: Role.MODERATOR }, 'pest')).rejects.toThrow(BadRequestException);
+      prisma.case.findUnique.mockResolvedValue(buildCase({ status: CaseStatus.SUBMITTED }));
+      prisma.caseCategoryMaster.findUnique.mockResolvedValue(null);
+      await expect(service.setCategory('case-1', { userId: 'mod-1', role: Role.MODERATOR }, 'nope')).rejects.toThrow(NotFoundException);
     });
   });
 

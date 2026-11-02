@@ -171,17 +171,64 @@ export class CasesService {
     if (!existing.evidenceMediaUrls.includes(url)) {
       throw new NotFoundException(bi('That photo or video is not on this case', 'ఆ ఫోటో లేదా వీడియో ఈ కేసులో లేదు'));
     }
-    const updated = await this.prisma.case.update({
-      where: { id: caseId },
-      data: { evidenceMediaUrls: existing.evidenceMediaUrls.filter((u) => u !== url) },
-      include: { category: true, farmLand: true, crop: true },
-    });
+    // One statement, so an upload that lands at the same moment is never overwritten, and a case
+    // that was closed since the read above is still refused.
+    const changed = await this.prisma.$executeRaw`UPDATE "Case" SET "evidenceMediaUrls" = array_remove("evidenceMediaUrls", ${url}) WHERE "id" = ${caseId} AND "status" <> 'CLOSED'::"CaseStatus"`;
+    if (changed === 0) {
+      throw new BadRequestException(bi('Cannot remove evidence from a closed case', 'మూసివేసిన కేసు నుండి ఆధారాలను తొలగించలేరు'));
+    }
     await this.audit.log({
       actorId: farmerId,
       action: 'case.evidence.remove',
       entityType: 'Case',
       entityId: caseId,
       metadata: { url },
+    });
+    // an expert already working on it should not find evidence missing without being told
+    if (existing.assignedExpertId) {
+      await this.notifications.create(
+        existing.assignedExpertId,
+        'case.evidence.removed',
+        bi('A photo or video was removed from a case', 'ఒక కేసు నుండి ఫోటో లేదా వీడియో తొలగించబడింది'),
+        bi(`${existing.caseNumber ?? 'A case'}: the farmer removed an attachment`, `${existing.caseNumber ?? 'ఒక కేసు'}: రైతు ఒక జోడింపును తొలగించారు`),
+        `/expert/cases/${caseId}`,
+      );
+    }
+    return this.prisma.case.findUniqueOrThrow({
+      where: { id: caseId },
+      include: {
+        category: true,
+        farmLand: true,
+        crop: true,
+        relatedCase: { select: { id: true, caseNumber: true } },
+        knowledgeArticle: { select: { id: true, title: true, status: true } },
+      },
+    });
+  }
+
+  // New cases start as "Unknown Problem" (the farmer is no longer asked); the moderator, or the
+  // expert the case is assigned to, sets the real category here.
+  async setCategory(caseId: string, actor: { userId: string; role: Role }, categoryId: string): Promise<Case> {
+    const existing = await this.getOrThrow(caseId);
+    if (actor.role === Role.EXPERT && existing.assignedExpertId !== actor.userId) {
+      throw new ForbiddenException(bi('This case is not assigned to you', 'ఈ కేసు మీకు కేటాయించబడలేదు'));
+    }
+    if (existing.status === CaseStatus.CLOSED || existing.status === CaseStatus.DRAFT) {
+      throw new BadRequestException(bi('The category can only be changed on a case that is open and sent', 'తెరిచి ఉన్న, పంపిన కేసు వర్గాన్ని మాత్రమే మార్చవచ్చు'));
+    }
+    const category = await this.prisma.caseCategoryMaster.findUnique({ where: { id: categoryId } });
+    if (!category) throw new NotFoundException(bi('Category not found', 'వర్గం కనుగొనబడలేదు'));
+    const updated = await this.prisma.case.update({
+      where: { id: caseId },
+      data: { categoryId },
+      include: { category: true, farmLand: true, crop: true },
+    });
+    await this.audit.log({
+      actorId: actor.userId,
+      action: 'case.category.change',
+      entityType: 'Case',
+      entityId: caseId,
+      metadata: { from: existing.categoryId, to: categoryId },
     });
     return updated;
   }

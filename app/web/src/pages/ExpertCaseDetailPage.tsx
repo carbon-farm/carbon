@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { CaseHistory } from '../components/CaseHistory';
 import { CaseFacts } from '../components/CaseFacts';
+import { CaseCategoryEditor } from '../components/CaseCategoryEditor';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
@@ -103,6 +104,7 @@ export function ExpertCaseDetailPage() {
             {theCase.isPriority && <BiValue value={strings.priorityBadgeLabel} as="span" className="priority-badge" />}
 
             <CaseFacts theCase={theCase} />
+            {theCase.status !== 'CLOSED' && <CaseCategoryEditor theCase={theCase} onChanged={setCase} />}
             {theCase.followUpQuestion && (
               <div>
                 <div className="field-label"><Bi id="followUpQuestionLabel" /></div>

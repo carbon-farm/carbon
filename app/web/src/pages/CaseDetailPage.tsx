@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { shrinkImage } from '../lib/image';
-import { cropAgeDays, cropAgeText } from '../lib/cropAge';
+import { cropAgeDays, cropAgeText, reportedAt } from '../lib/cropAge';
 import { CaseHistory } from '../components/CaseHistory';
 import { getCase, submitCase, respondToFollowUp, confirmCase, disputeCase, uploadCaseEvidence, removeCaseEvidence, type Case } from '../api/cases';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
@@ -25,6 +25,7 @@ export function CaseDetailPage() {
   const [busy, setBusy] = useState(false);
   const [resolutionAction, setResolutionAction] = useState<'confirm' | 'dispute' | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [removing, setRemoving] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -105,14 +106,17 @@ export function CaseDetailPage() {
   }
 
   async function handleRemoveEvidence(url: string) {
-    if (!session || !theCase) return;
+    if (!session || !theCase || removing) return;
     if (!window.confirm(`${strings.evidenceRemoveConfirm.en}
 ${strings.evidenceRemoveConfirm.te}`)) return;
     setError(null);
+    setRemoving(url);
     try {
       setCase(await removeCaseEvidence(session.accessToken, theCase.id, url));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : `${strings.genericError.en} / ${strings.genericError.te}`);
+    } finally {
+      setRemoving(null);
     }
   }
 
@@ -131,7 +135,7 @@ ${strings.evidenceRemoveConfirm.te}`)) return;
     }
   }
 
-  const cropAge = theCase ? cropAgeDays(theCase.farmLand, theCase.crop?.name ?? theCase.cropName) : null;
+  const cropAge = theCase ? cropAgeDays(theCase.farmLand, theCase.crop?.name ?? theCase.cropName, reportedAt(theCase)) : null;
 
   return (
     <>
@@ -178,7 +182,7 @@ ${strings.evidenceRemoveConfirm.te}`)) return;
                   {theCase.crop?.name ?? theCase.cropName}
                   {cropAge !== null && (
                     <span className="hint">
-                      {' '}· {cropAgeText(cropAge).en} / {cropAgeText(cropAge).te}
+                      {' '}· {cropAgeText(cropAge, true).en} / {cropAgeText(cropAge, true).te}
                     </span>
                   )}
                 </div>
@@ -211,7 +215,7 @@ ${strings.evidenceRemoveConfirm.te}`)) return;
                         </a>
                       )}
                       {theCase.status !== 'CLOSED' && (
-                        <button type="button" className="photo-remove" onClick={() => handleRemoveEvidence(url)} aria-label={biInline('casePhotoRemove')} title={biInline('casePhotoRemove')}>
+                        <button type="button" className="photo-remove" onClick={() => handleRemoveEvidence(url)} disabled={removing !== null} aria-label={biInline('casePhotoRemove')} title={biInline('casePhotoRemove')}>
                           ✕
                         </button>
                       )}

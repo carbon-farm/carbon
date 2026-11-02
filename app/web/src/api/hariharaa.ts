@@ -148,6 +148,7 @@ export interface Member {
   paidUntil: string | null;
   freeUntil: string | null;
   freeNote: string | null;
+  postalAddress?: string | null;
 }
 
 export function listMembers(token: string) {

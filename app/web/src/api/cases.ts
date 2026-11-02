@@ -154,6 +154,10 @@ export function removeCaseEvidence(token: string, id: string, url: string) {
   return apiRequest<Case>(`/cases/${id}/evidence/remove`, { method: 'POST', body: { url }, token });
 }
 
+export function setCaseCategory(token: string, id: string, categoryId: string) {
+  return apiRequest<Case>(`/cases/${id}/category`, { method: 'PATCH', body: { categoryId }, token });
+}
+
 export function uploadCaseEvidence(token: string, id: string, file: File) {
   return apiUpload<Case>(`/cases/${id}/evidence`, file, token);
 }

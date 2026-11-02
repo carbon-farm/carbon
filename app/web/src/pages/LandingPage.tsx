@@ -7,7 +7,7 @@ export function LandingPage() {
     <div>
       <section className="hero">
         <div className="hero-inner">
-          <img className="hero-logo" src="/logo-512.webp" width="200" height="200" alt="Organic Carbon Farming with SPIN" />
+          <img className="hero-logo" src="/logo-512.webp" width="200" height="200" alt="" />
           <Bi id="brand" as="h1" />
           <p className="hero-group">
             <span className="bi-en">{strings.brandGroup.en}</span>

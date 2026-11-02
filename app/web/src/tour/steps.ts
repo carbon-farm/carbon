@@ -171,7 +171,7 @@ export const TOURS: Record<Audience, TourStep[]> = {
 
   EXPERT: [
     { en: 'Welcome! This tour shows where your work is.', te: 'స్వాగతం! మీ పని ఎక్కడ ఉందో ఈ టూర్ చూపిస్తుంది.' },
-    { target: '/expert/cases', en: 'Cases assigned to you. Open one to see everything the farmer gave — parcel address, size, location, crops with age, problem and photos — then answer.', te: 'మీకు కేటాయించిన కేసులు. రైతు సమస్య, ఫోటోలు చదివి సమాధానం ఇవ్వడానికి ఒకదాన్ని తెరవండి.' },
+    { target: '/expert/cases', en: 'Cases assigned to you. Open one to see everything the farmer gave — parcel address, size, location, crops with age, problem and photos — then set the right category and answer.', te: 'మీకు కేటాయించిన కేసులు. ఒకటి తెరవండి: రైతు ఇచ్చిన అన్నీ — స్థలం చిరునామా, పరిమాణం, ప్రదేశం, వయస్సుతో పంటలు, సమస్య, ఫోటోలు — కనిపిస్తాయి; తర్వాత సరైన వర్గాన్ని సెట్ చేసి సమాధానం ఇవ్వండి.' },
     { target: '/expert/articles', en: 'Articles drafted from solved cases. Edit, then submit them for review.', te: 'పరిష్కరించిన కేసుల నుండి రూపొందించిన వ్యాసాలు. సవరించి, సమీక్ష కోసం సమర్పించండి.' },
     { target: '/expert/credentials', en: 'Your qualifications: submit them so an Administrator can verify you.', te: 'మీ అర్హతలు: అడ్మినిస్ట్రేటర్ మిమ్మల్ని ధృవీకరించడానికి వాటిని సమర్పించండి.' },
     BELL,
@@ -181,7 +181,7 @@ export const TOURS: Record<Audience, TourStep[]> = {
 
   MODERATOR: [
     { en: 'Welcome! This tour shows your review queues.', te: 'స్వాగతం! మీ సమీక్ష క్యూలను ఈ టూర్ చూపిస్తుంది.' },
-    { target: '/moderator/queue', en: 'The case queue: review new cases (tap “Show full details” to see the parcel, crops and photos) and assign them to the right expert.', te: 'కేసు క్యూ: కొత్త కేసులను సమీక్షించి, సరైన నిపుణుడికి కేటాయించండి.' },
+    { target: '/moderator/queue', en: 'The case queue: open “Show full details” to see the parcel, crops and photos, set the right category (new cases start as Unknown Problem), and assign the case to the right expert.', te: 'కేసు క్యూ: స్థలం, పంటలు, ఫోటోలు చూడటానికి “పూర్తి వివరాలు చూపండి” తెరవండి, సరైన వర్గాన్ని సెట్ చేయండి (కొత్త కేసులు తెలియని సమస్యగా మొదలవుతాయి), కేసును సరైన నిపుణుడికి కేటాయించండి.' },
     { target: '/moderator/articles', en: 'Article review: approve, reject or send articles back to the expert.', te: 'వ్యాసాల సమీక్ష: వ్యాసాలను ఆమోదించండి, తిరస్కరించండి లేదా నిపుణుడికి తిరిగి పంపండి.' },
     { target: '/courses/manage', en: 'Courses: build lessons and publish them.', te: 'కోర్సులు: పాఠాలను తయారు చేసి ప్రచురించండి.' },
     { target: '/soil-samples/manage', en: 'The soil-sample queue: track each sample through to its report.', te: 'నేల నమూనా క్యూ: ప్రతి నమూనాను నివేదిక వరకు ట్రాక్ చేయండి.' },

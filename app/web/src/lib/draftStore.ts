@@ -93,7 +93,7 @@ export async function clearDraft(key: string): Promise<void> {
   window.dispatchEvent(new Event(DRAFT_CHANGED_EVENT));
 }
 
-// True when there is nothing worth keeping.
+// True when there is nothing worth keeping. (categoryId is ignored: the form fills it in by itself.)
 export function isEmptyDraft(f: CaseDraftFields, photos: File[]): boolean {
-  return !f.description.trim() && !f.evidenceNotes.trim() && f.symptoms.length === 0 && Object.keys(f.answers ?? {}).length === 0 && photos.length === 0 && !f.farmLandId && !f.categoryId && !f.cropId && !f.cropName?.trim();
+  return !f.description.trim() && !f.evidenceNotes.trim() && f.symptoms.length === 0 && Object.keys(f.answers ?? {}).length === 0 && photos.length === 0 && !f.farmLandId && !f.cropId && !f.cropName?.trim();
 }

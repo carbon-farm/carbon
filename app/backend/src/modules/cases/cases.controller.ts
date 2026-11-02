@@ -10,6 +10,7 @@ import { RequestFollowUpDto, RespondFollowUpDto } from './dto/follow-up.dto';
 import { AnswerCaseDto } from './dto/answer-case.dto';
 import { ConfirmPriorityDto } from './dto/confirm-priority.dto';
 import { RemoveEvidenceDto } from './dto/remove-evidence.dto';
+import { SetCategoryDto } from './dto/set-category.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { MembershipGuard } from '../../common/guards/membership.guard';
@@ -81,6 +82,12 @@ export class CasesController {
   @Post(':id/evidence/remove')
   removeEvidence(@Param('id') id: string, @Body() dto: RemoveEvidenceDto, @CurrentUser() user: AuthenticatedUser) {
     return this.casesService.removeEvidenceMedia(id, user.userId, dto.url);
+  }
+
+  @Roles(Role.MODERATOR, Role.EXPERT)
+  @Patch(':id/category')
+  setCategory(@Param('id') id: string, @Body() dto: SetCategoryDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.casesService.setCategory(id, { userId: user.userId, role: user.role as Role }, dto.categoryId);
   }
 
   @Roles(Role.MEMBER)

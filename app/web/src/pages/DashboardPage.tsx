@@ -263,6 +263,7 @@ export function DashboardPage() {
                   </button>
                 )}
               </div>
+              <BiValue value={strings.locationSharedHint} as="p" className="hint" />
               <label>
                 <Bi id="landSizeField" />
                 <input

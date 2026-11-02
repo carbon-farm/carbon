@@ -154,9 +154,15 @@ export class UsersService {
     return safeUser;
   }
 
-  // The person's own full postal address (optional; empty clears it). Not shared with anyone else.
+  // The person's own full postal address (optional; empty clears it). Visible to them and to Administrators only.
   async updatePostalAddress(userId: string, postalAddress: string) {
-    const value = postalAddress.replace(/\s+/g, ' ').trim();
+    const value = postalAddress
+      .replace(/\r\n?/g, '\n')
+      .replace(/[^\S\n]+/g, ' ')
+      .replace(/[\u0000-\u0008\u000B-\u001F\u007F\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g, '')
+      .replace(/ ?\n ?/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
     const updated = await this.prisma.user.update({ where: { id: userId }, data: { postalAddress: value || null } });
     await this.audit.log({ actorId: userId, action: 'user.address_update', entityType: 'User', entityId: userId });
     const { passwordHash: _omit, ...safeUser } = updated;

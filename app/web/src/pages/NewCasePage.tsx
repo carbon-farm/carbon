@@ -54,6 +54,10 @@ export function NewCasePage() {
   const [description, setDescription] = useState('');
   const [farmLandId, setFarmLandId] = useState('');
   const [categoryId, setCategoryId] = useState('');
+  // The farmer is not asked for a category (testers, 1 Nov 2026): cases start as "Unknown Problem"
+  // and the moderator sets the real one. This is that default, kept apart so it can be re-applied.
+  const [defaultCategoryId, setDefaultCategoryId] = useState('');
+  const defaultCategoryRef = useRef('');
   const [cropId, setCropId] = useState('');
   const [cropName, setCropName] = useState('');
   // "Other crop" stays open while its box is emptied to retype
@@ -73,10 +77,11 @@ export function NewCasePage() {
     Promise.all([listFarms(session.accessToken), listCaseCategories(session.accessToken), listCrops(session.accessToken)])
       .then(([farmsResult, categoriesResult, cropsResult]) => {
         setFarms(farmsResult);
-        // The farmer is no longer asked for a category (testers, 1 Nov 2026): start every case as
-        // "Unknown Problem" and let the moderator/expert sort it. Follow-ups keep the earlier case's.
         const fallback = categoriesResult.find((c) => c.name === 'Unknown Problem') ?? categoriesResult[0];
-        if (fallback) setCategoryId((v) => v || fallback.id);
+        if (fallback) {
+          defaultCategoryRef.current = fallback.id;
+          setDefaultCategoryId(fallback.id);
+        }
         setCrops(cropsResult);
       })
       .catch((err) => {
@@ -97,7 +102,7 @@ export function NewCasePage() {
       if (cancelled) return;
       if (d) {
         setFarmLandId(d.fields.farmLandId);
-        setCategoryId(d.fields.categoryId);
+        if (d.fields.categoryId) setCategoryId(d.fields.categoryId);
         setCropId(d.fields.cropId);
         setCropName(d.fields.cropName ?? '');
         setOtherCrop(!!d.fields.cropName?.trim());
@@ -119,6 +124,11 @@ export function NewCasePage() {
     };
   }, [draftKey]);
 
+  // (Re)apply the default whenever the form has no category: first load, and after "Start over".
+  useEffect(() => {
+    if (defaultCategoryId && !categoryId) setCategoryId(defaultCategoryId);
+  }, [defaultCategoryId, categoryId]);
+
   // Following up an earlier case: say which one, and start from its parcel, category and crop.
   const prefilledFrom = useRef('');
   useEffect(() => {
@@ -128,7 +138,8 @@ export function NewCasePage() {
       .then((c) => {
         setRelatedLabel(c.caseNumber ?? c.id.slice(0, 8));
         setFarmLandId((v) => v || c.farmLandId);
-        setCategoryId((v) => v || c.categoryId);
+        // a follow-up keeps the earlier case's category, unless the farmer's form already holds another one
+        setCategoryId((v) => (!v || v === defaultCategoryRef.current ? c.categoryId : v));
         if (!cropId && !cropName) {
           if (c.cropId) setCropId(c.cropId);
           else if (c.cropName) {
@@ -237,6 +248,10 @@ export function NewCasePage() {
     if (!form.reportValidity()) return;
     if (fullDescription.length < 5) {
       setError(`${strings.describeProblemRequired.en} / ${strings.describeProblemRequired.te}`);
+      return;
+    }
+    if (!categoryId) {
+      setError(`${strings.caseCategoryMissing.en} / ${strings.caseCategoryMissing.te}`);
       return;
     }
 

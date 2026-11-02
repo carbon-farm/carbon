@@ -1,7 +1,7 @@
 import { type Case } from '../api/cases';
 import { Bi, BiValue } from '../i18n/Bi';
 import { strings, caseCategoryLabel } from '../i18n/strings';
-import { cropAgeDays, cropAgeText } from '../lib/cropAge';
+import { cropAgeDays, cropAgeText, reportedAt } from '../lib/cropAge';
 
 const isImage = (url: string) => /\.(jpe?g|png|webp)$/i.test(url);
 
@@ -10,7 +10,8 @@ const isImage = (url: string) => /\.(jpe?g|png|webp)$/i.test(url);
 export function CaseFacts({ theCase }: { theCase: Case }) {
   const parcel = theCase.farmLand;
   const cropName = theCase.crop?.name ?? theCase.cropName;
-  const cropAge = cropAgeDays(parcel, cropName);
+  const asOf = reportedAt(theCase);
+  const cropAge = cropAgeDays(parcel, cropName, asOf);
   const sentOn = theCase.submittedAt ? new Date(theCase.submittedAt).toLocaleDateString() : null;
 
   return (
@@ -46,13 +47,13 @@ export function CaseFacts({ theCase }: { theCase: Case }) {
           <div className="field-label"><BiValue value={strings.caseFactsCropsOnParcel} /></div>
           <ul className="plain-list">
             {parcel.primaryCrops.map((name) => {
-              const days = cropAgeDays(parcel, name);
+              const days = cropAgeDays(parcel, name, asOf);
               return (
                 <li key={name}>
                   {name}
                   {days !== null && (
                     <span className="hint">
-                      {' '}· {cropAgeText(days).en} / {cropAgeText(days).te}
+                      {' '}· {cropAgeText(days, true).en} / {cropAgeText(days, true).te}
                     </span>
                   )}
                 </li>
@@ -72,7 +73,7 @@ export function CaseFacts({ theCase }: { theCase: Case }) {
             {cropName}
             {cropAge !== null && (
               <span className="hint">
-                {' '}· {cropAgeText(cropAge).en} / {cropAgeText(cropAge).te}
+                {' '}· {cropAgeText(cropAge, true).en} / {cropAgeText(cropAge, true).te}
               </span>
             )}
           </div>

@@ -17,8 +17,17 @@ export const RELEASE_NOTES: ReleaseNote[] = [
     title: bi('Update: new logo, simpler problem report, fuller case details', 'అప్‌డేట్: కొత్త లోగో, సులభమైన సమస్య నివేదిక, పూర్తి కేసు వివరాలు'),
     body: bi(
       'The app is now "Organic Carbon Farming with SPIN" with the new logo. Report a problem no longer asks for a category (new cases start as Unknown Problem) and has a new farming choice, Transitioning to Organic. Members can remove a wrong photo from their case, see how old each crop is on their parcel, and add an optional postal address under Account. Moderators and experts now see all the details the farmer gave. The testers guide, help, FAQs and tour are updated.',
-      'యాప్ ఇప్పుడు కొత్త లోగోతో "ఆర్గానిక్ కార్బన్ ఫార్మింగ్ విత్ SPIN". సమస్య నివేదికలో ఇకపై వర్గం అడగదు (కొత్త కేసులు తెలియని సమస్యగా మొదలవుతాయి), కొత్త సాగు ఎంపిక — సేంద్రీయ మార్పు దిశగా — ఉంది. సభ్యులు తమ కేసు నుండి తప్పు ఫోటోను తొలగించవచ్చు, స్థలంలో ప్రతి పంట వయస్సు చూడవచ్చు, ఖాతాలో ఐచ్ఛికంగా తపాలా చిరునామా జోడించవచ్చు. మోడరేటర్లు, నిపుణులకు రైతు ఇచ్చిన పూర్తి వివరాలు కనిపిస్తాయి. టెస్టర్ల గైడ్, సహాయం, FAQలు, టూర్ నవీకరించబడ్డాయి.',
+      'యాప్ ఇప్పుడు కొత్త లోగోతో "ఆర్గానిక్ కార్బన్ ఫార్మింగ్ విత్ SPIN". సమస్య నివేదికలో ఇకపై వర్గం అడగదు (కొత్త కేసులు తెలియని సమస్యగా మొదలవుతాయి), కొత్త సాగు ఎంపిక — సేంద్రియ మార్పు దిశగా — ఉంది. సభ్యులు తమ కేసు నుండి తప్పు ఫోటోను తొలగించవచ్చు, స్థలంలో ప్రతి పంట వయస్సు చూడవచ్చు, ఖాతాలో ఐచ్ఛికంగా తపాలా చిరునామా జోడించవచ్చు. మోడరేటర్లు, నిపుణులకు రైతు ఇచ్చిన పూర్తి వివరాలు కనిపిస్తాయి. టెస్టర్ల గైడ్, సహాయం, FAQలు, టూర్ నవీకరించబడ్డాయి.',
     ),
     linkPath: '/admin',
+  },
+  {
+    id: '2026-11-02-audit-fixes',
+    title: bi('Update: moderators and experts can set a case category; fixes after review', 'అప్‌డేట్: మోడరేటర్లు, నిపుణులు కేసు వర్గాన్ని సెట్ చేయవచ్చు; సమీక్ష తర్వాత సవరణలు'),
+    body: bi(
+      'Moderators (and the assigned expert) can now set the category of a case, because new cases start as Unknown Problem. When a farmer removes a photo, the assigned expert is notified. Crop age is counted as of the day the problem was reported. Administrators can now see each member postal address under Members. Several smaller fixes to the new case form and photo removal.',
+      'కొత్త కేసులు తెలియని సమస్యగా మొదలవుతాయి కాబట్టి మోడరేటర్లు (మరియు కేటాయించిన నిపుణుడు) ఇప్పుడు కేసు వర్గాన్ని సెట్ చేయవచ్చు. రైతు ఫోటోను తొలగిస్తే కేటాయించిన నిపుణుడికి తెలియజేయబడుతుంది. పంట వయస్సు సమస్యను నివేదించిన రోజు నాటికి లెక్కించబడుతుంది. అడ్మినిస్ట్రేటర్లు ఇప్పుడు సభ్యుల పేజీలో ప్రతి సభ్యుని తపాలా చిరునామా చూడవచ్చు. కొత్త కేసు ఫారం, ఫోటో తొలగింపులో మరికొన్ని చిన్న సవరణలు.',
+    ),
+    linkPath: '/admin/members',
   },
 ];
