@@ -180,12 +180,12 @@ export const HELP_SECTIONS: HelpSection[] = [
     title: { en: 'Farm advice: cases, knowledge, courses, soil tests', te: 'వ్యవసాయ సలహా: కేసులు, జ్ఞానం, కోర్సులు, నేల పరీక్షలు' },
     body: [
       {
-        en: 'My cases: take photos of the problem (up to 6 — they are shrunk on your phone so they send quickly), tap the symptoms you see, and add a few words by typing or speaking. What you write is kept on your phone as you go, and if there is no signal when you press Send, the case waits on the phone and is sent by itself when you are back online. A moderator passes it to the right expert, who answers. You can reply if they need more detail.',
-        te: 'నా కేసులు: సమస్య ఫోటోలు తీయండి (6 వరకు — త్వరగా పంపడానికి అవి మీ ఫోన్‌లోనే చిన్నవిగా చేయబడతాయి), మీకు కనిపించే లక్షణాలను తాకండి, టైప్ చేసి లేదా మాట్లాడి కొన్ని మాటలు జోడించండి. మీరు రాసేది వెళ్తున్న కొద్దీ మీ ఫోన్‌లో భద్రపరచబడుతుంది, పంపండి తాకినప్పుడు సిగ్నల్ లేకపోతే కేసు ఫోన్‌లో వేచి ఉండి, మీరు మళ్ళీ ఆన్‌లైన్‌లోకి రాగానే దానంతట అదే పంపబడుతుంది. మోడరేటర్ దాన్ని సరైన నిపుణుడికి పంపుతారు, ఆయన సమాధానం ఇస్తారు. మరిన్ని వివరాలు కావాలంటే మీరు బదులివ్వవచ్చు.',
+        en: 'My cases: take photos of the problem (up to 6 — they are shrunk on your phone so they send quickly), tap the symptoms you see, say how you have farmed the land so far (chemical, organic, natural, or transitioning to organic), and add a few words by typing or speaking. You no longer choose a problem category — the moderator does. Open a saved case to remove a wrong photo with its ✕. What you write is kept on your phone as you go, and if there is no signal when you press Send, the case waits on the phone and is sent by itself when you are back online. A moderator passes it to the right expert, who answers. You can reply if they need more detail.',
+        te: 'నా కేసులు: సమస్య ఫోటోలు తీయండి (6 వరకు — త్వరగా పంపడానికి అవి మీ ఫోన్‌లోనే చిన్నవిగా చేయబడతాయి), మీకు కనిపించే లక్షణాలను తాకండి, ఇప్పటి వరకు ఈ భూమిలో ఎలా సాగు చేశారో (రసాయనిక, సేంద్రియ, ప్రకృతి, లేదా సేంద్రీయ మార్పు దిశగా) చెప్పండి, టైప్ చేసి లేదా మాట్లాడి కొన్ని మాటలు జోడించండి. ఇకపై సమస్య వర్గాన్ని మీరు ఎంచుకోరు — మోడరేటర్ నిర్ణయిస్తారు. తప్పు ఫోటోను దాని ✕ తో తొలగించడానికి సేవ్ చేసిన కేసును తెరవండి. మీరు రాసేది వెళ్తున్న కొద్దీ మీ ఫోన్‌లో భద్రపరచబడుతుంది, పంపండి తాకినప్పుడు సిగ్నల్ లేకపోతే కేసు ఫోన్‌లో వేచి ఉండి, మీరు మళ్ళీ ఆన్‌లైన్‌లోకి రాగానే దానంతట అదే పంపబడుతుంది. మోడరేటర్ దాన్ని సరైన నిపుణుడికి పంపుతారు, ఆయన సమాధానం ఇస్తారు. మరిన్ని వివరాలు కావాలంటే మీరు బదులివ్వవచ్చు.',
       },
       {
-        en: 'On your Dashboard, “Recent advice” shows advice for the crops on your parcels and from your own cases, with a tag saying why. “Delete parcel” removes a parcel nobody has used, or hides one that has cases (they stay safe). Knowledge: advice articles from solved cases — search, filter, and bookmark; under each article “Products that may help” suggests shop products that mention the same problem or crop. Courses: finish lessons in order and earn a certificate. Soil Testing: register a sample for your land and read the report when it is ready.',
-        te: 'మీ డాష్‌బోర్డ్‌లో “ఇటీవలి సలహా” మీ స్థలాలలోని పంటలకు, మీ స్వంత కేసుల నుండి సలహాను చూపిస్తుంది, ఎందుకో ఒక ట్యాగ్ చెబుతుంది. “స్థలాన్ని తొలగించండి” ఎవరూ వాడని స్థలాన్ని తీసివేస్తుంది, కేసులు ఉన్నదాన్ని దాచుతుంది (అవి భద్రంగా ఉంటాయి). జ్ఞానం: పరిష్కరించిన కేసుల సలహా వ్యాసాలు — శోధించండి, ఫిల్టర్ చేయండి, బుక్‌మార్క్ చేయండి; ప్రతి వ్యాసం కింద “ఇవి సహాయపడవచ్చు” అదే సమస్య లేదా పంటను పేర్కొనే షాప్ ఉత్పత్తులను సూచిస్తుంది. కోర్సులు: పాఠాలను క్రమంగా పూర్తి చేసి సర్టిఫికెట్ పొందండి. నేల పరీక్ష: మీ భూమికి నమూనాను నమోదు చేసి, సిద్ధమైనప్పుడు నివేదిక చదవండి.',
+        en: 'On your Dashboard, Each parcel shows how many days each crop has been on it (its age). “Recent advice” shows advice for the crops on your parcels and from your own cases, with a tag saying why. “Delete parcel” removes a parcel nobody has used, or hides one that has cases (they stay safe). Knowledge: advice articles from solved cases — search, filter, and bookmark; under each article “Products that may help” suggests shop products that mention the same problem or crop. Courses: finish lessons in order and earn a certificate. Soil Testing: register a sample for your land and read the report when it is ready.',
+        te: 'ప్రతి స్థలం కింద ప్రతి పంట ఎన్ని రోజులుగా ఉందో (దాని వయస్సు) కనిపిస్తుంది. మీ డాష్‌బోర్డ్‌లో “ఇటీవలి సలహా” మీ స్థలాలలోని పంటలకు, మీ స్వంత కేసుల నుండి సలహాను చూపిస్తుంది, ఎందుకో ఒక ట్యాగ్ చెబుతుంది. “స్థలాన్ని తొలగించండి” ఎవరూ వాడని స్థలాన్ని తీసివేస్తుంది, కేసులు ఉన్నదాన్ని దాచుతుంది (అవి భద్రంగా ఉంటాయి). జ్ఞానం: పరిష్కరించిన కేసుల సలహా వ్యాసాలు — శోధించండి, ఫిల్టర్ చేయండి, బుక్‌మార్క్ చేయండి; ప్రతి వ్యాసం కింద “ఇవి సహాయపడవచ్చు” అదే సమస్య లేదా పంటను పేర్కొనే షాప్ ఉత్పత్తులను సూచిస్తుంది. కోర్సులు: పాఠాలను క్రమంగా పూర్తి చేసి సర్టిఫికెట్ పొందండి. నేల పరీక్ష: మీ భూమికి నమూనాను నమోదు చేసి, సిద్ధమైనప్పుడు నివేదిక చదవండి.',
       },
       {
         en: 'These need an active membership. Without one you will see a “Members only” card with a button to pay.',
@@ -218,8 +218,8 @@ export const HELP_SECTIONS: HelpSection[] = [
     title: { en: 'Notifications and your account', te: 'నోటిఫికేషన్లు, మీ ఖాతా' },
     body: [
       {
-        en: 'The bell in the top bar shows new notifications. Open it to read them. Under Account you can change your password.',
-        te: 'పై బార్‌లోని గంట కొత్త నోటిఫికేషన్లను చూపిస్తుంది. చదవడానికి దాన్ని తెరవండి. ఖాతా లో మీ పాస్‌వర్డ్ మార్చవచ్చు.',
+        en: 'The bell in the top bar shows new notifications. Open it to read them. Under Account you can change your password and, if you wish, add your full postal address. Every app update also sends the administrators a notification here, saying what changed.',
+        te: 'పై బార్‌లోని గంట కొత్త నోటిఫికేషన్లను చూపిస్తుంది. చదవడానికి దాన్ని తెరవండి. ఖాతా లో మీ పాస్‌వర్డ్ మార్చవచ్చు, కావాలంటే మీ పూర్తి తపాలా చిరునామాను జోడించవచ్చు. ప్రతి యాప్ అప్‌డేట్ ఏం మారిందో చెబుతూ అడ్మినిస్ట్రేటర్లకు ఇక్కడ నోటిఫికేషన్ పంపుతుంది.',
       },
     ],
   },
@@ -380,8 +380,8 @@ export const HELP_SECTIONS: HelpSection[] = [
     title: { en: 'Answering cases and writing articles', te: 'కేసులకు సమాధానం, వ్యాసాలు రాయడం' },
     body: [
       {
-        en: 'Submit your qualifications first; once an administrator verifies you, cases can be assigned to you. Open a case: you see the farmer’s photos and videos and “What has been said on this case” — the whole conversation, including your earlier advice if the farmer disputed it. Then answer, or ask the farmer for more detail. Solved cases become draft articles you can edit and send for review.',
-        te: 'ముందు మీ అర్హతలను సమర్పించండి; అడ్మినిస్ట్రేటర్ ధృవీకరించిన తర్వాత మీకు కేసులు కేటాయించబడతాయి. కేసు తెరవండి: రైతు ఫోటోలు, వీడియోలు, “ఈ కేసులో ఇప్పటివరకు చెప్పినవి” — రైతు వివాదం చేస్తే మీ ముందటి సలహా సహా మొత్తం సంభాషణ — కనిపిస్తాయి. తర్వాత సమాధానం ఇవ్వండి, లేదా రైతును మరిన్ని వివరాలు అడగండి. పరిష్కరించిన కేసులు మీరు సవరించి సమీక్షకు పంపగల డ్రాఫ్ట్ వ్యాసాలు అవుతాయి.',
+        en: 'Submit your qualifications first; once an administrator verifies you, cases can be assigned to you. Open a case: you see everything the farmer gave — the parcel’s address, size and location, every crop with its age, the problem, notes, photos and videos — and “What has been said on this case” — the whole conversation, including your earlier advice if the farmer disputed it. Then answer, or ask the farmer for more detail. Solved cases become draft articles you can edit and send for review.',
+        te: 'ముందు మీ అర్హతలను సమర్పించండి; అడ్మినిస్ట్రేటర్ ధృవీకరించిన తర్వాత మీకు కేసులు కేటాయించబడతాయి. కేసు తెరవండి: రైతు ఇచ్చిన అన్నీ — స్థలం చిరునామా, పరిమాణం, ప్రదేశం, ప్రతి పంట దాని వయస్సుతో, సమస్య, గమనికలు, ఫోటోలు, వీడియోలు — మరియు “ఈ కేసులో ఇప్పటివరకు చెప్పినవి” — రైతు వివాదం చేస్తే మీ ముందటి సలహా సహా మొత్తం సంభాషణ — కనిపిస్తాయి. తర్వాత సమాధానం ఇవ్వండి, లేదా రైతును మరిన్ని వివరాలు అడగండి. పరిష్కరించిన కేసులు మీరు సవరించి సమీక్షకు పంపగల డ్రాఫ్ట్ వ్యాసాలు అవుతాయి.',
       },
     ],
   },
@@ -391,8 +391,8 @@ export const HELP_SECTIONS: HelpSection[] = [
     title: { en: 'Reviewing cases, articles, courses and soil samples', te: 'కేసులు, వ్యాసాలు, కోర్సులు, నేల నమూనాల సమీక్ష' },
     body: [
       {
-        en: 'Assign new cases to the right expert, approve or reject articles (or send them back with notes), build and publish courses, and move soil samples through each stage to the report.',
-        te: 'కొత్త కేసులను సరైన నిపుణుడికి కేటాయించండి, వ్యాసాలను ఆమోదించండి లేదా తిరస్కరించండి (లేదా నోట్స్‌తో తిరిగి పంపండి), కోర్సులను తయారు చేసి ప్రచురించండి, నేల నమూనాలను ప్రతి దశ ద్వారా నివేదిక వరకు తరలించండి.',
+        en: 'Assign new cases to the right expert (tap “Show full details” under a case to see the parcel, crops with age, problem and photos first), approve or reject articles (or send them back with notes), build and publish courses, and move soil samples through each stage to the report.',
+        te: 'కొత్త కేసులను సరైన నిపుణుడికి కేటాయించండి (ముందుగా స్థలం, వయస్సుతో పంటలు, సమస్య, ఫోటోలు చూడటానికి కేసు కింద “పూర్తి వివరాలు చూపండి” తాకండి), వ్యాసాలను ఆమోదించండి లేదా తిరస్కరించండి (లేదా నోట్స్‌తో తిరిగి పంపండి), కోర్సులను తయారు చేసి ప్రచురించండి, నేల నమూనాలను ప్రతి దశ ద్వారా నివేదిక వరకు తరలించండి.',
       },
     ],
   },

@@ -101,13 +101,13 @@ export const TOURS: Record<Audience, TourStep[]> = {
     },
     {
       target: '/dashboard',
-      en: 'Your farm dashboard: a summary of your cases and what needs your attention.',
-      te: 'మీ వ్యవసాయ డాష్‌బోర్డ్: మీ కేసుల సారాంశం, మీ శ్రద్ధ అవసరమైనవి.',
+      en: 'Your farm dashboard: a summary of your cases and what needs your attention. Each parcel shows how many days its crops have been growing.',
+      te: 'మీ వ్యవసాయ డాష్‌బోర్డ్: మీ కేసుల సారాంశం, మీ శ్రద్ధ అవసరమైనవి. ప్రతి స్థలం కింద దాని పంటలు ఎన్ని రోజులుగా పెరుగుతున్నాయో కనిపిస్తుంది.',
     },
     {
       target: '/cases',
-      en: 'My cases: take photos of a problem in your field, tap the symptoms or speak, and an expert will answer. Members only.',
-      te: 'నా కేసులు: మీ పొలంలోని సమస్య ఫోటోలు తీయండి, లక్షణాలను తాకండి లేదా మాట్లాడండి, నిపుణుడు సమాధానం ఇస్తారు. సభ్యులకు మాత్రమే.',
+      en: 'My cases: take photos of a problem in your field, tap the symptoms or speak, and an expert will answer. A wrong photo can be removed with its ✕. Members only.',
+      te: 'నా కేసులు: మీ పొలంలోని సమస్య ఫోటోలు తీయండి, లక్షణాలను తాకండి లేదా మాట్లాడండి, నిపుణుడు సమాధానం ఇస్తారు. తప్పు ఫోటోను దాని ✕ తో తొలగించవచ్చు. సభ్యులకు మాత్రమే.',
     },
     {
       target: '/knowledge',
@@ -139,7 +139,7 @@ export const TOURS: Record<Audience, TourStep[]> = {
       en: 'Welcome, Administrator. This tour shows where each of your tools is.',
       te: 'స్వాగతం, అడ్మినిస్ట్రేటర్. మీ ప్రతి సాధనం ఎక్కడ ఉందో ఈ టూర్ చూపిస్తుంది.',
     },
-    { target: '/admin', en: 'The Admin hub: a one-page summary of what is waiting for you.', te: 'అడ్మిన్ హబ్: మీ కోసం వేచి ఉన్నవాటి ఒక పేజీ సారాంశం.' },
+    { target: '/admin', en: 'The Admin hub: a one-page summary of what is waiting for you. Every app update also sends you a notification under the bell, saying what changed.', te: 'అడ్మిన్ హబ్: మీ కోసం వేచి ఉన్నవాటి ఒక పేజీ సారాంశం. ప్రతి యాప్ అప్‌డేట్ ఏం మారిందో చెబుతూ గంట కింద మీకు నోటిఫికేషన్ పంపుతుంది.' },
     { target: '/admin/staff', en: 'Staff accounts: create experts, moderators, vendors, support agents and administrators; switch accounts off or on.', te: 'సిబ్బంది ఖాతాలు: నిపుణులు, మోడరేటర్లు, విక్రేతలు, సపోర్ట్ ఏజెంట్లు, అడ్మినిస్ట్రేటర్లను సృష్టించండి; ఖాతాలను ఆఫ్ లేదా ఆన్ చేయండి.' },
     { target: '/admin/members', en: 'Members: everyone who signed up, labelled Paid, Free, Waiting, Unpaid or Expired. Give free access until a date here — and when someone forgets their password, check it is really them and issue a “Temporary password” from this list.', te: 'సభ్యులు: సైన్ అప్ అయిన అందరూ, చెల్లించారు, ఉచితం, వేచి ఉంది, చెల్లించలేదు లేదా గడువు ముగిసింది అని లేబుల్‌తో. ఇక్కడ తేదీ వరకు ఉచిత ప్రాప్యత ఇవ్వండి — ఎవరైనా పాస్‌వర్డ్ మర్చిపోతే, నిజంగా వారేనని నిర్ధారించుకుని ఈ జాబితా నుండి “తాత్కాలిక పాస్‌వర్డ్” ఇవ్వండి.' },
     { target: '/admin/hariharaa-subscriptions', en: 'Membership payments waiting for you: check the UTR in the bank, then approve or reject with a reason.', te: 'మీ కోసం వేచి ఉన్న సభ్యత్వ చెల్లింపులు: బ్యాంకులో UTR తనిఖీ చేసి, ఆమోదించండి లేదా కారణంతో తిరస్కరించండి.' },
@@ -171,7 +171,7 @@ export const TOURS: Record<Audience, TourStep[]> = {
 
   EXPERT: [
     { en: 'Welcome! This tour shows where your work is.', te: 'స్వాగతం! మీ పని ఎక్కడ ఉందో ఈ టూర్ చూపిస్తుంది.' },
-    { target: '/expert/cases', en: 'Cases assigned to you. Open one to read the farmer’s problem and photos, then answer.', te: 'మీకు కేటాయించిన కేసులు. రైతు సమస్య, ఫోటోలు చదివి సమాధానం ఇవ్వడానికి ఒకదాన్ని తెరవండి.' },
+    { target: '/expert/cases', en: 'Cases assigned to you. Open one to see everything the farmer gave — parcel address, size, location, crops with age, problem and photos — then answer.', te: 'మీకు కేటాయించిన కేసులు. రైతు సమస్య, ఫోటోలు చదివి సమాధానం ఇవ్వడానికి ఒకదాన్ని తెరవండి.' },
     { target: '/expert/articles', en: 'Articles drafted from solved cases. Edit, then submit them for review.', te: 'పరిష్కరించిన కేసుల నుండి రూపొందించిన వ్యాసాలు. సవరించి, సమీక్ష కోసం సమర్పించండి.' },
     { target: '/expert/credentials', en: 'Your qualifications: submit them so an Administrator can verify you.', te: 'మీ అర్హతలు: అడ్మినిస్ట్రేటర్ మిమ్మల్ని ధృవీకరించడానికి వాటిని సమర్పించండి.' },
     BELL,
@@ -181,7 +181,7 @@ export const TOURS: Record<Audience, TourStep[]> = {
 
   MODERATOR: [
     { en: 'Welcome! This tour shows your review queues.', te: 'స్వాగతం! మీ సమీక్ష క్యూలను ఈ టూర్ చూపిస్తుంది.' },
-    { target: '/moderator/queue', en: 'The case queue: review new cases and assign them to the right expert.', te: 'కేసు క్యూ: కొత్త కేసులను సమీక్షించి, సరైన నిపుణుడికి కేటాయించండి.' },
+    { target: '/moderator/queue', en: 'The case queue: review new cases (tap “Show full details” to see the parcel, crops and photos) and assign them to the right expert.', te: 'కేసు క్యూ: కొత్త కేసులను సమీక్షించి, సరైన నిపుణుడికి కేటాయించండి.' },
     { target: '/moderator/articles', en: 'Article review: approve, reject or send articles back to the expert.', te: 'వ్యాసాల సమీక్ష: వ్యాసాలను ఆమోదించండి, తిరస్కరించండి లేదా నిపుణుడికి తిరిగి పంపండి.' },
     { target: '/courses/manage', en: 'Courses: build lessons and publish them.', te: 'కోర్సులు: పాఠాలను తయారు చేసి ప్రచురించండి.' },
     { target: '/soil-samples/manage', en: 'The soil-sample queue: track each sample through to its report.', te: 'నేల నమూనా క్యూ: ప్రతి నమూనాను నివేదిక వరకు ట్రాక్ చేయండి.' },

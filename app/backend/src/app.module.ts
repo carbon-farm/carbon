@@ -21,6 +21,7 @@ import { AddressesModule } from './modules/addresses/addresses.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
 import { SeasonalModule } from './modules/seasonal/seasonal.module';
 import { TesterFeedbackModule } from './modules/tester-feedback/tester-feedback.module';
+import { ReleasesModule } from './modules/releases/releases.module';
 import { HealthController } from './health/health.controller';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
@@ -53,6 +54,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
     TelemetryModule,
     SeasonalModule,
     TesterFeedbackModule,
+    ReleasesModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
