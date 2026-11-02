@@ -140,6 +140,35 @@ describe('CasesService', () => {
     });
   });
 
+  describe('removeEvidenceMedia', () => {
+    const a = 'https://example.supabase.co/storage/v1/object/public/case-evidence/a.jpg';
+    const b = 'https://example.supabase.co/storage/v1/object/public/case-evidence/b.jpg';
+
+    it('takes only the named photo off the case and logs it', async () => {
+      prisma.case.findUnique.mockResolvedValue(buildCase({ status: CaseStatus.SUBMITTED, evidenceMediaUrls: [a, b] }));
+      prisma.case.update.mockResolvedValue(buildCase({ evidenceMediaUrls: [b] }));
+      await service.removeEvidenceMedia('case-1', 'farmer-1', a);
+      expect(prisma.case.update).toHaveBeenCalledWith(expect.objectContaining({ data: { evidenceMediaUrls: [b] } }));
+      expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ action: 'case.evidence.remove', metadata: { url: a } }));
+    });
+
+    it('refuses an address that is not on the case', async () => {
+      prisma.case.findUnique.mockResolvedValue(buildCase({ evidenceMediaUrls: [b] }));
+      await expect(service.removeEvidenceMedia('case-1', 'farmer-1', a)).rejects.toThrow(NotFoundException);
+      expect(prisma.case.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses on a CLOSED case', async () => {
+      prisma.case.findUnique.mockResolvedValue(buildCase({ status: CaseStatus.CLOSED, evidenceMediaUrls: [a] }));
+      await expect(service.removeEvidenceMedia('case-1', 'farmer-1', a)).rejects.toThrow(BadRequestException);
+    });
+
+    it('refuses a farmer who does not own the case', async () => {
+      prisma.case.findUnique.mockResolvedValue(buildCase({ farmerId: 'someone-else', evidenceMediaUrls: [a] }));
+      await expect(service.removeEvidenceMedia('case-1', 'farmer-1', a)).rejects.toThrow(ForbiddenException);
+    });
+  });
+
   describe('submit', () => {
     it('moves a DRAFT case to SUBMITTED and assigns a case number', async () => {
       prisma.case.findUnique.mockResolvedValue(buildCase({ status: CaseStatus.DRAFT }));

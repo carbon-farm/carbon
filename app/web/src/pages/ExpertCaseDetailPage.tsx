@@ -1,11 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { CaseHistory } from '../components/CaseHistory';
+import { CaseFacts } from '../components/CaseFacts';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { getCase, startWorkCase, requestFollowUpOnCase, answerCase, type Case } from '../api/cases';
 import { Bi, BiValue } from '../i18n/Bi';
-import { strings, caseCategoryLabel, caseStatusLabel } from '../i18n/strings';
+import { strings, caseStatusLabel } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 
 export function ExpertCaseDetailPage() {
@@ -101,48 +102,7 @@ export function ExpertCaseDetailPage() {
             </div>
             {theCase.isPriority && <BiValue value={strings.priorityBadgeLabel} as="span" className="priority-badge" />}
 
-            <div>
-              <div className="field-label"><Bi id="parcelLabel" /></div>
-              <div>{theCase.farmLand.label}</div>
-            </div>
-            <div>
-              <div className="field-label"><Bi id="categoryLabel" /></div>
-              <div><BiValue value={caseCategoryLabel(theCase.category.name)} /></div>
-            </div>
-            {(theCase.crop || theCase.cropName) && (
-              <div>
-                <div className="field-label"><Bi id="articleCropField" /></div>
-                <div>{theCase.crop?.name ?? theCase.cropName}</div>
-              </div>
-            )}
-            <div>
-              <div className="field-label"><Bi id="problemLabel" /></div>
-              <div>{theCase.problemDescription}</div>
-            </div>
-            {theCase.evidenceNotes && (
-              <div>
-                <div className="field-label"><Bi id="evidenceLabel" /></div>
-                <div>{theCase.evidenceNotes}</div>
-              </div>
-            )}
-            {theCase.evidenceMediaUrls.length > 0 && (
-              <div>
-                <div className="field-label"><Bi id="evidenceMediaLabel" /></div>
-                <div className="evidence-media-grid">
-                  {theCase.evidenceMediaUrls.map((url) =>
-                    /\.(jpe?g|png|webp)$/i.test(url) ? (
-                      <a href={url} target="_blank" rel="noopener noreferrer" key={url}>
-                        <img src={url} alt="" className="evidence-thumb" />
-                      </a>
-                    ) : (
-                      <a href={url} target="_blank" rel="noopener noreferrer" key={url} className="link-button">
-                        {strings.watchVideoLink.en} / {strings.watchVideoLink.te}
-                      </a>
-                    ),
-                  )}
-                </div>
-              </div>
-            )}
+            <CaseFacts theCase={theCase} />
             {theCase.followUpQuestion && (
               <div>
                 <div className="field-label"><Bi id="followUpQuestionLabel" /></div>

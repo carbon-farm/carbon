@@ -19,7 +19,18 @@ export interface Case {
   caseNumber: string | null;
   farmerId: string;
   farmLandId: string;
-  farmLand: { id: string; label: string };
+  // The parcel as the backend sends it; the extra fields are what moderators and experts need.
+  farmLand: {
+    id: string;
+    label: string;
+    address?: string;
+    landSizeAcres?: number;
+    primaryCrops?: string[];
+    cropAddedAt?: Record<string, string> | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    createdAt?: string;
+  };
   categoryId: string;
   category: { id: string; name: string };
   cropId: string | null;
@@ -137,6 +148,10 @@ export function requestFollowUpOnCase(token: string, id: string, question: strin
 
 export function answerCase(token: string, id: string, resolutionNotes: string) {
   return apiRequest<Case>(`/cases/${id}/answer`, { method: 'POST', body: { resolutionNotes }, token });
+}
+
+export function removeCaseEvidence(token: string, id: string, url: string) {
+  return apiRequest<Case>(`/cases/${id}/evidence/remove`, { method: 'POST', body: { url }, token });
 }
 
 export function uploadCaseEvidence(token: string, id: string, file: File) {

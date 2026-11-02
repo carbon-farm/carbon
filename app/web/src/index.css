@@ -124,10 +124,25 @@ body {
 
 .brand-wordmark {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   text-decoration: none;
   color: white;
   line-height: 1.15;
+}
+
+.brand-wordmark .brand-logo {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.brand-wordmark .brand-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .brand-wordmark .bi-en {
@@ -806,6 +821,11 @@ button.case-item:hover:not(:disabled) {
   gap: 8px;
 }
 
+.evidence-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
 .evidence-thumb {
   width: 84px;
   height: 84px;
@@ -940,6 +960,13 @@ button.case-item:hover:not(:disabled) {
 .hero-mark {
   font-size: 38px;
   line-height: 1;
+}
+
+.hero-logo {
+  width: clamp(130px, 38vw, 200px);
+  height: auto;
+  border-radius: 50%;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
 }
 
 .hero h1 {
@@ -2033,6 +2060,12 @@ button.chip-on {
   justify-content: space-between;
   gap: 12px;
 }
+.receipt-logo {
+  display: block;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 6px;
+}
 .receipt-brand {
   font-family: var(--font-heading);
   font-size: 18px;
@@ -2245,3 +2278,22 @@ button.chip-on {
 /* Recording check (Speak your problem) */
 .voice-review { display: flex; flex-direction: column; gap: 10px; width: 100%; }
 .voice-review audio { width: 100%; }
+
+/* Everything the farmer gave on a case, for moderators and experts */
+.case-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+.case-facts-problem {
+  white-space: pre-line;
+}
+.case-facts-toggle > summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--accent-deep);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}

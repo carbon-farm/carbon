@@ -137,6 +137,9 @@ model User {
   // search by — the UUID above stays the internal key. Assigned once at creation,
   // never reused or changed; see common/user-code.ts.
   userCode           String    @unique
+  // Full postal address, asked for once (e.g. when joining). Optional. Aadhaar is deliberately
+  // NOT stored: a government ID needs encryption and a legal basis this platform has not set up.
+  postalAddress      String?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
@@ -213,6 +216,9 @@ model FarmLand {
   address       String
   landSizeAcres Float
   primaryCrops  String[] // crop names, validated against CropMaster at the API layer
+  // When each crop was put on this parcel: lower-cased crop name -> ISO time. Keeps "how old is
+  // the crop" answerable; parcels made before this was kept fall back to their own createdAt.
+  cropAddedAt   Json?
   latitude      Float? // optional GPS pin, captured via the browser's Geolocation
   longitude     Float? // API — easier for a farmer standing in the field than typing an address
   // Set when a farmer "deletes" a parcel that has cases or soil samples: hidden from their lists

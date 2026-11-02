@@ -50,6 +50,7 @@ export function OrderReceiptPage() {
         <div className="card receipt">
           <div className="receipt-head">
             <div>
+              <img className="receipt-logo" src="/logo-160.webp" width="48" height="48" alt="" />
               <strong className="receipt-brand">
                 {strings.brand.en} · {strings.brandGroup.en}
               </strong>

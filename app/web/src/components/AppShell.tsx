@@ -61,11 +61,14 @@ export function AppShell({ children, wide = false }: { children: ReactNode; wide
     <div>
       <header className="app-header">
         <Link to={session ? roleHomePath(session.role) : '/'} className="brand-wordmark">
-          <span className="bi-en">
-            {strings.brand.en} <small className="brand-group">· {strings.brandGroup.en}</small>
-          </span>
-          <span className="bi-te">
-            {strings.brand.te} <small className="brand-group">· {strings.brandGroup.te}</small>
+          <img className="brand-logo" src="/logo-160.webp" width="44" height="44" alt="" />
+          <span className="brand-text">
+            <span className="bi-en">
+              {strings.brand.en} <small className="brand-group">· {strings.brandGroup.en}</small>
+            </span>
+            <span className="bi-te">
+              {strings.brand.te} <small className="brand-group">· {strings.brandGroup.te}</small>
+            </span>
           </span>
         </Link>
         {!session && (

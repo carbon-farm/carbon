@@ -9,6 +9,7 @@ import { AssignCaseDto } from './dto/assign-case.dto';
 import { RequestFollowUpDto, RespondFollowUpDto } from './dto/follow-up.dto';
 import { AnswerCaseDto } from './dto/answer-case.dto';
 import { ConfirmPriorityDto } from './dto/confirm-priority.dto';
+import { RemoveEvidenceDto } from './dto/remove-evidence.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { MembershipGuard } from '../../common/guards/membership.guard';
@@ -73,6 +74,13 @@ export class CasesController {
     @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.casesService.addEvidenceMedia(id, user.userId, file);
+  }
+
+  // POST rather than DELETE: the photo is named in the body, and addresses do not fit a URL path.
+  @Roles(Role.MEMBER)
+  @Post(':id/evidence/remove')
+  removeEvidence(@Param('id') id: string, @Body() dto: RemoveEvidenceDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.casesService.removeEvidenceMedia(id, user.userId, dto.url);
   }
 
   @Roles(Role.MEMBER)

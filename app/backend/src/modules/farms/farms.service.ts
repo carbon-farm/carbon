@@ -5,6 +5,9 @@ import { bi } from '../../common/i18n';
 import { CreateFarmLandDto } from './dto/create-farm-land.dto';
 import { UpdateFarmLandDto } from './dto/update-farm-land.dto';
 
+// lower-cased, trimmed crop name: the key crops are dated under
+const cropKey = (name: string) => name.trim().toLowerCase();
+
 @Injectable()
 export class FarmsService {
   constructor(
@@ -22,8 +25,9 @@ export class FarmsService {
         bi('You already have a parcel with this name, place and size', 'ఈ పేరు, ప్రదేశం, పరిమాణంతో మీకు ఇప్పటికే ఒక స్థలం ఉంది'),
       );
     }
+    const now = new Date();
     const farmLand = await this.prisma.farmLand.create({
-      data: { ...dto, farmerId },
+      data: { ...dto, farmerId, cropAddedAt: Object.fromEntries(dto.primaryCrops.map((c) => [cropKey(c), now.toISOString()])) },
     });
     await this.audit.log({
       actorId: farmerId,
@@ -51,8 +55,11 @@ export class FarmsService {
   }
 
   async update(id: string, farmerId: string, dto: UpdateFarmLandDto) {
-    await this.getOwned(id, farmerId); // ownership check
-    const farmLand = await this.prisma.farmLand.update({ where: { id }, data: dto });
+    const existing = await this.getOwned(id, farmerId); // ownership check
+    const now = new Date();
+    // Crops already on the parcel keep their date; only crops added now start counting from now.
+    const data = dto.primaryCrops ? { ...dto, cropAddedAt: this.datesAfterChange(existing, dto.primaryCrops, now) } : dto;
+    const farmLand = await this.prisma.farmLand.update({ where: { id }, data });
     await this.audit.log({
       actorId: farmerId,
       action: 'farmland.update',
@@ -60,6 +67,18 @@ export class FarmsService {
       entityId: farmLand.id,
     });
     return farmLand;
+  }
+
+  private datesAfterChange(existing: { cropAddedAt?: unknown; primaryCrops?: string[]; createdAt?: Date }, crops: string[], now: Date) {
+    const before = existing.cropAddedAt && typeof existing.cropAddedAt === 'object' ? (existing.cropAddedAt as Record<string, string>) : {};
+    const wasThere = new Set((existing.primaryCrops ?? []).map(cropKey));
+    const parcelDate = existing.createdAt ?? now;
+    const out: Record<string, string> = {};
+    for (const name of crops) {
+      const key = cropKey(name);
+      out[key] = before[key] ?? (wasThere.has(key) ? parcelDate.toISOString() : now.toISOString());
+    }
+    return out;
   }
 
   // A parcel nobody has used is simply deleted. One that has cases or soil samples is hidden

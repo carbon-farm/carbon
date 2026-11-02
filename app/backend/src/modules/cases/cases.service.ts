@@ -161,6 +161,31 @@ export class CasesService {
     return updated;
   }
 
+  // The farmer takes one of their own photos/videos off the case (testers: "unable to delete").
+  // Only the listing is changed; the audit log keeps the address so a removal can be traced.
+  async removeEvidenceMedia(caseId: string, farmerId: string, url: string): Promise<Case> {
+    const existing = await this.getOwnedByFarmer(caseId, farmerId);
+    if (existing.status === CaseStatus.CLOSED) {
+      throw new BadRequestException(bi('Cannot remove evidence from a closed case', 'మూసివేసిన కేసు నుండి ఆధారాలను తొలగించలేరు'));
+    }
+    if (!existing.evidenceMediaUrls.includes(url)) {
+      throw new NotFoundException(bi('That photo or video is not on this case', 'ఆ ఫోటో లేదా వీడియో ఈ కేసులో లేదు'));
+    }
+    const updated = await this.prisma.case.update({
+      where: { id: caseId },
+      data: { evidenceMediaUrls: existing.evidenceMediaUrls.filter((u) => u !== url) },
+      include: { category: true, farmLand: true, crop: true },
+    });
+    await this.audit.log({
+      actorId: farmerId,
+      action: 'case.evidence.remove',
+      entityType: 'Case',
+      entityId: caseId,
+      metadata: { url },
+    });
+    return updated;
+  }
+
   async submit(caseId: string, farmerId: string): Promise<Case> {
     const existing = await this.getOwnedByFarmer(caseId, farmerId);
     this.assertStatus(existing, [CaseStatus.DRAFT], 'submit');

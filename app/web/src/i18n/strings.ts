@@ -14,7 +14,7 @@ export interface Bilingual {
 // Typed as plain {en, te} pairs (not one literal type per key): indexing by a StringKey union of a
 // thousand literal types overflows the compiler, and nothing needs the exact wording as a type.
 const stringsDef = {
-  brand: { en: 'Organic Carbon Farming', te: 'ఆర్గానిక్ కార్బన్ ఫార్మింగ్' },
+  brand: { en: 'Organic Carbon Farming with SPIN', te: 'ఆర్గానిక్ కార్బన్ ఫార్మింగ్ విత్ SPIN' },
   brandGroup: { en: 'HARIHARAA Group', te: 'హరిహర గ్రూప్' },
 
   // Landing page
@@ -1173,6 +1173,10 @@ const stringsDef = {
   casePhotoTake: { en: 'Take a photo', te: 'ఫోటో తీయండి' },
   casePhotoChoose: { en: 'Choose from gallery', te: 'గ్యాలరీ నుండి ఎంచుకోండి' },
   casePhotoRemove: { en: 'Remove photo', te: 'ఫోటోను తొలగించండి' },
+  evidenceRemoveConfirm: {
+    en: 'Remove this photo/video from the case?',
+    te: 'ఈ ఫోటో/వీడియోను కేసు నుండి తొలగించాలా?',
+  },
   casePhotosFailed: {
     en: 'Your case is saved, but {n} photo(s) could not be uploaded. Open the case to add them again.',
     te: 'మీ కేసు సేవ్ అయింది, కానీ {n} ఫోటో(లు) అప్‌లోడ్ కాలేదు. వాటిని మళ్ళీ జోడించడానికి కేసును తెరవండి.',
@@ -1251,6 +1255,26 @@ const stringsDef = {
     en: 'Sent to the mobile number above. You can switch this off at any time. The same updates always appear under the bell in the app.',
     te: 'పైన ఉన్న మొబైల్ నంబర్‌కు పంపబడతాయి. దీన్ని ఎప్పుడైనా ఆఫ్ చేయవచ్చు. అవే అప్‌డేట్‌లు యాప్‌లోని గంట కింద ఎల్లప్పుడూ కనిపిస్తాయి.',
   },
+  postalAddressTitle: { en: 'Your postal address', te: 'మీ తపాలా చిరునామా' },
+  postalAddressField: { en: 'Full postal address', te: 'పూర్తి చిరునామా' },
+  postalAddressHint: {
+    en: 'Optional. House or plot number, street, village, mandal, district and PIN code. Only you and the store Administrators can see this. We do not ask for your Aadhaar number.',
+    te: 'ఐచ్ఛికం. ఇంటి లేదా ప్లాట్ నంబర్, వీధి, గ్రామం, మండలం, జిల్లా, పిన్ కోడ్. ఇది మీకు మరియు స్టోర్ అడ్మినిస్ట్రేటర్లకు మాత్రమే కనిపిస్తుంది. మేము మీ ఆధార్ నంబర్ అడగము.',
+  },
+  postalAddressSave: { en: 'Save address', te: 'చిరునామా సేవ్ చేయండి' },
+  cropAgeDays: { en: '{n} days on this parcel', te: 'ఈ స్థలంలో {n} రోజులు' },
+  cropAgeOneDay: { en: '1 day on this parcel', te: 'ఈ స్థలంలో 1 రోజు' },
+  cropAgeToday: { en: 'added today', te: 'ఈరోజే చేర్చారు' },
+  caseFactsHeading: { en: 'Full details from the farmer', te: 'రైతు ఇచ్చిన పూర్తి వివరాలు' },
+  caseFactsAddress: { en: 'Parcel address', te: 'స్థలం చిరునామా' },
+  caseFactsSize: { en: 'Land size', te: 'భూమి పరిమాణం' },
+  caseFactsAcres: { en: '{n} acres', te: '{n} ఎకరాలు' },
+  caseFactsCropsOnParcel: { en: 'Crops on this parcel', te: 'ఈ స్థలంలోని పంటలు' },
+  caseFactsLocation: { en: 'Location', te: 'ప్రదేశం' },
+  caseFactsSubmitted: { en: 'Sent on', te: 'పంపిన తేదీ' },
+  caseFactsPriorityAsked: { en: 'Farmer asked for priority', te: 'రైతు ప్రాధాన్యత కోరారు' },
+  caseFactsShow: { en: 'Show full details', te: 'పూర్తి వివరాలు చూపండి' },
+  caseFactsHide: { en: 'Hide full details', te: 'పూర్తి వివరాలు దాచండి' },
   lowStockAtField: { en: 'Warn me when stock is at or below', te: 'స్టాక్ ఇంత లేదా తక్కువకు వచ్చినప్పుడు నాకు చెప్పండి' },
   lowStockAtHint: {
     en: 'Optional. Leave empty to use the shop default (5). Put 0 to be warned only when it is all gone.',

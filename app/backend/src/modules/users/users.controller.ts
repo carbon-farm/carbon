@@ -5,6 +5,7 @@ import { CreateStaffUserDto } from './dto/create-staff-user.dto';
 import { SetActiveDto } from './dto/set-active.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdatePreferencesDto } from './dto/update-preferences.dto';
+import { UpdateAddressDto } from './dto/update-address.dto';
 import { WhatsAppService } from '../notifications/whatsapp.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -40,6 +41,11 @@ export class UsersController {
   @Patch('me/preferences')
   updateMyPreferences(@Body() dto: UpdatePreferencesDto, @CurrentUser() user: AuthenticatedUser) {
     return this.usersService.updatePreferences(user.userId, dto);
+  }
+
+  @Patch('me/address')
+  updateMyAddress(@Body() dto: UpdateAddressDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.usersService.updatePostalAddress(user.userId, dto.postalAddress);
   }
 
   @Post('me/password')

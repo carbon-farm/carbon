@@ -5,6 +5,7 @@ import { listQueueCases, startReviewCase, assignCase, type Case } from '../api/c
 import { listVerifiedExperts, type VerifiedExpert } from '../api/experts';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, caseCategoryLabel, caseStatusLabel } from '../i18n/strings';
+import { CaseFacts } from '../components/CaseFacts';
 
 type SortMode = 'priority' | 'newest' | 'oldest' | 'status';
 
@@ -166,6 +167,12 @@ export function ModeratorQueuePage() {
                   <BiValue value={status} />
                 </div>
                 <div className="hint">{c.problemDescription}</div>
+                <details className="case-facts-toggle">
+                  <summary>
+                    <BiValue value={strings.caseFactsShow} />
+                  </summary>
+                  <CaseFacts theCase={c} />
+                </details>
 
                 {c.status === 'SUBMITTED' && (
                   <button type="button" onClick={() => handleStartReview(c.id)} disabled={isBusy}>

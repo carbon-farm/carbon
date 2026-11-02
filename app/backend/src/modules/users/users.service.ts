@@ -154,6 +154,15 @@ export class UsersService {
     return safeUser;
   }
 
+  // The person's own full postal address (optional; empty clears it). Not shared with anyone else.
+  async updatePostalAddress(userId: string, postalAddress: string) {
+    const value = postalAddress.replace(/\s+/g, ' ').trim();
+    const updated = await this.prisma.user.update({ where: { id: userId }, data: { postalAddress: value || null } });
+    await this.audit.log({ actorId: userId, action: 'user.address_update', entityType: 'User', entityId: userId });
+    const { passwordHash: _omit, ...safeUser } = updated;
+    return safeUser;
+  }
+
   async changeMyPassword(userId: string, dto: ChangePasswordDto) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user || !(await bcrypt.compare(dto.currentPassword, user.passwordHash))) {

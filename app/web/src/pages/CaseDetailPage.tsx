@@ -3,9 +3,10 @@ import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { shrinkImage } from '../lib/image';
+import { cropAgeDays, cropAgeText } from '../lib/cropAge';
 import { CaseHistory } from '../components/CaseHistory';
-import { getCase, submitCase, respondToFollowUp, confirmCase, disputeCase, uploadCaseEvidence, type Case } from '../api/cases';
-import { Bi, BiValue } from '../i18n/Bi';
+import { getCase, submitCase, respondToFollowUp, confirmCase, disputeCase, uploadCaseEvidence, removeCaseEvidence, type Case } from '../api/cases';
+import { Bi, BiValue, biInline } from '../i18n/Bi';
 import { strings, caseCategoryLabel, caseStatusLabel } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 
@@ -103,6 +104,18 @@ export function CaseDetailPage() {
     }
   }
 
+  async function handleRemoveEvidence(url: string) {
+    if (!session || !theCase) return;
+    if (!window.confirm(`${strings.evidenceRemoveConfirm.en}
+${strings.evidenceRemoveConfirm.te}`)) return;
+    setError(null);
+    try {
+      setCase(await removeCaseEvidence(session.accessToken, theCase.id, url));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : `${strings.genericError.en} / ${strings.genericError.te}`);
+    }
+  }
+
   async function handleFileSelected(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!session || !theCase || !file) return;
@@ -117,6 +130,8 @@ export function CaseDetailPage() {
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   }
+
+  const cropAge = theCase ? cropAgeDays(theCase.farmLand, theCase.crop?.name ?? theCase.cropName) : null;
 
   return (
     <>
@@ -159,7 +174,14 @@ export function CaseDetailPage() {
             {(theCase.crop || theCase.cropName) && (
               <div>
                 <div className="field-label"><Bi id="articleCropField" /></div>
-                <div>{theCase.crop?.name ?? theCase.cropName}</div>
+                <div>
+                  {theCase.crop?.name ?? theCase.cropName}
+                  {cropAge !== null && (
+                    <span className="hint">
+                      {' '}· {cropAgeText(cropAge).en} / {cropAgeText(cropAge).te}
+                    </span>
+                  )}
+                </div>
               </div>
             )}
             <div>
@@ -177,17 +199,24 @@ export function CaseDetailPage() {
               <div>
                 <div className="field-label"><Bi id="evidenceMediaLabel" /></div>
                 <div className="evidence-media-grid">
-                  {theCase.evidenceMediaUrls.map((url) =>
-                    isImageUrl(url) ? (
-                      <a href={url} target="_blank" rel="noopener noreferrer" key={url}>
-                        <img src={url} alt="" className="evidence-thumb" />
-                      </a>
-                    ) : (
-                      <a href={url} target="_blank" rel="noopener noreferrer" key={url} className="link-button">
-                        {strings.watchVideoLink.en} / {strings.watchVideoLink.te}
-                      </a>
-                    ),
-                  )}
+                  {theCase.evidenceMediaUrls.map((url) => (
+                    <div className="evidence-item" key={url}>
+                      {isImageUrl(url) ? (
+                        <a href={url} target="_blank" rel="noopener noreferrer">
+                          <img src={url} alt="" className="evidence-thumb" />
+                        </a>
+                      ) : (
+                        <a href={url} target="_blank" rel="noopener noreferrer" className="link-button">
+                          {strings.watchVideoLink.en} / {strings.watchVideoLink.te}
+                        </a>
+                      )}
+                      {theCase.status !== 'CLOSED' && (
+                        <button type="button" className="photo-remove" onClick={() => handleRemoveEvidence(url)} aria-label={biInline('casePhotoRemove')} title={biInline('casePhotoRemove')}>
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

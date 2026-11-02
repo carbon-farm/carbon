@@ -11,6 +11,7 @@ export interface AdminUser {
   // Only present on the signed-in user's own record (GET /users/me).
   whatsappOptIn?: boolean;
   whatsappAvailable?: boolean;
+  postalAddress?: string | null;
 }
 
 // The logged-in user's own record (name, mobile, user code) — shown in the header.
@@ -111,6 +112,10 @@ export function getUsageSummary(token: string, days: number) {
 
 export function updatePreferences(token: string, whatsappOptIn: boolean) {
   return apiRequest<AdminUser>('/users/me/preferences', { method: 'PATCH', body: { whatsappOptIn }, token });
+}
+
+export function updatePostalAddress(token: string, postalAddress: string) {
+  return apiRequest<AdminUser>('/users/me/address', { method: 'PATCH', body: { postalAddress }, token });
 }
 
 export function setUserActive(token: string, id: string, isActive: boolean) {

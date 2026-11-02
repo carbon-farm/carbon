@@ -4,9 +4,9 @@ import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import { listFarms, type FarmLand } from '../api/farms';
 import { getCase } from '../api/cases';
-import { listCaseCategories, listCrops, type CaseCategory, type Crop } from '../api/configuration';
+import { listCaseCategories, listCrops, type Crop } from '../api/configuration';
 import { Bi, BiValue, biInline } from '../i18n/Bi';
-import { strings, caseCategoryLabel } from '../i18n/strings';
+import { strings } from '../i18n/strings';
 import { bilingualInvalidHandler, clearCustomValidity } from '../i18n/validation';
 import { FIELD_QUESTIONS, LEGACY_SYMPTOM_LABELS, SOIL_QUESTIONS, SYMPTOMS } from '../help/caseSymptoms';
 import { ChoiceQuestions } from '../components/ChoiceQuestions';
@@ -44,7 +44,6 @@ export function NewCasePage() {
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const [farms, setFarms] = useState<FarmLand[]>([]);
-  const [categories, setCategories] = useState<CaseCategory[]>([]);
   const [crops, setCrops] = useState<Crop[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,7 +73,10 @@ export function NewCasePage() {
     Promise.all([listFarms(session.accessToken), listCaseCategories(session.accessToken), listCrops(session.accessToken)])
       .then(([farmsResult, categoriesResult, cropsResult]) => {
         setFarms(farmsResult);
-        setCategories(categoriesResult);
+        // The farmer is no longer asked for a category (testers, 1 Nov 2026): start every case as
+        // "Unknown Problem" and let the moderator/expert sort it. Follow-ups keep the earlier case's.
+        const fallback = categoriesResult.find((c) => c.name === 'Unknown Problem') ?? categoriesResult[0];
+        if (fallback) setCategoryId((v) => v || fallback.id);
         setCrops(cropsResult);
       })
       .catch((err) => {
@@ -414,32 +416,6 @@ export function NewCasePage() {
                     {farm.label}
                   </option>
                 ))}
-              </select>
-            </label>
-
-            <label>
-              <Bi id="categoryFieldLabel" />
-              <select
-                name="categoryId"
-                required
-                value={categoryId}
-                onChange={(e) => {
-                  setCategoryId(e.target.value);
-                  clearCustomValidity(e);
-                }}
-                onInvalid={bilingualInvalidHandler}
-              >
-                <option value="" disabled>
-                  {biInline('selectPlaceholder')}
-                </option>
-                {categories.map((cat) => {
-                  const label = caseCategoryLabel(cat.name);
-                  return (
-                    <option key={cat.id} value={cat.id}>
-                      {label.en} / {label.te}
-                    </option>
-                  );
-                })}
               </select>
             </label>
 

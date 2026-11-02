@@ -107,3 +107,25 @@ describe('UsersService — temporary passwords', () => {
     expect(prisma.user.update).not.toHaveBeenCalled();
   });
 });
+
+describe('UsersService.updatePostalAddress', () => {
+  const make = () => {
+    const prisma = { user: { update: jest.fn().mockImplementation(async ({ data }) => ({ id: 'u1', passwordHash: 'secret', ...data })) } };
+    const audit = { log: jest.fn().mockResolvedValue(undefined) };
+    return { prisma, audit, service: new UsersService(prisma as unknown as PrismaService, audit as unknown as AuditService) };
+  };
+
+  it('tidies the spacing, saves it and never returns the password hash', async () => {
+    const { service, prisma, audit } = make();
+    const r = await service.updatePostalAddress('u1', '  4-12,  Main Road,\n Guntur  522001 ');
+    expect(prisma.user.update).toHaveBeenCalledWith({ where: { id: 'u1' }, data: { postalAddress: '4-12, Main Road, Guntur 522001' } });
+    expect(r).not.toHaveProperty('passwordHash');
+    expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ action: 'user.address_update' }));
+  });
+
+  it('clears the address when it is empty', async () => {
+    const { service, prisma } = make();
+    await service.updatePostalAddress('u1', '   ');
+    expect(prisma.user.update).toHaveBeenCalledWith({ where: { id: 'u1' }, data: { postalAddress: null } });
+  });
+});

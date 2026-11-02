@@ -1,3 +1,4 @@
+import { cropAgeDays, cropAgeText } from '../lib/cropAge';
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
@@ -111,6 +112,14 @@ export function ParcelCard({
           <div className="meta">
             {farm.address} · {farm.landSizeAcres} acres · {farm.primaryCrops.join(', ')}
           </div>
+          {farm.primaryCrops.map((name) => {
+            const days = cropAgeDays(farm, name);
+            return days === null ? null : (
+              <div className="meta" key={name}>
+                {name}: {cropAgeText(days).en} / {cropAgeText(days).te}
+              </div>
+            );
+          })}
           <div className="meta">
             {strings.parcelAddedOn.en.replace('{date}', addedOn)} / {strings.parcelAddedOn.te.replace('{date}', addedOn)}
           </div>

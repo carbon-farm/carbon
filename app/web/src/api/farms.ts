@@ -6,6 +6,8 @@ export interface FarmLand {
   address: string;
   landSizeAcres: number;
   primaryCrops: string[];
+  // lower-cased crop name -> when it was put on the parcel (missing on parcels made earlier)
+  cropAddedAt?: Record<string, string> | null;
   latitude: number | null;
   longitude: number | null;
   createdAt: string;

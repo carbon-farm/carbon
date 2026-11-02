@@ -61,4 +61,37 @@ describe('FarmsService — parcels', () => {
     await service.create('u1', dto as never);
     expect(prisma.farmLand.create).toHaveBeenCalled();
   });
+  describe('crop dates', () => {
+    const day = (d: string) => new Date(d).toISOString();
+
+    it('dates every crop of a new parcel from now', async () => {
+      const { service, prisma } = make();
+      await service.create('u1', { ...dto, primaryCrops: ['Chilli', ' Paddy '] });
+      const data = prisma.farmLand.create.mock.calls[0][0].data;
+      expect(Object.keys(data.cropAddedAt).sort()).toEqual(['chilli', 'paddy']);
+    });
+
+    it('keeps the date of a crop already on the parcel and starts only the new one from now', async () => {
+      const { service, prisma } = make();
+      prisma.farmLand.findUnique.mockResolvedValue({ ...parcel, primaryCrops: ['Chilli'], cropAddedAt: { chilli: day('2026-09-01') }, createdAt: new Date('2026-08-01') });
+      await service.update('f1', 'u1', { primaryCrops: ['Chilli', 'Cotton'] });
+      const data = prisma.farmLand.update.mock.calls[0][0].data;
+      expect(data.cropAddedAt.chilli).toBe(day('2026-09-01'));
+      expect(new Date(data.cropAddedAt.cotton).getTime()).toBeGreaterThan(Date.now() - 60_000);
+    });
+
+    it('dates a crop that had no date from the parcel creation, and drops a removed crop', async () => {
+      const { service, prisma } = make();
+      prisma.farmLand.findUnique.mockResolvedValue({ ...parcel, primaryCrops: ['Chilli', 'Okra'], cropAddedAt: null, createdAt: new Date('2026-08-01T00:00:00Z') });
+      await service.update('f1', 'u1', { primaryCrops: ['Chilli'] });
+      const data = prisma.farmLand.update.mock.calls[0][0].data;
+      expect(data.cropAddedAt).toEqual({ chilli: '2026-08-01T00:00:00.000Z' });
+    });
+
+    it('leaves the dates alone when the crops are not part of the change', async () => {
+      const { service, prisma } = make();
+      await service.update('f1', 'u1', { label: 'South field' });
+      expect(prisma.farmLand.update.mock.calls[0][0].data).toEqual({ label: 'South field' });
+    });
+  });
 });
