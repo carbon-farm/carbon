@@ -30,4 +30,13 @@ export const RELEASE_NOTES: ReleaseNote[] = [
     ),
     linkPath: '/admin/members',
   },
+  {
+    id: '2026-11-02-water-and-pest-shop',
+    title: bi('Update: more water choices, and Pest Control and Mother Cultures in the shop', 'అప్‌డేట్: నీటి ఎంపికలు పెరిగాయి; షాప్‌లో చీడపీడల నివారణ, మదర్ కల్చర్లు'),
+    body: bi(
+      'Report a problem now offers Sprinkler and Rain hose under "How does your field get water?". The shop has two new groups under Farm Inputs: Pest Control (Solar Light Traps, Sticky Traps, Pheromone Traps & Lures) and Mother Cultures. Add products to them under Marketplace, and rename or reorder them under Taxonomy, Product categories. Help, FAQs and the testers guide are updated.',
+      'సమస్య నివేదికలో "మీ పొలానికి నీరు ఎలా అందుతుంది?" కింద ఇప్పుడు స్ప్రింక్లర్, రెయిన్ హోస్ ఎంపికలు ఉన్నాయి. షాప్‌లో వ్యవసాయ ఇన్‌పుట్ల కింద రెండు కొత్త విభాగాలు: చీడపీడల నివారణ (సోలార్ లైట్ ట్రాప్స్, జిగురు ట్రాప్స్, ఫెరోమోన్ ట్రాప్స్ & ల్యూర్స్) మరియు మదర్ కల్చర్లు. వీటిలో ఉత్పత్తులను మార్కెట్‌ప్లేస్‌లో జోడించండి; పేరు మార్చడానికి లేదా క్రమం మార్చడానికి వర్గీకరణ, ఉత్పత్తి వర్గాలు చూడండి. సహాయం, FAQలు, టెస్టర్ల గైడ్ నవీకరించబడ్డాయి.',
+    ),
+    linkPath: '/marketplace',
+  },
 ];

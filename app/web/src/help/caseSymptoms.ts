@@ -148,6 +148,8 @@ export const FIELD_QUESTIONS: ChoiceQuestion[] = [
     options: [
       { id: 'flood', label: { en: 'Flood / canal irrigation', te: 'నీటి పారుదల' } },
       { id: 'drip', label: { en: 'Drip', te: 'డ్రిప్' } },
+      { id: 'sprinkler', label: { en: 'Sprinkler', te: 'స్ప్రింక్లర్' } },
+      { id: 'rainhose', label: { en: 'Rain hose', te: 'రెయిన్ హోస్' } },
       { id: 'rainfed', label: { en: 'Rain-fed', te: 'వర్షాధారం' } },
     ],
   },

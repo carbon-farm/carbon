@@ -66,8 +66,8 @@ export const HELP_SECTIONS: HelpSection[] = [
         te: 'చూడటానికి ఖాతా అవసరం లేదు. వ్యవసాయ ఇన్‌పుట్లు, సహజ ఆహారాలు కలిపి చూడటానికి మార్కెట్‌ప్లేస్ తెరవండి.',
       },
       {
-        en: 'Use Department, then Category, then Sub-category to narrow the list. You can also search by name and sort by price, name or newest.',
-        te: 'జాబితాను తగ్గించడానికి విభాగం, తర్వాత వర్గం, తర్వాత ఉప-వర్గం ఉపయోగించండి. పేరుతో శోధించి, ధర, పేరు లేదా కొత్తవి ప్రకారం క్రమబద్ధీకరించవచ్చు.',
+        en: 'Use Department, then Category, then Sub-category to narrow the list. You can also search by name and sort by price, name or newest. Under Farm Inputs you will find Pest Control (solar light traps, sticky traps, pheromone traps and lures) and Mother Cultures.',
+        te: 'జాబితాను తగ్గించడానికి విభాగం, తర్వాత వర్గం, తర్వాత ఉప-వర్గం ఉపయోగించండి. పేరుతో శోధించి, ధర, పేరు లేదా కొత్తవి ప్రకారం క్రమబద్ధీకరించవచ్చు. వ్యవసాయ ఇన్‌పుట్లలో చీడపీడల నివారణ (సోలార్ లైట్ ట్రాప్స్, జిగురు ట్రాప్స్, ఫెరోమోన్ ట్రాప్స్ & ల్యూర్స్) మరియు మదర్ కల్చర్లు ఉంటాయి.',
       },
       {
         en: 'Open a product to see its photos, price, stock and reviews. “Out of stock” items cannot be added to the cart.',

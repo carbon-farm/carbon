@@ -182,8 +182,8 @@ export const FAQS: Faq[] = [
     q: { en: 'How do I find a product?', te: 'ఉత్పత్తిని ఎలా వెతకాలి?' },
     a: [
       {
-        en: 'In Marketplace, narrow the list with Department, then Category, then Sub-category. You can also search by name and sort by price, name or newest.',
-        te: 'మార్కెట్‌ప్లేస్‌లో విభాగం, తర్వాత వర్గం, తర్వాత ఉప-వర్గంతో జాబితాను తగ్గించండి. పేరుతో శోధించవచ్చు, ధర, పేరు లేదా కొత్తవి ప్రకారం క్రమబద్ధీకరించవచ్చు.',
+        en: 'In Marketplace, narrow the list with Department, then Category, then Sub-category. You can also search by name and sort by price, name or newest. Looking for traps or mother cultures? Open Farm Inputs, then Pest Control (solar light traps, sticky traps, pheromone traps and lures) or Mother Cultures.',
+        te: 'మార్కెట్‌ప్లేస్‌లో విభాగం, తర్వాత వర్గం, తర్వాత ఉప-వర్గంతో జాబితాను తగ్గించండి. పేరుతో శోధించవచ్చు, ధర, పేరు లేదా కొత్తవి ప్రకారం క్రమబద్ధీకరించవచ్చు. ట్రాప్స్ లేదా మదర్ కల్చర్లు కావాలా? వ్యవసాయ ఇన్‌పుట్లు తెరిచి, చీడపీడల నివారణ (సోలార్ లైట్ ట్రాప్స్, జిగురు ట్రాప్స్, ఫెరోమోన్ ట్రాప్స్ & ల్యూర్స్) లేదా మదర్ కల్చర్లు చూడండి.',
       },
     ],
     keywords: ['find product', 'find a product', 'search product', 'find product', 'search', 'filter', 'category', 'department', 'sort', 'where is', 'looking for', 'వెతక', 'శోధ', 'వర్గం', 'విభాగం', 'vetakali'],
@@ -510,7 +510,7 @@ export const FAQS: Faq[] = [
     q: { en: 'I cannot type well — how else can I describe the problem?', te: 'నేను బాగా టైప్ చేయలేను — సమస్యను ఇంకెలా వివరించాలి?' },
     a: [
       {
-        en: 'On the “Tell us your problem” screen, tap the questions that match what you see (yellow leaves, spots, wilting, insects, and more), then tap an answer for your soil, weeds, water and how you have farmed so far — tap an answer again to clear it. Everything you tap is written into your case in English and Telugu for you. Add photos, and speak a few words if you like.',
+        en: 'On the “Tell us your problem” screen, tap the questions that match what you see (yellow leaves, spots, wilting, insects, and more), then tap an answer for your soil, weeds, water (flood, drip, sprinkler, rain hose or rain-fed) and how you have farmed so far — tap an answer again to clear it. Everything you tap is written into your case in English and Telugu for you. Add photos, and speak a few words if you like.',
         te: '“మీ సమస్యను తెలియజేయండి” స్క్రీన్‌లో, మీకు కనిపించేదానికి సరిపోయే ప్రశ్నలను తాకండి (పసుపు ఆకులు, మచ్చలు, వాడిపోవడం, పురుగులు, ఇంకా), తరువాత మీ నేల, కలుపు, నీరు, ఇప్పటివరకు సాగు విధానం కోసం ఒక సమాధానం తాకండి — సమాధానాన్ని మళ్ళీ తాకితే తొలగుతుంది. మీరు తాకినవన్నీ మీ కోసం ఇంగ్లీష్, తెలుగులో మీ కేసులో రాయబడతాయి. ఫోటోలు జోడించండి, కావాలంటే కొన్ని మాటలు మాట్లాడండి.',
       },
     ],
